@@ -25,11 +25,26 @@
 package main
 
 import "github.com/seagate/kinetic-go/kinetic"
+import "strconv"
+import "fmt"
 
 func main() {
 	client, _ := kinetic.Connect("localhost:8123")
 	defer client.Close()
 	
-	rx, _ := client.Put([]byte("from-go"), []byte("refactored!"))
-	<-rx // wait for it
+	count := 10
+	
+	rxs := make([]<-chan error, count)
+	
+	for i := 0; i < count; i++ {
+		rxs[i], _ = client.Put([]byte("from-go-" + strconv.Itoa(i)), []byte("refactored 2.0!"))
+	}
+	
+	// wait for all
+	for i := 0; i < count; i++ {
+		err := <-rxs[i]
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
 }
