@@ -29,9 +29,43 @@ import (
 	"encoding/binary"
 	"net"
 	"io"
+	"errors"
 	
 	kproto "github.com/seagate/kinetic-go/kinetic/proto"
 )
+
+// Refactor
+func SendFrom(conn net.Conn, msg *kproto.Message, length int, queue <-chan []byte) error {
+	msg_bytes, err := proto.Marshal(msg)
+	if err != nil { return err }
+	
+	header := make([]byte, 9)
+	header[0] = 70 // magic
+	binary.BigEndian.PutUint32(header[1:5], uint32(len(msg_bytes)))
+	binary.BigEndian.PutUint32(header[5:9], uint32(length))
+	
+	conn.Write(header)
+	conn.Write(msg_bytes)
+	sent := 0
+	for {
+		chunk := <-queue
+		ln := len(chunk)
+		if ln + sent > length {
+			// TODO: should shut down socket to cancel operation.
+			return errors.New("Tried to send more bytes than promised.")
+		}
+		if chunk == nil { break }
+		conn.Write(chunk)
+		sent += ln
+	}
+	
+	if sent < length {
+		// TODO: should shut down socket to cancel operation.
+		return errors.New("Received less bytes than promised.")
+	}
+	
+	return nil
+}
 
 func Send(conn net.Conn, msg *kproto.Message, value []byte) error {
 	msg_bytes, err := proto.Marshal(msg)

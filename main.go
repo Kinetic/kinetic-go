@@ -28,7 +28,7 @@ import "github.com/seagate/kinetic-go/kinetic"
 import "strconv"
 import "fmt"
 
-func main() {
+func regular() {
 	client, _ := kinetic.Connect("localhost:8123")
 	defer client.Close()
 	
@@ -47,4 +47,47 @@ func main() {
 			fmt.Println(err)
 		}
 	}
+}
+
+func repeat(ch chan []byte, count int, data[] byte) {	
+	for i := 0; i < count; i++ {
+		ch <- data
+	}
+	ch <- nil
+}
+
+func channeled() {
+	client, err := kinetic.Connect("localhost:8123")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}	
+	defer client.Close()
+	
+	count := 10
+	
+	data := make([]byte, 64*1024)
+	
+	rxs := make([]<-chan error, count)
+	
+	for i := 0; i < count; i++ {
+		ch := make(chan []byte)
+		go repeat(ch, 16, data)
+		rxs[i], err = client.PutFrom([]byte("go-big-" + strconv.Itoa(i)), 1024*1024, ch)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+	
+	// wait for all
+	for i := 0; i < count; i++ {
+		err := <-rxs[i]
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+}
+
+func main() {
+	channeled()
 }
