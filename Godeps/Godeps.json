@@ -1,0 +1,11 @@
+{
+	"ImportPath": "github.com/yongzhy/kinetic-go",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v74",
+	"Deps": [
+		{
+			"ImportPath": "github.com/golang/protobuf/proto",
+			"Rev": "888eb0692c857ec880338addf316bd662d5e630e"
+		}
+	]
+}
