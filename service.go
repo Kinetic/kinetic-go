@@ -10,11 +10,31 @@ import (
 	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
+func newMessage(t kproto.Message_AuthType) *kproto.Message {
+	msg := &kproto.Message{
+		AuthType: t.Enum(),
+	}
+	if msg.GetAuthType() == kproto.Message_HMACAUTH {
+		msg.HmacAuth = &kproto.Message_HMACauth{}
+	}
+
+	return msg
+}
+
+func newCommand(t kproto.Command_MessageType) *kproto.Command {
+	return &kproto.Command{
+		Header: &kproto.Command_Header{
+			MessageType: t.Enum(),
+		},
+	}
+}
+
 type networkService struct {
 	conn   net.Conn
-	seq    int64
-	connId int64
-	option ClientOptions
+	seq    int64                     // Operation sequence ID
+	connId int64                     // current conection ID
+	option ClientOptions             // current connection operation
+	hmap   map[int64]*MessageHandler // Message handler map
 }
 
 func newNetworkService(op ClientOptions) (*networkService, error) {
@@ -32,13 +52,69 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 		return nil, err
 	}
 
-	go s.run()
-
 	return s, nil
 }
 
-func (s *networkService) run() {
+func (s *networkService) listen() error {
+	if len(s.hmap) == 0 {
+		return nil
+	}
 
+	msg, cmd, value, err := s.receive()
+	if err != nil {
+		return err
+	}
+
+	klog.Info("Kinetic response received", cmd.GetHeader().GetMessageType().String())
+
+	if msg.GetAuthType() == kproto.Message_UNSOLICITEDSTATUS {
+		*cmd.GetHeader().AckSequence = -1
+	}
+
+	ack := cmd.GetHeader().GetAckSequence()
+	h, ok := s.hmap[ack]
+	if ok == false {
+		klog.Error("Couldn't find a handler for acksequence ", ack)
+		return nil
+	}
+
+	(*h).Handle(cmd, value)
+
+	delete(s.hmap, ack)
+
+	return nil
+}
+
+func (s *networkService) execute(msg *kproto.Message, cmd *kproto.Command, value []byte, h *MessageHandler) error {
+	cmd.GetHeader().ConnectionID = &s.connId
+	cmd.GetHeader().Sequence = &s.seq
+	cmdBytes, err := proto.Marshal(cmd)
+	if err != nil {
+		klog.Error("Can't marshl Kinetic Command", err)
+		return err
+	}
+	msg.CommandBytes = cmdBytes[:]
+
+	if msg.GetAuthType() == kproto.Message_HMACAUTH {
+		msg.GetHmacAuth().Identity = &s.option.User
+		msg.GetHmacAuth().Hmac = s.option.Hmac[:]
+	}
+
+	err = s.send(msg, value)
+	if err != nil {
+		return err
+	}
+
+	klog.Info("Kinetic message send", cmd.GetHeader().GetMessageType().String())
+
+	if h != nil {
+		s.hmap[s.seq] = h
+	}
+
+	// update sequence number
+	s.seq++
+
+	return err
 }
 
 func (s *networkService) send(msg *kproto.Message, value []byte) error {
@@ -114,7 +190,7 @@ func (s *networkService) receive() (*kproto.Message, *kproto.Command, []byte, er
 		return nil, nil, nil, err
 	}
 
-	if validate_hmac(msg, s.option.Hmac) == false {
+	if msg.GetAuthType() == kproto.Message_HMACAUTH && validate_hmac(msg, s.option.Hmac) == false {
 		klog.Error("Received packet has invalid HMAC")
 		return nil, nil, nil, err
 	}

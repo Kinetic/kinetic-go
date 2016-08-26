@@ -1,5 +1,9 @@
 package kinetic
 
+import (
+	kproto "github.com/yongzhy/kinetic-go/proto"
+)
+
 type Connection struct {
 	service *networkService
 }
@@ -18,7 +22,11 @@ func NewConnection(op ClientOptions) (*Connection, error) {
 }
 
 func (conn *Connection) Nop() error {
-	return nil
+	msg := newMessage(kproto.Message_HMACAUTH)
+	cmd := newCommand(kproto.Command_NOOP)
+
+	err := conn.service.execute(msg, cmd, nil, nil)
+	return err
 }
 
 func (conn *Connection) Close() {
