@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	testConn *Connection
+	testConn *BlockConnection
 )
 
 const testDevice string = "10.29.24.55"
@@ -26,10 +26,24 @@ func TestHandshake(t *testing.T) {
 		Host: testDevice, Port: 8123,
 		User: 1, Hmac: []byte("asfdasfd")}
 
-	conn, err := NewConnection(option)
+	conn, err := NewNonBlockConnection(option)
 	if err != nil {
 		t.Fatal("Handshake fail")
 	}
 
+	conn.Close()
+}
+
+func TestNonBlockGet(t *testing.T) {
+	var option = ClientOptions{
+		Host: testDevice, Port: 8123,
+		User: 1, Hmac: []byte("asfdasfd")}
+
+	conn, err := NewBlockConnection(option)
+	if err != nil {
+		t.Fatal("Handshake fail")
+	}
+
+	conn.Get([]byte("object000"))
 	conn.Close()
 }

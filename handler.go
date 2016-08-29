@@ -4,45 +4,18 @@ import (
 	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
-type Callback interface {
-	Success()
-	Failure()
-	Done() bool
+type MessageHandler struct {
+	callback Callback
 }
 
-type MessageHandler interface {
-	Handle(cmd *kproto.Command, value []byte) error
-	Error()
-	SetCallback(callback *Callback)
-}
-
-type SimpleCallback struct {
-	done bool
-}
-
-func (c *SimpleCallback) Success() {
-	c.done = true
-}
-
-func (c *SimpleCallback) Failure() {
-	c.done = true
-}
-
-func (c *SimpleCallback) Done() bool {
-	return c.done
-}
-
-type SimpleHandler struct {
-	callback *Callback
-}
-
-func (h *SimpleHandler) Handle(cmd *kproto.Command, value []byte) error {
+func (h *MessageHandler) Handle(cmd *kproto.Command, value []byte) error {
 	if h.callback != nil {
 		if cmd.Status != nil && cmd.Status.Code != nil {
 			if cmd.GetStatus().GetCode() == kproto.Command_Status_SUCCESS {
-				(*h.callback).Success()
+				h.callback.Success(cmd, value)
 			} else {
-				(*h.callback).Failure()
+				var status = Status{}
+				h.callback.Failure(&status)
 			}
 		}
 
@@ -50,10 +23,11 @@ func (h *SimpleHandler) Handle(cmd *kproto.Command, value []byte) error {
 	return nil
 }
 
-func (h *SimpleHandler) Error() {
-
+func (h *MessageHandler) SetCallback(call Callback) {
+	h.callback = call
 }
 
-func (h *SimpleHandler) SetCallback(call *Callback) {
-	h.callback = call
+func NewMessageHandler(call Callback) *MessageHandler {
+	h := &MessageHandler{callback: call}
+	return h
 }

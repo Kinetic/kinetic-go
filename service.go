@@ -44,7 +44,11 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 		return nil, err
 	}
 
-	s := &networkService{conn: conn, seq: 1, connId: 0, option: op}
+	s := &networkService{conn: conn,
+		seq:    1,
+		connId: 0,
+		option: op,
+		hmap:   make(map[int64]*MessageHandler)}
 
 	_, _, _, err = s.receive()
 	if err != nil {
@@ -65,10 +69,12 @@ func (s *networkService) listen() error {
 		return err
 	}
 
-	klog.Info("Kinetic response received", cmd.GetHeader().GetMessageType().String())
+	klog.Info("Kinetic response received ", cmd.GetHeader().GetMessageType().String())
 
 	if msg.GetAuthType() == kproto.Message_UNSOLICITEDSTATUS {
-		*cmd.GetHeader().AckSequence = -1
+		if cmd.GetHeader() != nil {
+			*(cmd.GetHeader().AckSequence) = -1
+		}
 	}
 
 	ack := cmd.GetHeader().GetAckSequence()
@@ -85,12 +91,12 @@ func (s *networkService) listen() error {
 	return nil
 }
 
-func (s *networkService) execute(msg *kproto.Message, cmd *kproto.Command, value []byte, h *MessageHandler) error {
+func (s *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value []byte, h *MessageHandler) error {
 	cmd.GetHeader().ConnectionID = &s.connId
 	cmd.GetHeader().Sequence = &s.seq
 	cmdBytes, err := proto.Marshal(cmd)
 	if err != nil {
-		klog.Error("Can't marshl Kinetic Command", err)
+		klog.Error("Can't marshl Kinetic Command ", err)
 		return err
 	}
 	msg.CommandBytes = cmdBytes[:]
@@ -105,7 +111,7 @@ func (s *networkService) execute(msg *kproto.Message, cmd *kproto.Command, value
 		return err
 	}
 
-	klog.Info("Kinetic message send", cmd.GetHeader().GetMessageType().String())
+	klog.Info("Kinetic message send ", cmd.GetHeader().GetMessageType().String())
 
 	if h != nil {
 		s.hmap[s.seq] = h
