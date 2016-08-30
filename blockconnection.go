@@ -9,6 +9,7 @@ type BlockConnection struct {
 func NewBlockConnection(op ClientOptions) (*BlockConnection, error) {
 	nbc, err := NewNonBlockConnection(op)
 	if err != nil {
+		klog.Error("Can't establish nonblocking connection")
 		return nil, err
 	}
 
@@ -18,7 +19,15 @@ func NewBlockConnection(op ClientOptions) (*BlockConnection, error) {
 func (conn *BlockConnection) NoOp() error {
 	callback := &GenericCallback{}
 	h := NewMessageHandler(callback)
-	conn.nbc.Nop(h)
+	if h == nil {
+		klog.Error("Message Handler for NoOp Failure")
+	}
+	if conn == nil {
+		klog.Error("Connection nil")
+	} else if conn.nbc == nil {
+		klog.Error("Nonblock Connection nil")
+	}
+	conn.nbc.NoOp(h)
 
 	for callback.Done() == false {
 		conn.nbc.Run()
@@ -36,14 +45,9 @@ func (conn *BlockConnection) Get(key []byte) (Record, error) {
 		return Record{}, err
 	}
 
-	for i := 0; i < 10; i++ {
-		if callback.Done() == false {
-			conn.nbc.Run()
-		}
+	for callback.Done() == false {
+		conn.nbc.Run()
 	}
-	//for callback.Done() == false {
-	//		conn.nbc.Run()
-	//}
 
 	return callback.Record(), nil
 }

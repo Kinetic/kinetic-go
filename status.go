@@ -3,6 +3,7 @@ package kinetic
 type StatusCode int32
 
 const (
+	REMOTE_NOT_ATTEMPTED                    StatusCode = iota
 	OK                                      StatusCode = iota
 	CLIENT_IO_ERROR                         StatusCode = iota
 	CLIENT_SHUTDOWN                         StatusCode = iota
@@ -20,7 +21,7 @@ const (
 	REMOTE_EXPIRED                          StatusCode = iota
 	REMOTE_DATA_ERROR                       StatusCode = iota
 	REMOTE_PERM_DATA_ERROR                  StatusCode = iota
-	REMOTE_REMOTE_CONNECTION_ERROR          StatusCode = iota
+	REMOTE_CONNECTION_ERROR                 StatusCode = iota
 	REMOTE_NO_SPACE                         StatusCode = iota
 	REMOTE_NO_SUCH_HMAC_ALGORITHM           StatusCode = iota
 	REMOTE_OTHER_ERROR                      StatusCode = iota
@@ -35,6 +36,10 @@ const (
 )
 
 type Status struct {
-	Code    StatusCode
-	Message string
+	Code     StatusCode
+	ErrorMsg string
+}
+
+func (s Status) Error() string {
+	return s.ErrorMsg
 }

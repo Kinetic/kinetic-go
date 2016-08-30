@@ -21,7 +21,7 @@ func NewNonBlockConnection(op ClientOptions) (*NonBlockConnection, error) {
 	return &NonBlockConnection{service}, nil
 }
 
-func (conn *NonBlockConnection) Nop(h *MessageHandler) error {
+func (conn *NonBlockConnection) NoOp(h *MessageHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 
 	cmd := newCommand(kproto.Command_NOOP)

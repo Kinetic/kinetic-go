@@ -15,8 +15,7 @@ func (h *MessageHandler) Handle(cmd *kproto.Command, value []byte) error {
 			if cmd.GetStatus().GetCode() == kproto.Command_Status_SUCCESS {
 				h.callback.Success(cmd, value)
 			} else {
-				var status = Status{}
-				h.callback.Failure(&status)
+				h.callback.Failure(getStatusFromProto(cmd))
 			}
 		} else {
 			klog.Info("Other status received")
@@ -25,6 +24,12 @@ func (h *MessageHandler) Handle(cmd *kproto.Command, value []byte) error {
 
 	}
 	return nil
+}
+
+func (h *MessageHandler) Error(s Status) {
+	if h.callback != nil {
+		h.callback.Failure(s)
+	}
 }
 
 func (h *MessageHandler) SetCallback(call Callback) {

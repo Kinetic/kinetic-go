@@ -6,7 +6,7 @@ import (
 
 type Callback interface {
 	Success(resp *kproto.Command, value []byte)
-	Failure(status *Status)
+	Failure(status Status)
 	Done() bool
 	Status() Status
 }
@@ -22,9 +22,9 @@ func (c *GenericCallback) Success(resp *kproto.Command, value []byte) {
 	klog.Info("Callback Success")
 }
 
-func (c *GenericCallback) Failure(status *Status) {
+func (c *GenericCallback) Failure(status Status) {
 	c.done = true
-	c.status = *status
+	c.status = status
 	klog.Info("Callback Failure")
 }
 
@@ -44,9 +44,11 @@ type GetCallback struct {
 func (c *GetCallback) Success(resp *kproto.Command, value []byte) {
 	c.GenericCallback.Success(resp, value)
 	c.record.Key = resp.GetBody().GetKeyValue().GetKey()
+	c.record.Tag = resp.GetBody().GetKeyValue().GetTag()
+	c.record.Version = resp.GetBody().GetKeyValue().GetDbVersion()
+	c.record.Algo = convertAlgoFromProto(resp.GetBody().GetKeyValue().GetAlgorithm())
+
 	c.record.Value = value
-	klog.Info("Get Operation Success")
-	klog.Info("%v", c.record)
 }
 
 func (c *GetCallback) Record() Record {

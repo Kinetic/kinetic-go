@@ -6,44 +6,30 @@ import (
 )
 
 var (
-	testConn *BlockConnection
+	blockConn *BlockConnection = nil
 )
 
-const testDevice string = "10.29.24.55"
-
 var option = ClientOptions{
-	Host: testDevice,
+	Host: "10.29.24.55",
 	Port: 8123,
 	User: 1,
 	Hmac: []byte("asdfasdf")}
 
 func TestMain(m *testing.M) {
-	testConn = nil
-	code := m.Run()
-	os.Exit(code)
+	blockConn, _ = NewBlockConnection(option)
+	if blockConn != nil {
+		code := m.Run()
+		blockConn.Close()
+		os.Exit(code)
+	} else {
+		os.Exit(-1)
+	}
 }
 
-func TestHandshake(t *testing.T) {
-
-	if testConn == nil {
-		t.Skip("No Connection, skip this test")
-	}
-
-	conn, err := NewNonBlockConnection(option)
-	if err != nil {
-		t.Fatal("Handshake fail")
-	}
-
-	conn.Close()
+func TestNonBlockNoOp(t *testing.T) {
+	blockConn.NoOp()
 }
 
 func TestNonBlockGet(t *testing.T) {
-
-	conn, err := NewBlockConnection(option)
-	if err != nil {
-		t.Fatal("Handshake fail")
-	}
-
-	conn.Get([]byte("object000"))
-	conn.Close()
+	blockConn.Get([]byte("object000"))
 }

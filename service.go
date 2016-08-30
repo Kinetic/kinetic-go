@@ -2,12 +2,18 @@ package kinetic
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"net"
+	"time"
 
 	proto "github.com/golang/protobuf/proto"
 	kproto "github.com/yongzhy/kinetic-go/proto"
+)
+
+var (
+	networkTimeout = 20 * time.Second
 )
 
 func newMessage(t kproto.Message_AuthType) *kproto.Message {
@@ -39,32 +45,46 @@ type networkService struct {
 
 func newNetworkService(op ClientOptions) (*networkService, error) {
 	target := fmt.Sprintf("%s:%d", op.Host, op.Port)
-	conn, err := net.Dial("tcp", target)
+	conn, err := net.DialTimeout("tcp", target, networkTimeout)
 	if err != nil {
+		klog.Panic("Can't establish connection to ", op.Host)
 		return nil, err
 	}
 
-	s := &networkService{conn: conn,
+	ns := &networkService{conn: conn,
 		seq:    0,
 		connId: 0,
 		option: op,
 		hmap:   make(map[int64]*MessageHandler)}
 
-	_, _, _, err = s.receive()
+	_, _, _, err = ns.receive()
 	if err != nil {
 		klog.Error("Can't establish connection to %s", op.Host)
 		return nil, err
 	}
 
-	return s, nil
+	return ns, nil
 }
 
-func (s *networkService) listen() error {
-	if len(s.hmap) == 0 {
+// When client network service has error, call error handling from all Messagehandler current in Queue.
+func (ns *networkService) clientError(s Status, mh *MessageHandler) {
+	for ack, h := range ns.hmap {
+		if h.callback != nil {
+			h.callback.Failure(s)
+		}
+		delete(ns.hmap, ack)
+	}
+	if mh != nil && mh.callback != nil {
+		mh.callback.Failure(s)
+	}
+}
+
+func (ns *networkService) listen() error {
+	if len(ns.hmap) == 0 {
 		return nil
 	}
 
-	msg, cmd, value, err := s.receive()
+	msg, cmd, value, err := ns.receive()
 	if err != nil {
 		klog.Error("Network Service listen error")
 		return err
@@ -79,58 +99,66 @@ func (s *networkService) listen() error {
 	}
 
 	ack := cmd.GetHeader().GetAckSequence()
-	h, ok := s.hmap[ack]
+	h, ok := ns.hmap[ack]
 	if ok == false {
-		klog.Error("Couldn't find a handler for acksequence ", ack)
+		klog.Warn("Couldn't find a handler for acksequence ", ack)
 		return nil
 	}
 
 	(*h).Handle(cmd, value)
 
-	delete(s.hmap, ack)
+	delete(ns.hmap, ack)
 
 	return nil
 }
 
-func (s *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value []byte, h *MessageHandler) error {
-	cmd.GetHeader().ConnectionID = &s.connId
-	cmd.GetHeader().Sequence = &s.seq
+func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value []byte, h *MessageHandler) error {
+	cmd.GetHeader().ConnectionID = &ns.connId
+	cmd.GetHeader().Sequence = &ns.seq
 	cmdBytes, err := proto.Marshal(cmd)
 	if err != nil {
-		klog.Error("Can't marshl Kinetic Command ", err)
+		klog.Error("Error marshl Kinetic Command")
+		s := Status{CLIENT_INTERNAL_ERROR, "Error marshl Kinetic Command"}
+		ns.clientError(s, h)
 		return err
 	}
 	msg.CommandBytes = cmdBytes[:]
 
 	if msg.GetAuthType() == kproto.Message_HMACAUTH {
-		msg.GetHmacAuth().Identity = &s.option.User
-		msg.GetHmacAuth().Hmac = compute_hmac(msg.CommandBytes, s.option.Hmac)
+		msg.GetHmacAuth().Identity = &ns.option.User
+		msg.GetHmacAuth().Hmac = compute_hmac(msg.CommandBytes, ns.option.Hmac)
 	}
 
-	err = s.send(msg, value)
+	err = ns.send(msg, value)
 	if err != nil {
-		return err
+		return nil
 	}
 
 	klog.Info("Kinetic message send ", cmd.GetHeader().GetMessageType().String())
 
 	if h != nil {
-		s.hmap[s.seq] = h
-		klog.Info("Insert handler for ACK ", s.seq)
+		ns.hmap[ns.seq] = h
+		klog.Info("Insert handler for ACK ", ns.seq)
 	}
 
 	// update sequence number
-	s.seq++
+	ns.seq++
 
 	return err
 }
 
-func (s *networkService) send(msg *kproto.Message, value []byte) error {
+func (ns *networkService) send(msg *kproto.Message, value []byte) error {
 	msgBytes, err := proto.Marshal(msg)
 	if err != nil {
+		s := Status{CLIENT_INTERNAL_ERROR, "Error marshl Kinetic Message"}
+		ns.clientError(s, nil)
 		return err
 	}
 
+	// Set timeout for send packet
+	ns.conn.SetWriteDeadline(time.Now().Add(networkTimeout))
+
+	// Construct message header 9 bytes
 	header := make([]byte, 9)
 	header[0] = 'F' // Magic number
 	binary.BigEndian.PutUint32(header[1:5], uint32(len(msgBytes)))
@@ -140,71 +168,88 @@ func (s *networkService) send(msg *kproto.Message, value []byte) error {
 	if value != nil && len(value) > 0 {
 		packet = append(packet, value...)
 	}
-	var cnt int
-	cnt, err = s.conn.Write(packet)
+
+	_, err = ns.conn.Write(packet)
 	if err != nil {
-		klog.Error("Send packet fail")
+		klog.Error("Network I/O write error")
+		s := Status{CLIENT_IO_ERROR, "Network I/O write error"}
+		ns.clientError(s, nil)
 		return err
-	}
-	if cnt != len(packet) {
-		klog.Fatal("Send packet length not match")
 	}
 
 	return nil
 }
 
-func (s *networkService) receive() (*kproto.Message, *kproto.Command, []byte, error) {
+func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, error) {
+	// Set timeout for receive packet
+	ns.conn.SetReadDeadline(time.Now().Add(networkTimeout))
+
 	header := make([]byte, 9)
 
-	_, err := io.ReadFull(s.conn, header[0:])
+	_, err := io.ReadFull(ns.conn, header[0:])
 	if err != nil {
-		klog.Error("Receive protocol header error : ", err)
+		klog.Error("Network I/O read error")
+		s := Status{CLIENT_IO_ERROR, "Network I/O read error"}
+		ns.clientError(s, nil)
 		return nil, nil, nil, err
 	}
 
 	magic := header[0]
 	if magic != 'F' {
-		klog.Panic("Received package has invalid magic number")
+		klog.Error("Network I/O read error Header wrong magic")
+		s := Status{CLIENT_IO_ERROR, "Network I/O read error Header wrong magic"}
+		ns.clientError(s, nil)
+		return nil, nil, nil, errors.New("Network I/O read error Header wrong magic")
 	}
 
 	protoLen := int(binary.BigEndian.Uint32(header[1:5]))
 	valueLen := int(binary.BigEndian.Uint32(header[5:9]))
 
 	protoBuf := make([]byte, protoLen)
-	_, err = io.ReadFull(s.conn, protoBuf)
+	_, err = io.ReadFull(ns.conn, protoBuf)
 	if err != nil {
-		klog.Error("Receive protocol Message error : ", err)
+		klog.Error("Network I/O read error receive Kinetic Header")
+		s := Status{CLIENT_IO_ERROR, "Network I/O read error receive Kinetic Header"}
+		ns.clientError(s, nil)
 		return nil, nil, nil, err
 	}
 
 	msg := &kproto.Message{}
 	err = proto.Unmarshal(protoBuf, msg)
 	if err != nil {
-		klog.Error("Received packet can't unmarshal to Kinetic Message", err)
+		klog.Error("Network I/O read error receive Kinetic Header")
+		s := Status{CLIENT_IO_ERROR, "Network I/O read error reaceive Kinetic Message"}
+		ns.clientError(s, nil)
 		return nil, nil, nil, err
 	}
 
-	if msg.GetAuthType() == kproto.Message_HMACAUTH && validate_hmac(msg, s.option.Hmac) == false {
-		klog.Error("Received packet has invalid HMAC")
+	if msg.GetAuthType() == kproto.Message_HMACAUTH && validate_hmac(msg, ns.option.Hmac) == false {
+		klog.Error("Response HMAC mismatch")
+		s := Status{CLIENT_RESPONSE_HMAC_VERIFICATION_ERROR, "Response HMAC mismatch"}
+		ns.clientError(s, nil)
 		return nil, nil, nil, err
 	}
 
 	cmd := &kproto.Command{}
 	err = proto.Unmarshal(msg.CommandBytes, cmd)
 	if err != nil {
-		klog.Error("Received packet can't unmarshal to Kinetic Command: ", err)
+		klog.Error("Network I/O read error parsing Kinetic Command")
+		s := Status{CLIENT_IO_ERROR, "Network I/O read error parsing Kinetic Command"}
+		ns.clientError(s, nil)
 		return nil, nil, nil, err
 	}
 
 	if cmd.Header != nil && cmd.Header.ConnectionID != nil {
-		s.connId = cmd.GetHeader().GetConnectionID()
+		ns.connId = cmd.GetHeader().GetConnectionID()
 	}
 
 	if valueLen > 0 {
 		valueBuf := make([]byte, valueLen)
-		_, err = io.ReadFull(s.conn, valueBuf)
+		_, err = io.ReadFull(ns.conn, valueBuf)
 		if err != nil {
-			klog.Error("Recive value error : ", err)
+			klog.Error("Network I/O read error parsing Kinetic Value")
+			s := Status{CLIENT_IO_ERROR, "Network I/O read error parsing Kinetic Value"}
+			ns.clientError(s, nil)
 			return nil, nil, nil, err
 		}
 
@@ -214,7 +259,7 @@ func (s *networkService) receive() (*kproto.Message, *kproto.Command, []byte, er
 	return msg, cmd, nil, nil
 }
 
-func (s *networkService) close() {
-	s.conn.Close()
-	klog.Infof("Connection to %s closed", s.option.Host)
+func (ns *networkService) close() {
+	ns.conn.Close()
+	klog.Infof("Connection to %s closed", ns.option.Host)
 }
