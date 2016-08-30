@@ -36,7 +36,7 @@ func (conn *BlockConnection) Get(key []byte) (Record, error) {
 		return Record{}, err
 	}
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10; i++ {
 		if callback.Done() == false {
 			conn.nbc.Run()
 		}

@@ -9,6 +9,7 @@ type MessageHandler struct {
 }
 
 func (h *MessageHandler) Handle(cmd *kproto.Command, value []byte) error {
+	klog.Info("Message handler called")
 	if h.callback != nil {
 		if cmd.Status != nil && cmd.Status.Code != nil {
 			if cmd.GetStatus().GetCode() == kproto.Command_Status_SUCCESS {
@@ -17,6 +18,9 @@ func (h *MessageHandler) Handle(cmd *kproto.Command, value []byte) error {
 				var status = Status{}
 				h.callback.Failure(&status)
 			}
+		} else {
+			klog.Info("Other status received")
+			klog.Info("%v", cmd)
 		}
 
 	}

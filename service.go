@@ -45,7 +45,7 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 	}
 
 	s := &networkService{conn: conn,
-		seq:    1,
+		seq:    0,
 		connId: 0,
 		option: op,
 		hmap:   make(map[int64]*MessageHandler)}
@@ -66,6 +66,7 @@ func (s *networkService) listen() error {
 
 	msg, cmd, value, err := s.receive()
 	if err != nil {
+		klog.Error("Network Service listen error")
 		return err
 	}
 
@@ -103,7 +104,7 @@ func (s *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value 
 
 	if msg.GetAuthType() == kproto.Message_HMACAUTH {
 		msg.GetHmacAuth().Identity = &s.option.User
-		msg.GetHmacAuth().Hmac = s.option.Hmac[:]
+		msg.GetHmacAuth().Hmac = compute_hmac(msg.CommandBytes, s.option.Hmac)
 	}
 
 	err = s.send(msg, value)
@@ -115,6 +116,7 @@ func (s *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value 
 
 	if h != nil {
 		s.hmap[s.seq] = h
+		klog.Info("Insert handler for ACK ", s.seq)
 	}
 
 	// update sequence number
@@ -134,32 +136,18 @@ func (s *networkService) send(msg *kproto.Message, value []byte) error {
 	binary.BigEndian.PutUint32(header[1:5], uint32(len(msgBytes)))
 	binary.BigEndian.PutUint32(header[5:9], uint32(len(value)))
 
+	packet := append(header, msgBytes...)
+	if value != nil && len(value) > 0 {
+		packet = append(packet, value...)
+	}
 	var cnt int
-	cnt, err = s.conn.Write(header)
+	cnt, err = s.conn.Write(packet)
 	if err != nil {
-		klog.Error("Write header fail")
+		klog.Error("Send packet fail")
 		return err
 	}
-	if cnt != len(header) {
-		klog.Fatal("Write header fail")
-	}
-
-	cnt, err = s.conn.Write(msgBytes)
-	if err != nil {
-		klog.Error("Write message fail")
-		return err
-	}
-	if cnt != len(msgBytes) {
-		klog.Fatal("Write message fail")
-	}
-
-	cnt, err = s.conn.Write(value)
-	if err != nil {
-		klog.Error("Write message fail")
-		return err
-	}
-	if cnt != len(value) {
-		klog.Fatal("Write value fail")
+	if cnt != len(packet) {
+		klog.Fatal("Send packet length not match")
 	}
 
 	return nil
@@ -228,5 +216,5 @@ func (s *networkService) receive() (*kproto.Message, *kproto.Command, []byte, er
 
 func (s *networkService) close() {
 	s.conn.Close()
-	klog.Info("Connection to %s closed", s.option.Host)
+	klog.Infof("Connection to %s closed", s.option.Host)
 }

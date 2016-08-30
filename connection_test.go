@@ -11,6 +11,12 @@ var (
 
 const testDevice string = "10.29.24.55"
 
+var option = ClientOptions{
+	Host: testDevice,
+	Port: 8123,
+	User: 1,
+	Hmac: []byte("asdfasdf")}
+
 func TestMain(m *testing.M) {
 	testConn = nil
 	code := m.Run()
@@ -22,9 +28,6 @@ func TestHandshake(t *testing.T) {
 	if testConn == nil {
 		t.Skip("No Connection, skip this test")
 	}
-	var option = ClientOptions{
-		Host: testDevice, Port: 8123,
-		User: 1, Hmac: []byte("asfdasfd")}
 
 	conn, err := NewNonBlockConnection(option)
 	if err != nil {
@@ -35,9 +38,6 @@ func TestHandshake(t *testing.T) {
 }
 
 func TestNonBlockGet(t *testing.T) {
-	var option = ClientOptions{
-		Host: testDevice, Port: 8123,
-		User: 1, Hmac: []byte("asfdasfd")}
 
 	conn, err := NewBlockConnection(option)
 	if err != nil {
