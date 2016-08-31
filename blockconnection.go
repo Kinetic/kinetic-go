@@ -21,7 +21,10 @@ func NewBlockConnection(op ClientOptions) (*BlockConnection, error) {
 func (conn *BlockConnection) NoOp() (Status, error) {
 	callback := &GenericCallback{}
 	h := NewMessageHandler(callback)
-	conn.nbc.NoOp(h)
+	err := conn.nbc.NoOp(h)
+	if err != nil {
+		return callback.Status(), err
+	}
 
 	for callback.Done() == false {
 		conn.nbc.Run()
@@ -69,7 +72,10 @@ func (conn *BlockConnection) GetPrevious(key []byte) (Record, Status, error) {
 func (conn *BlockConnection) GetKeyRange(r *KeyRange) ([][]byte, Status, error) {
 	callback := &GetKeyRangeCallback{}
 	h := NewMessageHandler(callback)
-	conn.nbc.GetKeyRange(r, h)
+	err := conn.nbc.GetKeyRange(r, h)
+	if err != nil {
+		return nil, callback.Status(), err
+	}
 
 	for callback.Done() == false {
 		conn.nbc.Run()
@@ -81,7 +87,10 @@ func (conn *BlockConnection) GetKeyRange(r *KeyRange) ([][]byte, Status, error) 
 func (conn *BlockConnection) Delete(entry *Record) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewMessageHandler(callback)
-	conn.nbc.Delete(entry, h)
+	err := conn.nbc.Delete(entry, h)
+	if err != nil {
+		return callback.Status(), err
+	}
 
 	for callback.Done() == false {
 		conn.nbc.Run()
@@ -93,13 +102,59 @@ func (conn *BlockConnection) Delete(entry *Record) (Status, error) {
 func (conn *BlockConnection) Put(entry *Record) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewMessageHandler(callback)
-	conn.nbc.Put(entry, h)
+	err := conn.nbc.Put(entry, h)
+	if err != nil {
+		return callback.Status(), err
+	}
 
 	for callback.Done() == false {
 		conn.nbc.Run()
 	}
 
 	return callback.Status(), nil
+}
+
+func (conn *BlockConnection) pinop(pin []byte, op kproto.Command_PinOperation_PinOpType) (Status, error) {
+	callback := &GenericCallback{}
+	h := NewMessageHandler(callback)
+
+	var err error = nil
+	switch op {
+	case kproto.Command_PinOperation_SECURE_ERASE_PINOP:
+		err = conn.nbc.SecureErase(pin, h)
+	case kproto.Command_PinOperation_ERASE_PINOP:
+		err = conn.nbc.InstantErase(pin, h)
+	case kproto.Command_PinOperation_LOCK_PINOP:
+		err = conn.nbc.LockDevice(pin, h)
+	case kproto.Command_PinOperation_UNLOCK_PINOP:
+		err = conn.nbc.UnlockDevice(pin, h)
+	}
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	for callback.Done() == false {
+		conn.nbc.Run()
+	}
+
+	return callback.Status(), nil
+}
+
+func (conn *BlockConnection) SecureErase(pin []byte) (Status, error) {
+	return conn.pinop(pin, kproto.Command_PinOperation_SECURE_ERASE_PINOP)
+}
+
+func (conn *BlockConnection) InstantErase(pin []byte) (Status, error) {
+	return conn.pinop(pin, kproto.Command_PinOperation_ERASE_PINOP)
+
+}
+
+func (conn *BlockConnection) LockDevice(pin []byte) (Status, error) {
+	return conn.pinop(pin, kproto.Command_PinOperation_LOCK_PINOP)
+}
+
+func (conn *BlockConnection) UnlockDevice(pin []byte) (Status, error) {
+	return conn.pinop(pin, kproto.Command_PinOperation_UNLOCK_PINOP)
 }
 
 func (conn *BlockConnection) Close() {

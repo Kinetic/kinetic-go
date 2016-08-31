@@ -114,6 +114,41 @@ func (conn *NonBlockConnection) Put(entry *Record, h *MessageHandler) error {
 	return err
 }
 
+func (conn *NonBlockConnection) pinop(pin []byte, op kproto.Command_PinOperation_PinOpType, h *MessageHandler) error {
+	msg := newMessage(kproto.Message_PINAUTH)
+	msg.PinAuth = &kproto.Message_PINauth{
+		Pin: pin,
+	}
+
+	cmd := newCommand(kproto.Command_PINOP)
+
+	cmd.Body = &kproto.Command_Body{
+		PinOp: &kproto.Command_PinOperation{
+			PinOpType: &op,
+		},
+	}
+
+	err := conn.service.submit(msg, cmd, nil, h)
+	return err
+}
+
+func (conn *NonBlockConnection) SecureErase(pin []byte, h *MessageHandler) error {
+	return conn.pinop(pin, kproto.Command_PinOperation_SECURE_ERASE_PINOP, h)
+}
+
+func (conn *NonBlockConnection) InstantErase(pin []byte, h *MessageHandler) error {
+	return conn.pinop(pin, kproto.Command_PinOperation_ERASE_PINOP, h)
+
+}
+
+func (conn *NonBlockConnection) LockDevice(pin []byte, h *MessageHandler) error {
+	return conn.pinop(pin, kproto.Command_PinOperation_LOCK_PINOP, h)
+}
+
+func (conn *NonBlockConnection) UnlockDevice(pin []byte, h *MessageHandler) error {
+	return conn.pinop(pin, kproto.Command_PinOperation_UNLOCK_PINOP, h)
+}
+
 func (conn *NonBlockConnection) Run() error {
 	return conn.service.listen()
 }
