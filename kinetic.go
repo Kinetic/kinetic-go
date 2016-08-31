@@ -33,12 +33,24 @@ const (
 	ALGO_CRC64             Algorithm = 5
 )
 
+type Synchronization int32
+
+const (
+	SYNC_INVALID_SYNCHRONIZATION Synchronization = -1
+	SYNC_WRITETHROUGH            Synchronization = 1
+	SYNC_WRITEBACK               Synchronization = 2
+	SYNC_FLUSH                   Synchronization = 3
+)
+
 type Record struct {
-	Key     []byte
-	Value   []byte
-	Version []byte
-	Tag     []byte
-	Algo    Algorithm
+	Key      []byte
+	Value    []byte
+	Version  []byte
+	Tag      []byte
+	Algo     Algorithm
+	Sync     Synchronization
+	Force    bool
+	MetaOnly bool
 }
 
 type KeyRange struct {
@@ -47,27 +59,7 @@ type KeyRange struct {
 	StartKeyInclusive bool
 	EndKeyInclusive   bool
 	Reverse           bool
-	Max               uint
-}
-
-type Client interface {
-	Nop() error
-	Version() error
-	Put(key, value []byte, h *MessageHandler) error
-	Get(key []byte, h *MessageHandler) ([]byte, error)
-	GetNext() error
-	GetPrevious() error
-	Flush(h *MessageHandler) error
-	Delete(key []byte, h *MessageHandler) error
-	GetRange(r *KeyRange, h *MessageHandler) ([][]byte, error)
-
-	SetErasePin(old, new []byte, h *MessageHandler) error
-	SecureErase(pin []byte) error
-	InstantErase(pin []byte) error
-	SetLockPin(old, new []byte) error
-	Lock(pin []byte) error
-	UnLock(pin []byte) error
-	GetLog() error
+	Max               int32
 }
 
 func convertAlgoToProto(a Algorithm) kproto.Command_Algorithm {
@@ -104,6 +96,36 @@ func convertAlgoFromProto(a kproto.Command_Algorithm) Algorithm {
 		ret = ALGO_CRC32
 	case kproto.Command_CRC64:
 		ret = ALGO_CRC64
+	}
+	return ret
+}
+
+func convertSyncToProto(sync Synchronization) kproto.Command_Synchronization {
+	ret := kproto.Command_INVALID_SYNCHRONIZATION
+	switch sync {
+	case SYNC_INVALID_SYNCHRONIZATION:
+		ret = kproto.Command_INVALID_SYNCHRONIZATION
+	case SYNC_WRITETHROUGH:
+		ret = kproto.Command_WRITETHROUGH
+	case SYNC_WRITEBACK:
+		ret = kproto.Command_WRITEBACK
+	case SYNC_FLUSH:
+		ret = kproto.Command_FLUSH
+	}
+	return ret
+}
+
+func convertSyncFromProto(sync kproto.Command_Synchronization) Synchronization {
+	ret := SYNC_INVALID_SYNCHRONIZATION
+	switch sync {
+	case kproto.Command_INVALID_SYNCHRONIZATION:
+		ret = SYNC_INVALID_SYNCHRONIZATION
+	case kproto.Command_WRITETHROUGH:
+		ret = SYNC_WRITETHROUGH
+	case kproto.Command_WRITEBACK:
+		ret = SYNC_WRITEBACK
+	case kproto.Command_FLUSH:
+		ret = SYNC_FLUSH
 	}
 	return ret
 }
@@ -212,59 +234,65 @@ func convertStatusCodeFromProto(s kproto.Command_Status_StatusCode) StatusCode {
 
 func getStatusFromProto(cmd *kproto.Command) Status {
 	code := convertStatusCodeFromProto(cmd.GetStatus().GetCode())
-	switch code {
-	case CLIENT_IO_ERROR:
-		return Status{code, "IO error"}
-	case CLIENT_SHUTDOWN:
-		return Status{code, "Client shutdown"}
-	case PROTOCOL_ERROR_RESPONSE_NO_ACKSEQUENCE:
-		return Status{code, "Response did not contain ack sequence"}
-	case CLIENT_RESPONSE_HMAC_VERIFICATION_ERROR:
-		return Status{code, "Response HMAC verification failed"}
-	case REMOTE_HMAC_ERROR:
-		return Status{code, "Remote HMAC verification failed"}
-	case REMOTE_NOT_AUTHORIZED:
-		return Status{code, "Not authorized"}
-	case REMOTE_CLUSTER_VERSION_MISMATCH:
-		expected_cluster_version := cmd.GetHeader().GetClusterVersion()
-		return Status{code, "Cluster version mismatch " + string(expected_cluster_version)}
-	case REMOTE_INTERNAL_ERROR:
-		return Status{code, "Remote internal error"}
-	case REMOTE_HEADER_REQUIRED:
-		return Status{code, "Request requires a header to be set"}
-	case REMOTE_NOT_FOUND:
-		return Status{code, "Key not found"}
-	case REMOTE_VERSION_MISMATCH:
-		return Status{code, "Version mismatch"}
-	case REMOTE_SERVICE_BUSY:
-		return Status{code, "Remote service is busy"}
-	case REMOTE_EXPIRED:
-		return Status{code, "Remote timeout"}
-	case REMOTE_DATA_ERROR:
-		return Status{code, "Remote transient data error"}
-	case REMOTE_PERM_DATA_ERROR:
-		return Status{code, "Remote permanent data error"}
-	case REMOTE_CONNECTION_ERROR:
-		return Status{code, "Remote connection to peer failed"}
-	case REMOTE_NO_SPACE:
-		return Status{code, "No space left"}
-	case REMOTE_NO_SUCH_HMAC_ALGORITHM:
-		return Status{code, "Unknown HMAC algorithm"}
-	case REMOTE_NESTED_OPERATION_ERRORS:
-		return Status{code, "Operation completed but has nested errors"}
-	case REMOTE_DEVICE_LOCKED:
-		return Status{code, "Remote device is locked"}
-	case REMOTE_DEVICE_ALREADY_UNLOCKED:
-		return Status{code, "Remote device is already unlocked"}
-	case REMOTE_CONNECTION_TERMINATED:
-		return Status{code, "Remote connection is terminated"}
-	case REMOTE_INVALID_BATCH:
-		return Status{code, "Invalid batch"}
-	case REMOTE_INVALID_EXECUTE:
-		return Status{code, "Invalid execute of applet"}
-	case REMOTE_EXECUTE_COMPLETE:
-		return Status{code, "Applet execute complete"}
-	default:
-		return Status{code, "Internal Error"}
-	}
+	msg := cmd.GetStatus().GetStatusMessage()
+
+	return Status{code, msg}
+
+	/*
+		switch code {
+		case CLIENT_IO_ERROR:
+			return Status{code, "IO error"}
+		case CLIENT_SHUTDOWN:
+			return Status{code, "Client shutdown"}
+		case PROTOCOL_ERROR_RESPONSE_NO_ACKSEQUENCE:
+			return Status{code, "Response did not contain ack sequence"}
+		case CLIENT_RESPONSE_HMAC_VERIFICATION_ERROR:
+			return Status{code, "Response HMAC verification failed"}
+		case REMOTE_HMAC_ERROR:
+			return Status{code, "Remote HMAC verification failed"}
+		case REMOTE_NOT_AUTHORIZED:
+			return Status{code, "Not authorized"}
+		case REMOTE_CLUSTER_VERSION_MISMATCH:
+			expected_cluster_version := cmd.GetHeader().GetClusterVersion()
+			return Status{code, "Cluster version mismatch " + string(expected_cluster_version)}
+		case REMOTE_INTERNAL_ERROR:
+			return Status{code, "Remote internal error"}
+		case REMOTE_HEADER_REQUIRED:
+			return Status{code, "Request requires a header to be set"}
+		case REMOTE_NOT_FOUND:
+			return Status{code, "Key not found"}
+		case REMOTE_VERSION_MISMATCH:
+			return Status{code, "Version mismatch"}
+		case REMOTE_SERVICE_BUSY:
+			return Status{code, "Remote service is busy"}
+		case REMOTE_EXPIRED:
+			return Status{code, "Remote timeout"}
+		case REMOTE_DATA_ERROR:
+			return Status{code, "Remote transient data error"}
+		case REMOTE_PERM_DATA_ERROR:
+			return Status{code, "Remote permanent data error"}
+		case REMOTE_CONNECTION_ERROR:
+			return Status{code, "Remote connection to peer failed"}
+		case REMOTE_NO_SPACE:
+			return Status{code, "No space left"}
+		case REMOTE_NO_SUCH_HMAC_ALGORITHM:
+			return Status{code, "Unknown HMAC algorithm"}
+		case REMOTE_NESTED_OPERATION_ERRORS:
+			return Status{code, "Operation completed but has nested errors"}
+		case REMOTE_DEVICE_LOCKED:
+			return Status{code, "Remote device is locked"}
+		case REMOTE_DEVICE_ALREADY_UNLOCKED:
+			return Status{code, "Remote device is already unlocked"}
+		case REMOTE_CONNECTION_TERMINATED:
+			return Status{code, "Remote connection is terminated"}
+		case REMOTE_INVALID_BATCH:
+			return Status{code, "Invalid batch"}
+		case REMOTE_INVALID_EXECUTE:
+			return Status{code, "Invalid execute of applet"}
+		case REMOTE_EXECUTE_COMPLETE:
+			return Status{code, "Applet execute complete"}
+		default:
+			return Status{code, "Internal Error"}
+		}
+	*/
 }

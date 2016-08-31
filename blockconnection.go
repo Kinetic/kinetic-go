@@ -1,6 +1,8 @@
 package kinetic
 
-//kproto "github.com/yongzhy/kinetic-go/proto"
+import (
+	kproto "github.com/yongzhy/kinetic-go/proto"
+)
 
 type BlockConnection struct {
 	nbc *NonBlockConnection
@@ -16,40 +18,88 @@ func NewBlockConnection(op ClientOptions) (*BlockConnection, error) {
 	return &BlockConnection{nbc: nbc}, err
 }
 
-func (conn *BlockConnection) NoOp() error {
+func (conn *BlockConnection) NoOp() (Status, error) {
 	callback := &GenericCallback{}
 	h := NewMessageHandler(callback)
-	if h == nil {
-		klog.Error("Message Handler for NoOp Failure")
-	}
-	if conn == nil {
-		klog.Error("Connection nil")
-	} else if conn.nbc == nil {
-		klog.Error("Nonblock Connection nil")
-	}
 	conn.nbc.NoOp(h)
 
 	for callback.Done() == false {
 		conn.nbc.Run()
 	}
 
-	return nil
+	return callback.Status(), nil
 }
 
-func (conn *BlockConnection) Get(key []byte) (Record, error) {
+func (conn *BlockConnection) get(key []byte, getCmd kproto.Command_MessageType) (Record, Status, error) {
 	callback := &GetCallback{}
 	h := NewMessageHandler(callback)
 
-	err := conn.nbc.Get(key, h)
+	var err error = nil
+	switch getCmd {
+	case kproto.Command_GET:
+		err = conn.nbc.Get(key, h)
+	case kproto.Command_GETPREVIOUS:
+		err = conn.nbc.GetPrevious(key, h)
+	case kproto.Command_GETNEXT:
+		err = conn.nbc.GetNext(key, h)
+	}
 	if err != nil {
-		return Record{}, err
+		return Record{}, callback.Status(), err
 	}
 
 	for callback.Done() == false {
 		conn.nbc.Run()
 	}
 
-	return callback.Record(), nil
+	return callback.Entry, callback.Status(), nil
+}
+
+func (conn *BlockConnection) Get(key []byte) (Record, Status, error) {
+	return conn.get(key, kproto.Command_GET)
+}
+
+func (conn *BlockConnection) GetNext(key []byte) (Record, Status, error) {
+	return conn.get(key, kproto.Command_GETNEXT)
+}
+
+func (conn *BlockConnection) GetPrevious(key []byte) (Record, Status, error) {
+	return conn.get(key, kproto.Command_GETPREVIOUS)
+}
+
+func (conn *BlockConnection) GetKeyRange(r *KeyRange) ([][]byte, Status, error) {
+	callback := &GetKeyRangeCallback{}
+	h := NewMessageHandler(callback)
+	conn.nbc.GetKeyRange(r, h)
+
+	for callback.Done() == false {
+		conn.nbc.Run()
+	}
+
+	return callback.Keys, callback.Status(), nil
+}
+
+func (conn *BlockConnection) Delete(entry *Record) (Status, error) {
+	callback := &GenericCallback{}
+	h := NewMessageHandler(callback)
+	conn.nbc.Delete(entry, h)
+
+	for callback.Done() == false {
+		conn.nbc.Run()
+	}
+
+	return callback.Status(), nil
+}
+
+func (conn *BlockConnection) Put(entry *Record) (Status, error) {
+	callback := &GenericCallback{}
+	h := NewMessageHandler(callback)
+	conn.nbc.Put(entry, h)
+
+	for callback.Done() == false {
+		conn.nbc.Run()
+	}
+
+	return callback.Status(), nil
 }
 
 func (conn *BlockConnection) Close() {

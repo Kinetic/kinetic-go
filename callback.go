@@ -11,6 +11,7 @@ type Callback interface {
 	Status() Status
 }
 
+// Generic Callback, for Message which doesn't require data from Kinetic drive.
 type GenericCallback struct {
 	done   bool
 	status Status
@@ -36,21 +37,32 @@ func (c *GenericCallback) Status() Status {
 	return c.status
 }
 
+// Callback for Command_GET Message
 type GetCallback struct {
 	GenericCallback
-	record Record
+	Entry Record
 }
 
 func (c *GetCallback) Success(resp *kproto.Command, value []byte) {
 	c.GenericCallback.Success(resp, value)
-	c.record.Key = resp.GetBody().GetKeyValue().GetKey()
-	c.record.Tag = resp.GetBody().GetKeyValue().GetTag()
-	c.record.Version = resp.GetBody().GetKeyValue().GetDbVersion()
-	c.record.Algo = convertAlgoFromProto(resp.GetBody().GetKeyValue().GetAlgorithm())
+	c.Entry.Key = resp.GetBody().GetKeyValue().GetKey()
+	c.Entry.Tag = resp.GetBody().GetKeyValue().GetTag()
+	c.Entry.Version = resp.GetBody().GetKeyValue().GetDbVersion()
+	c.Entry.Algo = convertAlgoFromProto(resp.GetBody().GetKeyValue().GetAlgorithm())
 
-	c.record.Value = value
+	c.Entry.Value = value
 }
 
-func (c *GetCallback) Record() Record {
-	return c.record
+// Callback for Command_GETKEYRANGE Message
+type GetKeyRangeCallback struct {
+	GenericCallback
+	Keys [][]byte
 }
+
+func (c *GetKeyRangeCallback) Success(resp *kproto.Command, value []byte) {
+	c.GenericCallback.Success(resp, value)
+	c.Keys = resp.GetBody().GetRange().GetKeys()
+}
+
+// Callback for Command_GETVERSION Message
+// Callback for Command_GETLOG Message
