@@ -54,6 +54,21 @@ func TestNonBlockGetPrevious(t *testing.T) {
 	}
 }
 
+func TestNonBlockGetVersion(t *testing.T) {
+	version, status, err := blockConn.GetVersion([]byte("object000"))
+	if err != nil || status.Code != OK {
+		t.Fatal("Nonblocking GetVersion Failure")
+	}
+	t.Logf("Object version = %x", version)
+}
+
+func TestNonBlockFlush(t *testing.T) {
+	status, err := blockConn.Flush()
+	if err != nil || status.Code != OK {
+		t.Fatal("Nonblocking Flush Failure")
+	}
+}
+
 func TestNonBlockPut(t *testing.T) {
 	entry := Record{
 		Key:   []byte("object001"),

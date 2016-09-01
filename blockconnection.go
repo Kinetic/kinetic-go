@@ -87,7 +87,7 @@ func (conn *BlockConnection) GetKeyRange(r *KeyRange) ([][]byte, Status, error) 
 func (conn *BlockConnection) GetVersion(key []byte) ([]byte, Status, error) {
 	callback := &GetVersionCallback{}
 	h := NewMessageHandler(callback)
-	err := conn.nbc.GetVersion(r, h)
+	err := conn.nbc.GetVersion(key, h)
 	if err != nil {
 		return nil, callback.Status(), err
 	}
@@ -142,6 +142,21 @@ func (conn *BlockConnection) Put(entry *Record) (Status, error) {
 	}
 
 	return callback.Status(), nil
+}
+
+func (conn *BlockConnection) GetLog(logs []LogType) (Log, Status, error) {
+	callback := &GetLogCallback{}
+	h := NewMessageHandler(callback)
+	err := conn.nbc.GetLog(logs, h)
+	if err != nil {
+		return Log{}, callback.Status(), err
+	}
+
+	for callback.Done() == false {
+		conn.nbc.Run()
+	}
+
+	return callback.Logs, callback.Status(), nil
 }
 
 func (conn *BlockConnection) pinop(pin []byte, op kproto.Command_PinOperation_PinOpType) (Status, error) {

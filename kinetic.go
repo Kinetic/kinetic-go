@@ -21,26 +21,152 @@ type ClientOptions struct {
 	Hmac []byte
 }
 
+// message type
+type MessageType int32
+
+const (
+	_                     MessageType = iota
+	INVALID_MESSAGE_TYPE  MessageType = iota
+	GET                   MessageType = iota
+	GET_RESPONSE          MessageType = iota
+	PUT                   MessageType = iota
+	PUT_RESPONSE          MessageType = iota
+	DELETE                MessageType = iota
+	DELETE_RESPONSE       MessageType = iota
+	GETNEXT               MessageType = iota
+	GETNEXT_RESPONSE      MessageType = iota
+	GETPREVIOUS           MessageType = iota
+	GETPREVIOUS_RESPONSE  MessageType = iota
+	GETKEYRANGE           MessageType = iota
+	GETKEYRANGE_RESPONSE  MessageType = iota
+	GETVERSION            MessageType = iota
+	GETVERSION_RESPONSE   MessageType = iota
+	SETUP                 MessageType = iota
+	SETUP_RESPONSE        MessageType = iota
+	GETLOG                MessageType = iota
+	GETLOG_RESPONSE       MessageType = iota
+	SECURITY              MessageType = iota
+	SECURITY_RESPONSE     MessageType = iota
+	PEER2PEERPUSH         MessageType = iota
+	PEER2PEERPUSH_RESPONS MessageType = iota
+	NOOP                  MessageType = iota
+	NOOP_RESPONSE         MessageType = iota
+	FLUSHALLDATA          MessageType = iota
+	FLUSHALLDATA_RESPONS  MessageType = iota
+	PINOP                 MessageType = iota
+	PINOP_RESPONSE        MessageType = iota
+	MEDIASCAN             MessageType = iota
+	MEDIASCAN_RESPONSE    MessageType = iota
+	MEDIAOPTIMIZE         MessageType = iota
+	MEDIAOPTIMIZE_RESPON  MessageType = iota
+	START_BATCH           MessageType = iota
+	START_BATCH_RESPONSE  MessageType = iota
+	END_BATCH             MessageType = iota
+	END_BATCH_RESPONSE    MessageType = iota
+	ABORT_BATCH           MessageType = iota
+	ABORT_BATCH_RESPONSE  MessageType = iota
+)
+
+var strMessageType = map[MessageType]string{
+	INVALID_MESSAGE_TYPE:  "INVALID_MESSAGE_TYPE",
+	GET:                   "GET",
+	GET_RESPONSE:          "GET_RESPONSE",
+	PUT:                   "PUT",
+	PUT_RESPONSE:          "PUT_RESPONSE",
+	DELETE:                "DELETE",
+	DELETE_RESPONSE:       "DELETE_RESPONSE",
+	GETNEXT:               "GETNEXT",
+	GETNEXT_RESPONSE:      "GETNEXT_RESPONSE",
+	GETPREVIOUS:           "GETPREVIOUS",
+	GETPREVIOUS_RESPONSE:  "GETPREVIOUS_RESPONSE",
+	GETKEYRANGE:           "GETKEYRANGE",
+	GETKEYRANGE_RESPONSE:  "GETKEYRANGE_RESPONSE",
+	GETVERSION:            "GETVERSION",
+	GETVERSION_RESPONSE:   "GETVERSION_RESPONSE",
+	SETUP:                 "SETUP",
+	SETUP_RESPONSE:        "SETUP_RESPONSE",
+	GETLOG:                "GETLOG",
+	GETLOG_RESPONSE:       "GETLOG_RESPONSE",
+	SECURITY:              "SECURITY",
+	SECURITY_RESPONSE:     "SECURITY_RESPONSE",
+	PEER2PEERPUSH:         "PEER2PEERPUSH",
+	PEER2PEERPUSH_RESPONS: "PEER2PEERPUSH_RESPONS",
+	NOOP:                 "NOOP",
+	NOOP_RESPONSE:        "NOOP_RESPONSE",
+	FLUSHALLDATA:         "FLUSHALLDATA",
+	FLUSHALLDATA_RESPONS: "FLUSHALLDATA_RESPONS",
+	PINOP:                "PINOP",
+	PINOP_RESPONSE:       "PINOP_RESPONSE",
+	MEDIASCAN:            "MEDIASCAN",
+	MEDIASCAN_RESPONSE:   "MEDIASCAN_RESPONSE",
+	MEDIAOPTIMIZE:        "MEDIAOPTIMIZE",
+	MEDIAOPTIMIZE_RESPON: "MEDIAOPTIMIZE_RESPON",
+	START_BATCH:          "START_BATCH",
+	START_BATCH_RESPONSE: "START_BATCH_RESPONSE",
+	END_BATCH:            "END_BATCH",
+	END_BATCH_RESPONSE:   "END_BATCH_RESPONSE",
+	ABORT_BATCH:          "ABORT_BATCH",
+	ABORT_BATCH_RESPONSE: "ABORT_BATCH_RESPONSE",
+}
+
+func (m MessageType) String() string {
+	s, ok := strMessageType[m]
+	if ok {
+		return s
+	}
+	return "Unknown MessageType"
+}
+
 // algorithm
 type Algorithm int32
 
 const (
-	_          Algorithm = -1
-	ALGO_SHA1  Algorithm = 1
-	ALGO_SHA2  Algorithm = 2
-	ALGO_SHA3  Algorithm = 3
-	ALGO_CRC32 Algorithm = 4
-	ALGO_CRC64 Algorithm = 5
+	_          Algorithm = iota
+	ALGO_SHA1  Algorithm = iota
+	ALGO_SHA2  Algorithm = iota
+	ALGO_SHA3  Algorithm = iota
+	ALGO_CRC32 Algorithm = iota
+	ALGO_CRC64 Algorithm = iota
 )
+
+var strAlgorithm = map[Algorithm]string{
+	ALGO_SHA1:  "ALGO_SHA1",
+	ALGO_SHA2:  "ALGO_SHA2",
+	ALGO_SHA3:  "ALGO_SHA3",
+	ALGO_CRC32: "ALGO_CRC32",
+	ALGO_CRC64: "ALGO_CRC64",
+}
+
+func (a Algorithm) String() string {
+	s, ok := strAlgorithm[a]
+	if ok {
+		return s
+	}
+	return "Unknown Algorithm"
+}
 
 type Synchronization int32
 
 const (
-	_                 Synchronization = -1
-	SYNC_WRITETHROUGH Synchronization = 1
-	SYNC_WRITEBACK    Synchronization = 2
-	SYNC_FLUSH        Synchronization = 3
+	_                 Synchronization = iota
+	SYNC_WRITETHROUGH Synchronization = iota
+	SYNC_WRITEBACK    Synchronization = iota
+	SYNC_FLUSH        Synchronization = iota
 )
+
+var strSynchronization = map[Synchronization]string{
+	SYNC_WRITETHROUGH: "SYNC_WRITETHROUGH",
+	SYNC_WRITEBACK:    "SYNC_WRITEBACK",
+	SYNC_FLUSH:        "SYNC_FLUSH",
+}
+
+func (sync Synchronization) String() string {
+	s, ok := strSynchronization[sync]
+	if ok {
+		return s
+	}
+	return "Unknown Synchronization"
+}
 
 type Priority int32
 
@@ -52,6 +178,22 @@ const (
 	PRIORITY_HIGHER  Priority = iota
 	PRIORITY_HIGHEST Priority = iota
 )
+
+var strPriority = map[Priority]string{
+	PRIORITY_LOWEST:  "PRIORITY_LOWEST",
+	PRIORITY_LOWER:   "PRIORITY_LOWER",
+	PRIORITY_NORMAL:  "PRIORITY_NORMAL",
+	PRIORITY_HIGHER:  "PRIORITY_HIGHER",
+	PRIORITY_HIGHEST: "PRIORITY_HIGHEST",
+}
+
+func (p Priority) String() string {
+	s, ok := strPriority[p]
+	if ok {
+		return s
+	}
+	return "Unknown Priority"
+}
 
 type LogType int32
 
@@ -67,19 +209,57 @@ const (
 	LOG_DEVICE        LogType = iota
 )
 
-type ACL int32
+var strLogType = map[LogType]string{
+	LOG_UTILIZATIONS:  "LOG_UTILIZATIONS",
+	LOG_TEMPERATURES:  "LOG_TEMPERATURES",
+	LOG_CAPACITIES:    "LOG_CAPACITIES",
+	LOG_CONFIGURATION: "LOG_CONFIGURATION",
+	LOG_STATISTICS:    "LOG_STATISTICS",
+	LOG_MESSAGES:      "LOG_MESSAGES",
+	LOG_LIMITS:        "LOG_LIMITS",
+	LOG_DEVICE:        "LOG_DEVICE",
+}
+
+func (l LogType) String() string {
+	s, ok := strLogType[l]
+	if ok {
+		return s
+	}
+	return "Unknown LogType"
+}
+
+type Permission int32
 
 const (
-	_            ACL = iota
-	ACL_READ     ACL = iota
-	ACL_WRITE    ACL = iota
-	ACL_DELETE   ACL = iota
-	ACL_RANGE    ACL = iota
-	ACL_SETUP    ACL = iota
-	ACL_P2POP    ACL = iota
-	ACL_GETLOG   ACL = iota
-	ACL_SECURITY ACL = iota
+	_                   Permission = iota
+	PERMISSION_READ     Permission = iota
+	PERMISSION_WRITE    Permission = iota
+	PERMISSION_DELETE   Permission = iota
+	PERMISSION_RANGE    Permission = iota
+	PERMISSION_SETUP    Permission = iota
+	PERMISSION_P2POP    Permission = iota
+	PERMISSION_GETLOG   Permission = iota
+	PERMISSION_SECURITY Permission = iota
 )
+
+var strPermission = map[Permission]string{
+	PERMISSION_READ:     "PERMISSION_READ",
+	PERMISSION_WRITE:    "PERMISSION_WRITE",
+	PERMISSION_DELETE:   "PERMISSION_DELETE",
+	PERMISSION_RANGE:    "PERMISSION_RANGE",
+	PERMISSION_SETUP:    "PERMISSION_SETUP",
+	PERMISSION_P2POP:    "PERMISSION_P2POP",
+	PERMISSION_GETLOG:   "PERMISSION_GETLOG",
+	PERMISSION_SECURITY: "PERMISSION_SECURITY",
+}
+
+func (p Permission) String() string {
+	s, ok := strPermission[p]
+	if ok {
+		return s
+	}
+	return "Unknown Permission"
+}
 
 type Record struct {
 	Key      []byte
@@ -99,6 +279,85 @@ type KeyRange struct {
 	EndKeyInclusive   bool
 	Reverse           bool
 	Max               int32
+}
+
+type UtilizationLog struct {
+	Name  string
+	Value float32
+}
+
+type TemperatureLog struct {
+	Name    string
+	Current float32
+	Minimum float32
+	Maximum float32
+	Target  float32
+}
+
+type CapacityLog struct {
+	CapacityInBytes uint64
+	PortionFull     float32
+}
+
+type ConfigurationInterface struct {
+	Name     string
+	MAC      []byte
+	Ipv4Addr []byte
+	Ipv6Addr []byte
+}
+
+type ConfigurationLog struct {
+	Vendor                  string
+	Model                   string
+	SerialNumber            []byte
+	WorldWideName           []byte
+	Version                 string
+	CompilationDate         string
+	SourceHash              string
+	ProtocolVersion         string
+	ProtocolCompilationDate string
+	ProtocolSourceHash      string
+	Interface               []ConfigurationInterface
+	Port                    int32
+	TlsPort                 int32
+}
+
+type StatisticsLog struct {
+	// TODO: Would it better just use the protocol Command_MessageType?
+	Type  MessageType
+	Count uint64
+	Bytes uint64
+}
+
+type LimitsLog struct {
+	MaxKeySize                  uint32
+	MaxValueSize                uint32
+	MaxVersionSize              uint32
+	MaxTagSize                  uint32
+	MaxConnections              uint32
+	MaxOutstandingReadRequests  uint32
+	MaxOutstandingWriteRequests uint32
+	MaxMessageSize              uint32
+	MaxKeyRangeCount            uint32
+	MaxIdentityCount            uint32
+	MaxPinSize                  uint32
+	MaxOperationCountPerBatch   uint32
+	MaxBatchCountPerDevice      uint32
+}
+
+type DeviceLog struct {
+	Name []byte
+}
+
+type Log struct {
+	Utilizations  []UtilizationLog
+	Temperatures  []TemperatureLog
+	Capacity      CapacityLog
+	Configuration ConfigurationLog
+	Statistics    []StatisticsLog
+	Messages      []byte
+	Limits        LimitsLog
+	Device        DeviceLog
 }
 
 func convertAlgoToProto(a Algorithm) kproto.Command_Algorithm {

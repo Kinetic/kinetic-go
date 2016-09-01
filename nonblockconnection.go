@@ -130,6 +130,23 @@ func (conn *NonBlockConnection) Put(entry *Record, h *MessageHandler) error {
 	return conn.service.submit(msg, cmd, entry.Value, h)
 }
 
+func (conn *NonBlockConnection) GetLog(logs []LogType, h *MessageHandler) error {
+	msg := newMessage(kproto.Message_HMACAUTH)
+
+	types := make([]kproto.Command_GetLog_Type, len(logs))
+	for l := range logs {
+		types[l] = convertLogTypeToProto(logs[l])
+	}
+	cmd := newCommand(kproto.Command_GETLOG)
+	cmd.Body = &kproto.Command_Body{
+		GetLog: &kproto.Command_GetLog{
+			Types: types,
+		},
+	}
+
+	return conn.service.submit(msg, cmd, nil, h)
+}
+
 func (conn *NonBlockConnection) pinop(pin []byte, op kproto.Command_PinOperation_PinOpType, h *MessageHandler) error {
 	msg := newMessage(kproto.Message_PINAUTH)
 	msg.PinAuth = &kproto.Message_PINauth{

@@ -76,3 +76,11 @@ func (c *GetVersionCallback) Success(resp *kproto.Command, value []byte) {
 }
 
 // Callback for Command_GETLOG Message
+type GetLogCallback struct {
+	GenericCallback
+	Logs Log
+}
+
+func (c *GetLogCallback) Success(resp *kproto.Command, value []byte) {
+	c.GenericCallback.Success(resp, value)
+}
