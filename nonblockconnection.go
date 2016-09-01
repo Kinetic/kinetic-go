@@ -26,8 +26,7 @@ func (conn *NonBlockConnection) NoOp(h *MessageHandler) error {
 
 	cmd := newCommand(kproto.Command_NOOP)
 
-	err := conn.service.submit(msg, cmd, nil, h)
-	return err
+	return conn.service.submit(msg, cmd, nil, h)
 }
 
 func (conn *NonBlockConnection) get(key []byte, getType kproto.Command_MessageType, h *MessageHandler) error {
@@ -40,8 +39,7 @@ func (conn *NonBlockConnection) get(key []byte, getType kproto.Command_MessageTy
 		},
 	}
 
-	err := conn.service.submit(msg, cmd, nil, h)
-	return err
+	return conn.service.submit(msg, cmd, nil, h)
 }
 
 func (conn *NonBlockConnection) Get(key []byte, h *MessageHandler) error {
@@ -71,8 +69,7 @@ func (conn *NonBlockConnection) GetKeyRange(r *KeyRange, h *MessageHandler) erro
 		},
 	}
 
-	err := conn.service.submit(msg, cmd, nil, h)
-	return err
+	return conn.service.submit(msg, cmd, nil, h)
 }
 
 func (conn *NonBlockConnection) Delete(entry *Record, h *MessageHandler) error {
@@ -90,8 +87,7 @@ func (conn *NonBlockConnection) Delete(entry *Record, h *MessageHandler) error {
 		},
 	}
 
-	err := conn.service.submit(msg, cmd, nil, h)
-	return err
+	return conn.service.submit(msg, cmd, nil, h)
 }
 
 func (conn *NonBlockConnection) Put(entry *Record, h *MessageHandler) error {
@@ -110,8 +106,7 @@ func (conn *NonBlockConnection) Put(entry *Record, h *MessageHandler) error {
 		},
 	}
 
-	err := conn.service.submit(msg, cmd, entry.Value, h)
-	return err
+	return conn.service.submit(msg, cmd, entry.Value, h)
 }
 
 func (conn *NonBlockConnection) pinop(pin []byte, op kproto.Command_PinOperation_PinOpType, h *MessageHandler) error {
@@ -128,8 +123,7 @@ func (conn *NonBlockConnection) pinop(pin []byte, op kproto.Command_PinOperation
 		},
 	}
 
-	err := conn.service.submit(msg, cmd, nil, h)
-	return err
+	return conn.service.submit(msg, cmd, nil, h)
 }
 
 func (conn *NonBlockConnection) SecureErase(pin []byte, h *MessageHandler) error {
@@ -147,6 +141,61 @@ func (conn *NonBlockConnection) LockDevice(pin []byte, h *MessageHandler) error 
 
 func (conn *NonBlockConnection) UnlockDevice(pin []byte, h *MessageHandler) error {
 	return conn.pinop(pin, kproto.Command_PinOperation_UNLOCK_PINOP, h)
+}
+
+func (conn *NonBlockConnection) UpdateFirmware(code []byte, h *MessageHandler) error {
+	msg := newMessage(kproto.Message_HMACAUTH)
+	cmd := newCommand(kproto.Command_SETUP)
+
+	var download bool = true
+	cmd.Body = &kproto.Command_Body{
+		Setup: &kproto.Command_Setup{
+			FirmwareDownload: &download,
+		},
+	}
+
+	return conn.service.submit(msg, cmd, code, h)
+}
+
+func (conn *NonBlockConnection) SetClusterVersion(version int64, h *MessageHandler) error {
+	msg := newMessage(kproto.Message_HMACAUTH)
+	cmd := newCommand(kproto.Command_SETUP)
+
+	cmd.Body = &kproto.Command_Body{
+		Setup: &kproto.Command_Setup{
+			NewClusterVersion: &version,
+		},
+	}
+
+	return conn.service.submit(msg, cmd, nil, h)
+}
+
+func (conn *NonBlockConnection) SetLockPin(currentPin []byte, newPin []byte, h *MessageHandler) error {
+	msg := newMessage(kproto.Message_HMACAUTH)
+	cmd := newCommand(kproto.Command_SECURITY)
+
+	cmd.Body = &kproto.Command_Body{
+		Security: &kproto.Command_Security{
+			OldLockPIN: currentPin,
+			NewLockPIN: newPin,
+		},
+	}
+
+	return conn.service.submit(msg, cmd, nil, h)
+}
+
+func (conn *NonBlockConnection) SetErasePin(currentPin []byte, newPin []byte, h *MessageHandler) error {
+	msg := newMessage(kproto.Message_HMACAUTH)
+	cmd := newCommand(kproto.Command_SECURITY)
+
+	cmd.Body = &kproto.Command_Body{
+		Security: &kproto.Command_Security{
+			OldErasePIN: currentPin,
+			NewErasePIN: newPin,
+		},
+	}
+
+	return conn.service.submit(msg, cmd, nil, h)
 }
 
 func (conn *NonBlockConnection) Run() error {

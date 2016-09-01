@@ -157,6 +157,66 @@ func (conn *BlockConnection) UnlockDevice(pin []byte) (Status, error) {
 	return conn.pinop(pin, kproto.Command_PinOperation_UNLOCK_PINOP)
 }
 
+func (conn *BlockConnection) UpdateFirmware(code []byte) (Status, error) {
+	callback := &GenericCallback{}
+	h := NewMessageHandler(callback)
+	err := conn.nbc.UpdateFirmware(code, h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	for callback.Done() == false {
+		conn.nbc.Run()
+	}
+
+	return callback.Status(), nil
+}
+
+func (conn *BlockConnection) SetClusterVersion(version int64) (Status, error) {
+	callback := &GenericCallback{}
+	h := NewMessageHandler(callback)
+	err := conn.nbc.SetClusterVersion(version, h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	for callback.Done() == false {
+		conn.nbc.Run()
+	}
+
+	return callback.Status(), nil
+}
+
+func (conn *BlockConnection) SetLockPin(currentPin []byte, newPin []byte) (Status, error) {
+	callback := &GenericCallback{}
+	h := NewMessageHandler(callback)
+	err := conn.nbc.SetLockPin(currentPin, newPin, h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	for callback.Done() == false {
+		conn.nbc.Run()
+	}
+
+	return callback.Status(), nil
+}
+
+func (conn *BlockConnection) SetErasePin(currentPin []byte, newPin []byte) (Status, error) {
+	callback := &GenericCallback{}
+	h := NewMessageHandler(callback)
+	err := conn.nbc.SetErasePin(currentPin, newPin, h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	for callback.Done() == false {
+		conn.nbc.Run()
+	}
+
+	return callback.Status(), nil
+}
+
 func (conn *BlockConnection) Close() {
 	conn.nbc.Close()
 }
