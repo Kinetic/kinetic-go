@@ -84,6 +84,36 @@ func (conn *BlockConnection) GetKeyRange(r *KeyRange) ([][]byte, Status, error) 
 	return callback.Keys, callback.Status(), nil
 }
 
+func (conn *BlockConnection) GetVersion(key []byte) ([]byte, Status, error) {
+	callback := &GetVersionCallback{}
+	h := NewMessageHandler(callback)
+	err := conn.nbc.GetVersion(r, h)
+	if err != nil {
+		return nil, callback.Status(), err
+	}
+
+	for callback.Done() == false {
+		conn.nbc.Run()
+	}
+
+	return callback.Version, callback.Status(), nil
+}
+
+func (conn *BlockConnection) Flush() (Status, error) {
+	callback := &GenericCallback{}
+	h := NewMessageHandler(callback)
+	err := conn.nbc.Flush(h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	for callback.Done() == false {
+		conn.nbc.Run()
+	}
+
+	return callback.Status(), nil
+}
+
 func (conn *BlockConnection) Delete(entry *Record) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewMessageHandler(callback)
