@@ -21,7 +21,7 @@ func NewNonBlockConnection(op ClientOptions) (*NonBlockConnection, error) {
 	return &NonBlockConnection{service}, nil
 }
 
-func (conn *NonBlockConnection) NoOp(h *MessageHandler) error {
+func (conn *NonBlockConnection) NoOp(h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 
 	cmd := newCommand(kproto.Command_NOOP)
@@ -29,7 +29,7 @@ func (conn *NonBlockConnection) NoOp(h *MessageHandler) error {
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) get(key []byte, getType kproto.Command_MessageType, h *MessageHandler) error {
+func (conn *NonBlockConnection) get(key []byte, getType kproto.Command_MessageType, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 
 	cmd := newCommand(getType)
@@ -42,19 +42,19 @@ func (conn *NonBlockConnection) get(key []byte, getType kproto.Command_MessageTy
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) Get(key []byte, h *MessageHandler) error {
+func (conn *NonBlockConnection) Get(key []byte, h *ResponseHandler) error {
 	return conn.get(key, kproto.Command_GET, h)
 }
 
-func (conn *NonBlockConnection) GetNext(key []byte, h *MessageHandler) error {
+func (conn *NonBlockConnection) GetNext(key []byte, h *ResponseHandler) error {
 	return conn.get(key, kproto.Command_GETNEXT, h)
 }
 
-func (conn *NonBlockConnection) GetPrevious(key []byte, h *MessageHandler) error {
+func (conn *NonBlockConnection) GetPrevious(key []byte, h *ResponseHandler) error {
 	return conn.get(key, kproto.Command_GETPREVIOUS, h)
 }
 
-func (conn *NonBlockConnection) GetKeyRange(r *KeyRange, h *MessageHandler) error {
+func (conn *NonBlockConnection) GetKeyRange(r *KeyRange, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 
 	cmd := newCommand(kproto.Command_GETKEYRANGE)
@@ -72,7 +72,7 @@ func (conn *NonBlockConnection) GetKeyRange(r *KeyRange, h *MessageHandler) erro
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) GetVersion(key []byte, h *MessageHandler) error {
+func (conn *NonBlockConnection) GetVersion(key []byte, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 
 	cmd := newCommand(kproto.Command_GETVERSION)
@@ -85,7 +85,7 @@ func (conn *NonBlockConnection) GetVersion(key []byte, h *MessageHandler) error 
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) Flush(h *MessageHandler) error {
+func (conn *NonBlockConnection) Flush(h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 
 	cmd := newCommand(kproto.Command_FLUSHALLDATA)
@@ -93,7 +93,7 @@ func (conn *NonBlockConnection) Flush(h *MessageHandler) error {
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) Delete(entry *Record, h *MessageHandler) error {
+func (conn *NonBlockConnection) Delete(entry *Record, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_DELETE)
 
@@ -111,7 +111,7 @@ func (conn *NonBlockConnection) Delete(entry *Record, h *MessageHandler) error {
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) Put(entry *Record, h *MessageHandler) error {
+func (conn *NonBlockConnection) Put(entry *Record, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_PUT)
 
@@ -130,7 +130,7 @@ func (conn *NonBlockConnection) Put(entry *Record, h *MessageHandler) error {
 	return conn.service.submit(msg, cmd, entry.Value, h)
 }
 
-func (conn *NonBlockConnection) GetLog(logs []LogType, h *MessageHandler) error {
+func (conn *NonBlockConnection) GetLog(logs []LogType, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 
 	types := make([]kproto.Command_GetLog_Type, len(logs))
@@ -147,7 +147,7 @@ func (conn *NonBlockConnection) GetLog(logs []LogType, h *MessageHandler) error 
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) pinop(pin []byte, op kproto.Command_PinOperation_PinOpType, h *MessageHandler) error {
+func (conn *NonBlockConnection) pinop(pin []byte, op kproto.Command_PinOperation_PinOpType, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_PINAUTH)
 	msg.PinAuth = &kproto.Message_PINauth{
 		Pin: pin,
@@ -164,24 +164,24 @@ func (conn *NonBlockConnection) pinop(pin []byte, op kproto.Command_PinOperation
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) SecureErase(pin []byte, h *MessageHandler) error {
+func (conn *NonBlockConnection) SecureErase(pin []byte, h *ResponseHandler) error {
 	return conn.pinop(pin, kproto.Command_PinOperation_SECURE_ERASE_PINOP, h)
 }
 
-func (conn *NonBlockConnection) InstantErase(pin []byte, h *MessageHandler) error {
+func (conn *NonBlockConnection) InstantErase(pin []byte, h *ResponseHandler) error {
 	return conn.pinop(pin, kproto.Command_PinOperation_ERASE_PINOP, h)
 
 }
 
-func (conn *NonBlockConnection) LockDevice(pin []byte, h *MessageHandler) error {
+func (conn *NonBlockConnection) LockDevice(pin []byte, h *ResponseHandler) error {
 	return conn.pinop(pin, kproto.Command_PinOperation_LOCK_PINOP, h)
 }
 
-func (conn *NonBlockConnection) UnlockDevice(pin []byte, h *MessageHandler) error {
+func (conn *NonBlockConnection) UnlockDevice(pin []byte, h *ResponseHandler) error {
 	return conn.pinop(pin, kproto.Command_PinOperation_UNLOCK_PINOP, h)
 }
 
-func (conn *NonBlockConnection) UpdateFirmware(code []byte, h *MessageHandler) error {
+func (conn *NonBlockConnection) UpdateFirmware(code []byte, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_SETUP)
 
@@ -195,7 +195,7 @@ func (conn *NonBlockConnection) UpdateFirmware(code []byte, h *MessageHandler) e
 	return conn.service.submit(msg, cmd, code, h)
 }
 
-func (conn *NonBlockConnection) SetClusterVersion(version int64, h *MessageHandler) error {
+func (conn *NonBlockConnection) SetClusterVersion(version int64, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_SETUP)
 
@@ -208,7 +208,7 @@ func (conn *NonBlockConnection) SetClusterVersion(version int64, h *MessageHandl
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) SetLockPin(currentPin []byte, newPin []byte, h *MessageHandler) error {
+func (conn *NonBlockConnection) SetLockPin(currentPin []byte, newPin []byte, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_SECURITY)
 
@@ -222,7 +222,7 @@ func (conn *NonBlockConnection) SetLockPin(currentPin []byte, newPin []byte, h *
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) SetErasePin(currentPin []byte, newPin []byte, h *MessageHandler) error {
+func (conn *NonBlockConnection) SetErasePin(currentPin []byte, newPin []byte, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_SECURITY)
 
@@ -236,15 +236,15 @@ func (conn *NonBlockConnection) SetErasePin(currentPin []byte, newPin []byte, h 
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) SetACL(h *MessageHandler) error {
+func (conn *NonBlockConnection) SetACL(h *ResponseHandler) error {
 	return nil
 }
 
-func (conn *NonBlockConnection) MediaScan(h *MessageHandler) error {
+func (conn *NonBlockConnection) MediaScan(h *ResponseHandler) error {
 	return nil
 }
 
-func (conn *NonBlockConnection) MediaOptimize(h *MessageHandler) error {
+func (conn *NonBlockConnection) MediaOptimize(h *ResponseHandler) error {
 	return nil
 }
 

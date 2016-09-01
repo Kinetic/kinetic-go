@@ -4,11 +4,11 @@ import (
 	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
-type MessageHandler struct {
+type ResponseHandler struct {
 	callback Callback
 }
 
-func (h *MessageHandler) Handle(cmd *kproto.Command, value []byte) error {
+func (h *ResponseHandler) Handle(cmd *kproto.Command, value []byte) error {
 	klog.Info("Message handler called")
 	if h.callback != nil {
 		if cmd.Status != nil && cmd.Status.Code != nil {
@@ -26,17 +26,17 @@ func (h *MessageHandler) Handle(cmd *kproto.Command, value []byte) error {
 	return nil
 }
 
-func (h *MessageHandler) Error(s Status) {
+func (h *ResponseHandler) Error(s Status) {
 	if h.callback != nil {
 		h.callback.Failure(s)
 	}
 }
 
-func (h *MessageHandler) SetCallback(call Callback) {
+func (h *ResponseHandler) SetCallback(call Callback) {
 	h.callback = call
 }
 
-func NewMessageHandler(call Callback) *MessageHandler {
-	h := &MessageHandler{callback: call}
+func NewResponseHandler(call Callback) *ResponseHandler {
+	h := &ResponseHandler{callback: call}
 	return h
 }

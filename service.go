@@ -37,11 +37,11 @@ func newCommand(t kproto.Command_MessageType) *kproto.Command {
 
 type networkService struct {
 	conn   net.Conn
-	seq    int64                     // Operation sequence ID
-	connId int64                     // current conection ID
-	option ClientOptions             // current connection operation
-	hmap   map[int64]*MessageHandler // Message handler map
-	fatal  bool                      // Network has fatal failure
+	seq    int64                      // Operation sequence ID
+	connId int64                      // current conection ID
+	option ClientOptions              // current connection operation
+	hmap   map[int64]*ResponseHandler // Message handler map
+	fatal  bool                       // Network has fatal failure
 }
 
 func newNetworkService(op ClientOptions) (*networkService, error) {
@@ -56,7 +56,7 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 		seq:    0,
 		connId: 0,
 		option: op,
-		hmap:   make(map[int64]*MessageHandler),
+		hmap:   make(map[int64]*ResponseHandler),
 		fatal:  false}
 
 	_, _, _, err = ns.receive()
@@ -69,7 +69,7 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 }
 
 // When client network service has error, call error handling from all Messagehandler current in Queue.
-func (ns *networkService) clientError(s Status, mh *MessageHandler) {
+func (ns *networkService) clientError(s Status, mh *ResponseHandler) {
 	for ack, h := range ns.hmap {
 		if h.callback != nil {
 			h.callback.Failure(s)
@@ -118,7 +118,7 @@ func (ns *networkService) listen() error {
 	return nil
 }
 
-func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value []byte, h *MessageHandler) error {
+func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value []byte, h *ResponseHandler) error {
 	if ns.fatal {
 		return errors.New("Network service has fatal error")
 	}

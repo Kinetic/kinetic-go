@@ -20,7 +20,7 @@ func NewBlockConnection(op ClientOptions) (*BlockConnection, error) {
 
 func (conn *BlockConnection) NoOp() (Status, error) {
 	callback := &GenericCallback{}
-	h := NewMessageHandler(callback)
+	h := NewResponseHandler(callback)
 	err := conn.nbc.NoOp(h)
 	if err != nil {
 		return callback.Status(), err
@@ -35,7 +35,7 @@ func (conn *BlockConnection) NoOp() (Status, error) {
 
 func (conn *BlockConnection) get(key []byte, getCmd kproto.Command_MessageType) (Record, Status, error) {
 	callback := &GetCallback{}
-	h := NewMessageHandler(callback)
+	h := NewResponseHandler(callback)
 
 	var err error = nil
 	switch getCmd {
@@ -71,7 +71,7 @@ func (conn *BlockConnection) GetPrevious(key []byte) (Record, Status, error) {
 
 func (conn *BlockConnection) GetKeyRange(r *KeyRange) ([][]byte, Status, error) {
 	callback := &GetKeyRangeCallback{}
-	h := NewMessageHandler(callback)
+	h := NewResponseHandler(callback)
 	err := conn.nbc.GetKeyRange(r, h)
 	if err != nil {
 		return nil, callback.Status(), err
@@ -86,7 +86,7 @@ func (conn *BlockConnection) GetKeyRange(r *KeyRange) ([][]byte, Status, error) 
 
 func (conn *BlockConnection) GetVersion(key []byte) ([]byte, Status, error) {
 	callback := &GetVersionCallback{}
-	h := NewMessageHandler(callback)
+	h := NewResponseHandler(callback)
 	err := conn.nbc.GetVersion(key, h)
 	if err != nil {
 		return nil, callback.Status(), err
@@ -101,7 +101,7 @@ func (conn *BlockConnection) GetVersion(key []byte) ([]byte, Status, error) {
 
 func (conn *BlockConnection) Flush() (Status, error) {
 	callback := &GenericCallback{}
-	h := NewMessageHandler(callback)
+	h := NewResponseHandler(callback)
 	err := conn.nbc.Flush(h)
 	if err != nil {
 		return callback.Status(), err
@@ -116,7 +116,7 @@ func (conn *BlockConnection) Flush() (Status, error) {
 
 func (conn *BlockConnection) Delete(entry *Record) (Status, error) {
 	callback := &GenericCallback{}
-	h := NewMessageHandler(callback)
+	h := NewResponseHandler(callback)
 	err := conn.nbc.Delete(entry, h)
 	if err != nil {
 		return callback.Status(), err
@@ -131,7 +131,7 @@ func (conn *BlockConnection) Delete(entry *Record) (Status, error) {
 
 func (conn *BlockConnection) Put(entry *Record) (Status, error) {
 	callback := &GenericCallback{}
-	h := NewMessageHandler(callback)
+	h := NewResponseHandler(callback)
 	err := conn.nbc.Put(entry, h)
 	if err != nil {
 		return callback.Status(), err
@@ -146,7 +146,7 @@ func (conn *BlockConnection) Put(entry *Record) (Status, error) {
 
 func (conn *BlockConnection) GetLog(logs []LogType) (Log, Status, error) {
 	callback := &GetLogCallback{}
-	h := NewMessageHandler(callback)
+	h := NewResponseHandler(callback)
 	err := conn.nbc.GetLog(logs, h)
 	if err != nil {
 		return Log{}, callback.Status(), err
@@ -161,7 +161,7 @@ func (conn *BlockConnection) GetLog(logs []LogType) (Log, Status, error) {
 
 func (conn *BlockConnection) pinop(pin []byte, op kproto.Command_PinOperation_PinOpType) (Status, error) {
 	callback := &GenericCallback{}
-	h := NewMessageHandler(callback)
+	h := NewResponseHandler(callback)
 
 	var err error = nil
 	switch op {
@@ -204,7 +204,7 @@ func (conn *BlockConnection) UnlockDevice(pin []byte) (Status, error) {
 
 func (conn *BlockConnection) UpdateFirmware(code []byte) (Status, error) {
 	callback := &GenericCallback{}
-	h := NewMessageHandler(callback)
+	h := NewResponseHandler(callback)
 	err := conn.nbc.UpdateFirmware(code, h)
 	if err != nil {
 		return callback.Status(), err
@@ -219,7 +219,7 @@ func (conn *BlockConnection) UpdateFirmware(code []byte) (Status, error) {
 
 func (conn *BlockConnection) SetClusterVersion(version int64) (Status, error) {
 	callback := &GenericCallback{}
-	h := NewMessageHandler(callback)
+	h := NewResponseHandler(callback)
 	err := conn.nbc.SetClusterVersion(version, h)
 	if err != nil {
 		return callback.Status(), err
@@ -234,7 +234,7 @@ func (conn *BlockConnection) SetClusterVersion(version int64) (Status, error) {
 
 func (conn *BlockConnection) SetLockPin(currentPin []byte, newPin []byte) (Status, error) {
 	callback := &GenericCallback{}
-	h := NewMessageHandler(callback)
+	h := NewResponseHandler(callback)
 	err := conn.nbc.SetLockPin(currentPin, newPin, h)
 	if err != nil {
 		return callback.Status(), err
@@ -249,7 +249,7 @@ func (conn *BlockConnection) SetLockPin(currentPin []byte, newPin []byte) (Statu
 
 func (conn *BlockConnection) SetErasePin(currentPin []byte, newPin []byte) (Status, error) {
 	callback := &GenericCallback{}
-	h := NewMessageHandler(callback)
+	h := NewResponseHandler(callback)
 	err := conn.nbc.SetErasePin(currentPin, newPin, h)
 	if err != nil {
 		return callback.Status(), err
