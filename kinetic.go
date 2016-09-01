@@ -25,21 +25,60 @@ type ClientOptions struct {
 type Algorithm int32
 
 const (
-	ALGO_INVALID_ALGORITHM Algorithm = -1
-	ALGO_SHA1              Algorithm = 1
-	ALGO_SHA2              Algorithm = 2
-	ALGO_SHA3              Algorithm = 3
-	ALGO_CRC32             Algorithm = 4
-	ALGO_CRC64             Algorithm = 5
+	_          Algorithm = -1
+	ALGO_SHA1  Algorithm = 1
+	ALGO_SHA2  Algorithm = 2
+	ALGO_SHA3  Algorithm = 3
+	ALGO_CRC32 Algorithm = 4
+	ALGO_CRC64 Algorithm = 5
 )
 
 type Synchronization int32
 
 const (
-	SYNC_INVALID_SYNCHRONIZATION Synchronization = -1
-	SYNC_WRITETHROUGH            Synchronization = 1
-	SYNC_WRITEBACK               Synchronization = 2
-	SYNC_FLUSH                   Synchronization = 3
+	_                 Synchronization = -1
+	SYNC_WRITETHROUGH Synchronization = 1
+	SYNC_WRITEBACK    Synchronization = 2
+	SYNC_FLUSH        Synchronization = 3
+)
+
+type Priority int32
+
+const (
+	_                Priority = iota
+	PRIORITY_LOWEST  Priority = iota
+	PRIORITY_LOWER   Priority = iota
+	PRIORITY_NORMAL  Priority = iota
+	PRIORITY_HIGHER  Priority = iota
+	PRIORITY_HIGHEST Priority = iota
+)
+
+type LogType int32
+
+const (
+	_                 LogType = iota
+	LOG_UTILIZATIONS  LogType = iota
+	LOG_TEMPERATURES  LogType = iota
+	LOG_CAPACITIES    LogType = iota
+	LOG_CONFIGURATION LogType = iota
+	LOG_STATISTICS    LogType = iota
+	LOG_MESSAGES      LogType = iota
+	LOG_LIMITS        LogType = iota
+	LOG_DEVICE        LogType = iota
+)
+
+type ACL int32
+
+const (
+	_            ACL = iota
+	ACL_READ     ACL = iota
+	ACL_WRITE    ACL = iota
+	ACL_DELETE   ACL = iota
+	ACL_RANGE    ACL = iota
+	ACL_SETUP    ACL = iota
+	ACL_P2POP    ACL = iota
+	ACL_GETLOG   ACL = iota
+	ACL_SECURITY ACL = iota
 )
 
 type Record struct {
@@ -65,8 +104,6 @@ type KeyRange struct {
 func convertAlgoToProto(a Algorithm) kproto.Command_Algorithm {
 	ret := kproto.Command_INVALID_ALGORITHM
 	switch a {
-	case ALGO_INVALID_ALGORITHM:
-		ret = kproto.Command_INVALID_ALGORITHM
 	case ALGO_SHA1:
 		ret = kproto.Command_SHA1
 	case ALGO_SHA2:
@@ -82,10 +119,8 @@ func convertAlgoToProto(a Algorithm) kproto.Command_Algorithm {
 }
 
 func convertAlgoFromProto(a kproto.Command_Algorithm) Algorithm {
-	ret := ALGO_INVALID_ALGORITHM
+	var ret Algorithm
 	switch a {
-	case kproto.Command_INVALID_ALGORITHM:
-		ret = ALGO_INVALID_ALGORITHM
 	case kproto.Command_SHA1:
 		ret = ALGO_SHA1
 	case kproto.Command_SHA2:
@@ -103,8 +138,6 @@ func convertAlgoFromProto(a kproto.Command_Algorithm) Algorithm {
 func convertSyncToProto(sync Synchronization) kproto.Command_Synchronization {
 	ret := kproto.Command_INVALID_SYNCHRONIZATION
 	switch sync {
-	case SYNC_INVALID_SYNCHRONIZATION:
-		ret = kproto.Command_INVALID_SYNCHRONIZATION
 	case SYNC_WRITETHROUGH:
 		ret = kproto.Command_WRITETHROUGH
 	case SYNC_WRITEBACK:
@@ -116,16 +149,94 @@ func convertSyncToProto(sync Synchronization) kproto.Command_Synchronization {
 }
 
 func convertSyncFromProto(sync kproto.Command_Synchronization) Synchronization {
-	ret := SYNC_INVALID_SYNCHRONIZATION
+	var ret Synchronization
 	switch sync {
-	case kproto.Command_INVALID_SYNCHRONIZATION:
-		ret = SYNC_INVALID_SYNCHRONIZATION
 	case kproto.Command_WRITETHROUGH:
 		ret = SYNC_WRITETHROUGH
 	case kproto.Command_WRITEBACK:
 		ret = SYNC_WRITEBACK
 	case kproto.Command_FLUSH:
 		ret = SYNC_FLUSH
+	}
+	return ret
+}
+
+func convertPriorityToProto(p Priority) kproto.Command_Priority {
+	ret := kproto.Command_NORMAL
+	switch p {
+	case PRIORITY_LOWEST:
+		ret = kproto.Command_LOWEST
+	case PRIORITY_LOWER:
+		ret = kproto.Command_LOWER
+	case PRIORITY_NORMAL:
+		ret = kproto.Command_NORMAL
+	case PRIORITY_HIGHER:
+		ret = kproto.Command_HIGHER
+	case PRIORITY_HIGHEST:
+		ret = kproto.Command_HIGHEST
+	}
+	return ret
+}
+
+func convertPriorityFromProto(p kproto.Command_Priority) Priority {
+	ret := PRIORITY_NORMAL
+	switch p {
+	case kproto.Command_LOWEST:
+		ret = PRIORITY_LOWEST
+	case kproto.Command_LOWER:
+		ret = PRIORITY_LOWER
+	case kproto.Command_NORMAL:
+		ret = PRIORITY_NORMAL
+	case kproto.Command_HIGHER:
+		ret = PRIORITY_HIGHER
+	case kproto.Command_HIGHEST:
+		ret = PRIORITY_HIGHEST
+	}
+	return ret
+}
+
+func convertLogTypeToProto(l LogType) kproto.Command_GetLog_Type {
+	ret := kproto.Command_GetLog_INVALID_TYPE
+	switch l {
+	case LOG_UTILIZATIONS:
+		ret = kproto.Command_GetLog_UTILIZATIONS
+	case LOG_TEMPERATURES:
+		ret = kproto.Command_GetLog_TEMPERATURES
+	case LOG_CAPACITIES:
+		ret = kproto.Command_GetLog_CAPACITIES
+	case LOG_CONFIGURATION:
+		ret = kproto.Command_GetLog_CONFIGURATION
+	case LOG_STATISTICS:
+		ret = kproto.Command_GetLog_STATISTICS
+	case LOG_MESSAGES:
+		ret = kproto.Command_GetLog_MESSAGES
+	case LOG_LIMITS:
+		ret = kproto.Command_GetLog_LIMITS
+	case LOG_DEVICE:
+		ret = kproto.Command_GetLog_DEVICE
+	}
+	return ret
+}
+
+func convertLogTypeFromProto(l kproto.Command_GetLog_Type) LogType {
+	var ret LogType
+	switch l {
+	case kproto.Command_GetLog_UTILIZATIONS:
+		ret = LOG_UTILIZATIONS
+	case kproto.Command_GetLog_TEMPERATURES:
+		ret = LOG_TEMPERATURES
+	case kproto.Command_GetLog_CAPACITIES:
+		ret = LOG_CAPACITIES
+	case kproto.Command_GetLog_CONFIGURATION:
+		ret = LOG_CONFIGURATION
+	case kproto.Command_GetLog_STATISTICS:
+		ret = LOG_STATISTICS
+	case kproto.Command_GetLog_MESSAGES:
+		ret = LOG_MESSAGES
+	case kproto.Command_GetLog_LIMITS:
+		ret = LOG_LIMITS
+	case kproto.Command_GetLog_DEVICE:
+		ret = LOG_DEVICE
 	}
 	return ret
 }

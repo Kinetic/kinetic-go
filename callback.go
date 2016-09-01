@@ -65,4 +65,14 @@ func (c *GetKeyRangeCallback) Success(resp *kproto.Command, value []byte) {
 }
 
 // Callback for Command_GETVERSION Message
+type GetVersionCallback struct {
+	GenericCallback
+	Version []byte
+}
+
+func (c *GetVersionCallback) Success(resp *kproto.Command, value []byte) {
+	c.GenericCallback.Success(resp, value)
+	c.Version = resp.GetBody().GetKeyValue().GetDbVersion()
+}
+
 // Callback for Command_GETLOG Message

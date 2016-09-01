@@ -72,6 +72,27 @@ func (conn *NonBlockConnection) GetKeyRange(r *KeyRange, h *MessageHandler) erro
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+func (conn *NonBlockConnection) GetVersion(key []byte, h *MessageHandler) error {
+	msg := newMessage(kproto.Message_HMACAUTH)
+
+	cmd := newCommand(kproto.Command_GETVERSION)
+	cmd.Body = &kproto.Command_Body{
+		KeyValue: &kproto.Command_KeyValue{
+			Key: key,
+		},
+	}
+
+	return conn.service.submit(msg, cmd, nil, h)
+}
+
+func (conn *NonBlockConnection) Flush(h *MessageHandler) error {
+	msg := newMessage(kproto.Message_HMACAUTH)
+
+	cmd := newCommand(kproto.Command_FLUSHALLDATA)
+
+	return conn.service.submit(msg, cmd, nil, h)
+}
+
 func (conn *NonBlockConnection) Delete(entry *Record, h *MessageHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_DELETE)
@@ -196,6 +217,18 @@ func (conn *NonBlockConnection) SetErasePin(currentPin []byte, newPin []byte, h 
 	}
 
 	return conn.service.submit(msg, cmd, nil, h)
+}
+
+func (conn *NonBlockConnection) SetACL(h *MessageHandler) error {
+	return nil
+}
+
+func (conn *NonBlockConnection) MediaScan(h *MessageHandler) error {
+	return nil
+}
+
+func (conn *NonBlockConnection) MediaOptimize(h *MessageHandler) error {
+	return nil
 }
 
 func (conn *NonBlockConnection) Run() error {
