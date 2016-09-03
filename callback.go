@@ -83,4 +83,5 @@ type GetLogCallback struct {
 
 func (c *GetLogCallback) Success(resp *kproto.Command, value []byte) {
 	c.GenericCallback.Success(resp, value)
+	c.Logs = getLogFromProto(resp)
 }

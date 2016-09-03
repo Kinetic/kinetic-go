@@ -113,3 +113,20 @@ func TestNonBlockGetKeyRange(t *testing.T) {
 		t.Logf("key[%d] = %s", k, string(key))
 	}
 }
+
+func TestNonBlockGetLog(t *testing.T) {
+	logs := []LogType{
+		LOG_UTILIZATIONS,
+		LOG_TEMPERATURES,
+		LOG_CAPACITIES,
+		LOG_CONFIGURATION,
+		LOG_STATISTICS,
+		LOG_MESSAGES,
+		LOG_LIMITS,
+	}
+	klogs, status, err := blockConn.GetLog(logs)
+	if err != nil || status.Code != OK {
+		t.Fatal("Nonblocking GetLog Failure")
+	}
+	t.Logf("GetLog %+v", klogs)
+}
