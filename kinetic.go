@@ -108,9 +108,9 @@ var strMessageType = map[MessageType]string{
 }
 
 func (m MessageType) String() string {
-	s, ok := strMessageType[m]
+	str, ok := strMessageType[m]
 	if ok {
-		return s
+		return str
 	}
 	return "Unknown MessageType"
 }
@@ -302,9 +302,9 @@ var strAlgorithm = map[Algorithm]string{
 }
 
 func (a Algorithm) String() string {
-	s, ok := strAlgorithm[a]
+	str, ok := strAlgorithm[a]
 	if ok {
-		return s
+		return str
 	}
 	return "Unknown Algorithm"
 }
@@ -359,9 +359,9 @@ var strSynchronization = map[Synchronization]string{
 }
 
 func (sync Synchronization) String() string {
-	s, ok := strSynchronization[sync]
+	str, ok := strSynchronization[sync]
 	if ok {
-		return s
+		return str
 	}
 	return "Unknown Synchronization"
 }
@@ -412,9 +412,9 @@ var strPriority = map[Priority]string{
 }
 
 func (p Priority) String() string {
-	s, ok := strPriority[p]
+	str, ok := strPriority[p]
 	if ok {
-		return s
+		return str
 	}
 	return "Unknown Priority"
 }
@@ -479,9 +479,9 @@ var strPermission = map[Permission]string{
 }
 
 func (p Permission) String() string {
-	s, ok := strPermission[p]
+	str, ok := strPermission[p]
 	if ok {
-		return s
+		return str
 	}
 	return "Unknown Permission"
 }

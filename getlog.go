@@ -30,9 +30,9 @@ var strLogType = map[LogType]string{
 }
 
 func (l LogType) String() string {
-	s, ok := strLogType[l]
+	str, ok := strLogType[l]
 	if ok {
-		return s
+		return str
 	}
 	return "Unknown LogType"
 }

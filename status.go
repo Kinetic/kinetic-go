@@ -82,7 +82,11 @@ func (s Status) Error() string {
 }
 
 func (s Status) String() string {
-	return statusName[s.Code] + " : " + s.ErrorMsg
+	str, ok := statusName[s.Code]
+	if ok {
+		return str + " : " + s.ErrorMsg
+	}
+	return "Unknown Status"
 }
 
 func convertStatusCodeToProto(s StatusCode) kproto.Command_Status_StatusCode {
