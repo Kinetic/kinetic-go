@@ -25,88 +25,86 @@ type ClientOptions struct {
 type MessageType int32
 
 const (
-	_                     MessageType = iota
-	INVALID_MESSAGE_TYPE  MessageType = iota
-	GET                   MessageType = iota
-	GET_RESPONSE          MessageType = iota
-	PUT                   MessageType = iota
-	PUT_RESPONSE          MessageType = iota
-	DELETE                MessageType = iota
-	DELETE_RESPONSE       MessageType = iota
-	GETNEXT               MessageType = iota
-	GETNEXT_RESPONSE      MessageType = iota
-	GETPREVIOUS           MessageType = iota
-	GETPREVIOUS_RESPONSE  MessageType = iota
-	GETKEYRANGE           MessageType = iota
-	GETKEYRANGE_RESPONSE  MessageType = iota
-	GETVERSION            MessageType = iota
-	GETVERSION_RESPONSE   MessageType = iota
-	SETUP                 MessageType = iota
-	SETUP_RESPONSE        MessageType = iota
-	GETLOG                MessageType = iota
-	GETLOG_RESPONSE       MessageType = iota
-	SECURITY              MessageType = iota
-	SECURITY_RESPONSE     MessageType = iota
-	PEER2PEERPUSH         MessageType = iota
-	PEER2PEERPUSH_RESPONS MessageType = iota
-	NOOP                  MessageType = iota
-	NOOP_RESPONSE         MessageType = iota
-	FLUSHALLDATA          MessageType = iota
-	FLUSHALLDATA_RESPONS  MessageType = iota
-	PINOP                 MessageType = iota
-	PINOP_RESPONSE        MessageType = iota
-	MEDIASCAN             MessageType = iota
-	MEDIASCAN_RESPONSE    MessageType = iota
-	MEDIAOPTIMIZE         MessageType = iota
-	MEDIAOPTIMIZE_RESPON  MessageType = iota
-	START_BATCH           MessageType = iota
-	START_BATCH_RESPONSE  MessageType = iota
-	END_BATCH             MessageType = iota
-	END_BATCH_RESPONSE    MessageType = iota
-	ABORT_BATCH           MessageType = iota
-	ABORT_BATCH_RESPONSE  MessageType = iota
+	_                             MessageType = iota
+	MESSAGE_GET                   MessageType = iota
+	MESSAGE_GET_RESPONSE          MessageType = iota
+	MESSAGE_PUT                   MessageType = iota
+	MESSAGE_PUT_RESPONSE          MessageType = iota
+	MESSAGE_DELETE                MessageType = iota
+	MESSAGE_DELETE_RESPONSE       MessageType = iota
+	MESSAGE_GETNEXT               MessageType = iota
+	MESSAGE_GETNEXT_RESPONSE      MessageType = iota
+	MESSAGE_GETPREVIOUS           MessageType = iota
+	MESSAGE_GETPREVIOUS_RESPONSE  MessageType = iota
+	MESSAGE_GETKEYRANGE           MessageType = iota
+	MESSAGE_GETKEYRANGE_RESPONSE  MessageType = iota
+	MESSAGE_GETVERSION            MessageType = iota
+	MESSAGE_GETVERSION_RESPONSE   MessageType = iota
+	MESSAGE_SETUP                 MessageType = iota
+	MESSAGE_SETUP_RESPONSE        MessageType = iota
+	MESSAGE_GETLOG                MessageType = iota
+	MESSAGE_GETLOG_RESPONSE       MessageType = iota
+	MESSAGE_SECURITY              MessageType = iota
+	MESSAGE_SECURITY_RESPONSE     MessageType = iota
+	MESSAGE_PEER2PEERPUSH         MessageType = iota
+	MESSAGE_PEER2PEERPUSH_RESPONS MessageType = iota
+	MESSAGE_NOOP                  MessageType = iota
+	MESSAGE_NOOP_RESPONSE         MessageType = iota
+	MESSAGE_FLUSHALLDATA          MessageType = iota
+	MESSAGE_FLUSHALLDATA_RESPONS  MessageType = iota
+	MESSAGE_PINOP                 MessageType = iota
+	MESSAGE_PINOP_RESPONSE        MessageType = iota
+	MESSAGE_MEDIASCAN             MessageType = iota
+	MESSAGE_MEDIASCAN_RESPONSE    MessageType = iota
+	MESSAGE_MEDIAOPTIMIZE         MessageType = iota
+	MESSAGE_MEDIAOPTIMIZE_RESPON  MessageType = iota
+	MESSAGE_START_BATCH           MessageType = iota
+	MESSAGE_START_BATCH_RESPONSE  MessageType = iota
+	MESSAGE_END_BATCH             MessageType = iota
+	MESSAGE_END_BATCH_RESPONSE    MessageType = iota
+	MESSAGE_ABORT_BATCH           MessageType = iota
+	MESSAGE_ABORT_BATCH_RESPONSE  MessageType = iota
 )
 
 var strMessageType = map[MessageType]string{
-	INVALID_MESSAGE_TYPE:  "INVALID_MESSAGE_TYPE",
-	GET:                   "GET",
-	GET_RESPONSE:          "GET_RESPONSE",
-	PUT:                   "PUT",
-	PUT_RESPONSE:          "PUT_RESPONSE",
-	DELETE:                "DELETE",
-	DELETE_RESPONSE:       "DELETE_RESPONSE",
-	GETNEXT:               "GETNEXT",
-	GETNEXT_RESPONSE:      "GETNEXT_RESPONSE",
-	GETPREVIOUS:           "GETPREVIOUS",
-	GETPREVIOUS_RESPONSE:  "GETPREVIOUS_RESPONSE",
-	GETKEYRANGE:           "GETKEYRANGE",
-	GETKEYRANGE_RESPONSE:  "GETKEYRANGE_RESPONSE",
-	GETVERSION:            "GETVERSION",
-	GETVERSION_RESPONSE:   "GETVERSION_RESPONSE",
-	SETUP:                 "SETUP",
-	SETUP_RESPONSE:        "SETUP_RESPONSE",
-	GETLOG:                "GETLOG",
-	GETLOG_RESPONSE:       "GETLOG_RESPONSE",
-	SECURITY:              "SECURITY",
-	SECURITY_RESPONSE:     "SECURITY_RESPONSE",
-	PEER2PEERPUSH:         "PEER2PEERPUSH",
-	PEER2PEERPUSH_RESPONS: "PEER2PEERPUSH_RESPONS",
-	NOOP:                 "NOOP",
-	NOOP_RESPONSE:        "NOOP_RESPONSE",
-	FLUSHALLDATA:         "FLUSHALLDATA",
-	FLUSHALLDATA_RESPONS: "FLUSHALLDATA_RESPONS",
-	PINOP:                "PINOP",
-	PINOP_RESPONSE:       "PINOP_RESPONSE",
-	MEDIASCAN:            "MEDIASCAN",
-	MEDIASCAN_RESPONSE:   "MEDIASCAN_RESPONSE",
-	MEDIAOPTIMIZE:        "MEDIAOPTIMIZE",
-	MEDIAOPTIMIZE_RESPON: "MEDIAOPTIMIZE_RESPON",
-	START_BATCH:          "START_BATCH",
-	START_BATCH_RESPONSE: "START_BATCH_RESPONSE",
-	END_BATCH:            "END_BATCH",
-	END_BATCH_RESPONSE:   "END_BATCH_RESPONSE",
-	ABORT_BATCH:          "ABORT_BATCH",
-	ABORT_BATCH_RESPONSE: "ABORT_BATCH_RESPONSE",
+	MESSAGE_GET:                   "GET",
+	MESSAGE_GET_RESPONSE:          "GET_RESPONSE",
+	MESSAGE_PUT:                   "PUT",
+	MESSAGE_PUT_RESPONSE:          "PUT_RESPONSE",
+	MESSAGE_DELETE:                "DELETE",
+	MESSAGE_DELETE_RESPONSE:       "DELETE_RESPONSE",
+	MESSAGE_GETNEXT:               "GETNEXT",
+	MESSAGE_GETNEXT_RESPONSE:      "GETNEXT_RESPONSE",
+	MESSAGE_GETPREVIOUS:           "GETPREVIOUS",
+	MESSAGE_GETPREVIOUS_RESPONSE:  "GETPREVIOUS_RESPONSE",
+	MESSAGE_GETKEYRANGE:           "GETKEYRANGE",
+	MESSAGE_GETKEYRANGE_RESPONSE:  "GETKEYRANGE_RESPONSE",
+	MESSAGE_GETVERSION:            "GETVERSION",
+	MESSAGE_GETVERSION_RESPONSE:   "GETVERSION_RESPONSE",
+	MESSAGE_SETUP:                 "SETUP",
+	MESSAGE_SETUP_RESPONSE:        "SETUP_RESPONSE",
+	MESSAGE_GETLOG:                "GETLOG",
+	MESSAGE_GETLOG_RESPONSE:       "GETLOG_RESPONSE",
+	MESSAGE_SECURITY:              "SECURITY",
+	MESSAGE_SECURITY_RESPONSE:     "SECURITY_RESPONSE",
+	MESSAGE_PEER2PEERPUSH:         "PEER2PEERPUSH",
+	MESSAGE_PEER2PEERPUSH_RESPONS: "PEER2PEERPUSH_RESPONS",
+	MESSAGE_NOOP:                  "NOOP",
+	MESSAGE_NOOP_RESPONSE:         "NOOP_RESPONSE",
+	MESSAGE_FLUSHALLDATA:          "FLUSHALLDATA",
+	MESSAGE_FLUSHALLDATA_RESPONS:  "FLUSHALLDATA_RESPONS",
+	MESSAGE_PINOP:                 "PINOP",
+	MESSAGE_PINOP_RESPONSE:        "PINOP_RESPONSE",
+	MESSAGE_MEDIASCAN:             "MEDIASCAN",
+	MESSAGE_MEDIASCAN_RESPONSE:    "MEDIASCAN_RESPONSE",
+	MESSAGE_MEDIAOPTIMIZE:         "MEDIAOPTIMIZE",
+	MESSAGE_MEDIAOPTIMIZE_RESPON:  "MEDIAOPTIMIZE_RESPON",
+	MESSAGE_START_BATCH:           "START_BATCH",
+	MESSAGE_START_BATCH_RESPONSE:  "START_BATCH_RESPONSE",
+	MESSAGE_END_BATCH:             "END_BATCH",
+	MESSAGE_END_BATCH_RESPONSE:    "END_BATCH_RESPONSE",
+	MESSAGE_ABORT_BATCH:           "ABORT_BATCH",
+	MESSAGE_ABORT_BATCH_RESPONSE:  "ABORT_BATCH_RESPONSE",
 }
 
 func (m MessageType) String() string {
@@ -119,13 +117,167 @@ func (m MessageType) String() string {
 
 func convertMessageTypeToProto(m MessageType) kproto.Command_MessageType {
 	ret := kproto.Command_INVALID_MESSAGE_TYPE
-	// TODO: Need add details
+	switch m {
+	case MESSAGE_GET:
+		ret = kproto.Command_GET
+	case MESSAGE_GET_RESPONSE:
+		ret = kproto.Command_GET_RESPONSE
+	case MESSAGE_PUT:
+		ret = kproto.Command_PUT
+	case MESSAGE_PUT_RESPONSE:
+		ret = kproto.Command_PUT_RESPONSE
+	case MESSAGE_DELETE:
+		ret = kproto.Command_DELETE
+	case MESSAGE_DELETE_RESPONSE:
+		ret = kproto.Command_DELETE_RESPONSE
+	case MESSAGE_GETNEXT:
+		ret = kproto.Command_GETNEXT
+	case MESSAGE_GETNEXT_RESPONSE:
+		ret = kproto.Command_GETNEXT_RESPONSE
+	case MESSAGE_GETPREVIOUS:
+		ret = kproto.Command_GETPREVIOUS
+	case MESSAGE_GETPREVIOUS_RESPONSE:
+		ret = kproto.Command_GETPREVIOUS_RESPONSE
+	case MESSAGE_GETKEYRANGE:
+		ret = kproto.Command_GETKEYRANGE
+	case MESSAGE_GETKEYRANGE_RESPONSE:
+		ret = kproto.Command_GETKEYRANGE_RESPONSE
+	case MESSAGE_GETVERSION:
+		ret = kproto.Command_GETVERSION
+	case MESSAGE_GETVERSION_RESPONSE:
+		ret = kproto.Command_GETVERSION_RESPONSE
+	case MESSAGE_SETUP:
+		ret = kproto.Command_SETUP
+	case MESSAGE_SETUP_RESPONSE:
+		ret = kproto.Command_SETUP_RESPONSE
+	case MESSAGE_GETLOG:
+		ret = kproto.Command_GETLOG
+	case MESSAGE_GETLOG_RESPONSE:
+		ret = kproto.Command_GETLOG_RESPONSE
+	case MESSAGE_SECURITY:
+		ret = kproto.Command_SECURITY
+	case MESSAGE_SECURITY_RESPONSE:
+		ret = kproto.Command_SECURITY_RESPONSE
+	case MESSAGE_PEER2PEERPUSH:
+		ret = kproto.Command_PEER2PEERPUSH
+	case MESSAGE_PEER2PEERPUSH_RESPONS:
+		ret = kproto.Command_PEER2PEERPUSH_RESPONSE
+	case MESSAGE_NOOP:
+		ret = kproto.Command_NOOP
+	case MESSAGE_NOOP_RESPONSE:
+		ret = kproto.Command_NOOP_RESPONSE
+	case MESSAGE_FLUSHALLDATA:
+		ret = kproto.Command_FLUSHALLDATA
+	case MESSAGE_FLUSHALLDATA_RESPONS:
+		ret = kproto.Command_FLUSHALLDATA_RESPONSE
+	case MESSAGE_PINOP:
+		ret = kproto.Command_PINOP
+	case MESSAGE_PINOP_RESPONSE:
+		ret = kproto.Command_PINOP_RESPONSE
+	case MESSAGE_MEDIASCAN:
+		ret = kproto.Command_MEDIASCAN
+	case MESSAGE_MEDIASCAN_RESPONSE:
+		ret = kproto.Command_MEDIASCAN_RESPONSE
+	case MESSAGE_MEDIAOPTIMIZE:
+		ret = kproto.Command_MEDIAOPTIMIZE
+	case MESSAGE_MEDIAOPTIMIZE_RESPON:
+		ret = kproto.Command_MEDIAOPTIMIZE_RESPONSE
+	case MESSAGE_START_BATCH:
+		ret = kproto.Command_START_BATCH
+	case MESSAGE_START_BATCH_RESPONSE:
+		ret = kproto.Command_START_BATCH_RESPONSE
+	case MESSAGE_END_BATCH:
+		ret = kproto.Command_END_BATCH
+	case MESSAGE_END_BATCH_RESPONSE:
+		ret = kproto.Command_END_BATCH_RESPONSE
+	case MESSAGE_ABORT_BATCH:
+		ret = kproto.Command_ABORT_BATCH
+	case MESSAGE_ABORT_BATCH_RESPONSE:
+		ret = kproto.Command_ABORT_BATCH_RESPONSE
+	}
 	return ret
 }
 
 func convertMessageTypeFromProto(m kproto.Command_MessageType) MessageType {
 	var ret MessageType
-	// TODO: Need add details
+	switch m {
+	case kproto.Command_GET:
+		ret = MESSAGE_GET
+	case kproto.Command_GET_RESPONSE:
+		ret = MESSAGE_GET_RESPONSE
+	case kproto.Command_PUT:
+		ret = MESSAGE_PUT
+	case kproto.Command_PUT_RESPONSE:
+		ret = MESSAGE_PUT_RESPONSE
+	case kproto.Command_DELETE:
+		ret = MESSAGE_DELETE
+	case kproto.Command_DELETE_RESPONSE:
+		ret = MESSAGE_DELETE_RESPONSE
+	case kproto.Command_GETNEXT:
+		ret = MESSAGE_GETNEXT
+	case kproto.Command_GETNEXT_RESPONSE:
+		ret = MESSAGE_GETNEXT_RESPONSE
+	case kproto.Command_GETPREVIOUS:
+		ret = MESSAGE_GETPREVIOUS
+	case kproto.Command_GETPREVIOUS_RESPONSE:
+		ret = MESSAGE_GETPREVIOUS_RESPONSE
+	case kproto.Command_GETKEYRANGE:
+		ret = MESSAGE_GETKEYRANGE
+	case kproto.Command_GETKEYRANGE_RESPONSE:
+		ret = MESSAGE_GETKEYRANGE_RESPONSE
+	case kproto.Command_GETVERSION:
+		ret = MESSAGE_GETVERSION
+	case kproto.Command_GETVERSION_RESPONSE:
+		ret = MESSAGE_GETVERSION_RESPONSE
+	case kproto.Command_SETUP:
+		ret = MESSAGE_SETUP
+	case kproto.Command_SETUP_RESPONSE:
+		ret = MESSAGE_SETUP_RESPONSE
+	case kproto.Command_GETLOG:
+		ret = MESSAGE_GETLOG
+	case kproto.Command_GETLOG_RESPONSE:
+		ret = MESSAGE_GETLOG_RESPONSE
+	case kproto.Command_SECURITY:
+		ret = MESSAGE_SECURITY
+	case kproto.Command_SECURITY_RESPONSE:
+		ret = MESSAGE_SECURITY_RESPONSE
+	case kproto.Command_PEER2PEERPUSH:
+		ret = MESSAGE_PEER2PEERPUSH
+	case kproto.Command_PEER2PEERPUSH_RESPONSE:
+		ret = MESSAGE_PEER2PEERPUSH_RESPONS
+	case kproto.Command_NOOP:
+		ret = MESSAGE_NOOP
+	case kproto.Command_NOOP_RESPONSE:
+		ret = MESSAGE_NOOP_RESPONSE
+	case kproto.Command_FLUSHALLDATA:
+		ret = MESSAGE_FLUSHALLDATA
+	case kproto.Command_FLUSHALLDATA_RESPONSE:
+		ret = MESSAGE_FLUSHALLDATA_RESPONS
+	case kproto.Command_PINOP:
+		ret = MESSAGE_PINOP
+	case kproto.Command_PINOP_RESPONSE:
+		ret = MESSAGE_PINOP_RESPONSE
+	case kproto.Command_MEDIASCAN:
+		ret = MESSAGE_MEDIASCAN
+	case kproto.Command_MEDIASCAN_RESPONSE:
+		ret = MESSAGE_MEDIASCAN_RESPONSE
+	case kproto.Command_MEDIAOPTIMIZE:
+		ret = MESSAGE_MEDIAOPTIMIZE
+	case kproto.Command_MEDIAOPTIMIZE_RESPONSE:
+		ret = MESSAGE_MEDIAOPTIMIZE_RESPON
+	case kproto.Command_START_BATCH:
+		ret = MESSAGE_START_BATCH
+	case kproto.Command_START_BATCH_RESPONSE:
+		ret = MESSAGE_START_BATCH_RESPONSE
+	case kproto.Command_END_BATCH:
+		ret = MESSAGE_END_BATCH
+	case kproto.Command_END_BATCH_RESPONSE:
+		ret = MESSAGE_END_BATCH_RESPONSE
+	case kproto.Command_ABORT_BATCH:
+		ret = MESSAGE_ABORT_BATCH
+	case kproto.Command_ABORT_BATCH_RESPONSE:
+		ret = MESSAGE_ABORT_BATCH_RESPONSE
+	}
 	return ret
 }
 
