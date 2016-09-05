@@ -453,39 +453,6 @@ func convertPriorityFromProto(p kproto.Command_Priority) Priority {
 	return ret
 }
 
-type Permission int32
-
-const (
-	_                   Permission = iota
-	PERMISSION_READ     Permission = iota
-	PERMISSION_WRITE    Permission = iota
-	PERMISSION_DELETE   Permission = iota
-	PERMISSION_RANGE    Permission = iota
-	PERMISSION_SETUP    Permission = iota
-	PERMISSION_P2POP    Permission = iota
-	PERMISSION_GETLOG   Permission = iota
-	PERMISSION_SECURITY Permission = iota
-)
-
-var strPermission = map[Permission]string{
-	PERMISSION_READ:     "PERMISSION_READ",
-	PERMISSION_WRITE:    "PERMISSION_WRITE",
-	PERMISSION_DELETE:   "PERMISSION_DELETE",
-	PERMISSION_RANGE:    "PERMISSION_RANGE",
-	PERMISSION_SETUP:    "PERMISSION_SETUP",
-	PERMISSION_P2POP:    "PERMISSION_P2POP",
-	PERMISSION_GETLOG:   "PERMISSION_GETLOG",
-	PERMISSION_SECURITY: "PERMISSION_SECURITY",
-}
-
-func (p Permission) String() string {
-	str, ok := strPermission[p]
-	if ok {
-		return str
-	}
-	return "Unknown Permission"
-}
-
 type Record struct {
 	Key      []byte
 	Value    []byte
@@ -511,4 +478,126 @@ type MediaOperation struct {
 	EndKey            []byte
 	StartKeyInclusive bool
 	EndKeyInclusive   bool
+}
+
+type ACLPermission int32
+
+const (
+	_                       ACLPermission = iota
+	ACL_PERMISSION_READ     ACLPermission = iota
+	ACL_PERMISSION_WRITE    ACLPermission = iota
+	ACL_PERMISSION_DELETE   ACLPermission = iota
+	ACL_PERMISSION_RANGE    ACLPermission = iota
+	ACL_PERMISSION_SETUP    ACLPermission = iota
+	ACL_PERMISSION_P2POP    ACLPermission = iota
+	ACL_PERMISSION_GETLOG   ACLPermission = iota
+	ACL_PERMISSION_SECURITY ACLPermission = iota
+)
+
+var strACLPermission = map[ACLPermission]string{
+	ACL_PERMISSION_READ:     "ACL_PERMISSION_READ",
+	ACL_PERMISSION_WRITE:    "ACL_PERMISSION_WRITE",
+	ACL_PERMISSION_DELETE:   "ACL_PERMISSION_DELETE",
+	ACL_PERMISSION_RANGE:    "ACL_PERMISSION_RANGE",
+	ACL_PERMISSION_SETUP:    "ACL_PERMISSION_SETUP",
+	ACL_PERMISSION_P2POP:    "ACL_PERMISSION_P2POP",
+	ACL_PERMISSION_GETLOG:   "ACL_PERMISSION_GETLOG",
+	ACL_PERMISSION_SECURITY: "ACL_PERMISSION_SECURITY",
+}
+
+func (p ACLPermission) String() string {
+	str, ok := strACLPermission[p]
+	if ok {
+		return str
+	}
+	return "Unknown Permission"
+}
+
+func convertACLPermissionToProto(perm ACLPermission) kproto.Command_Security_ACL_Permission {
+	ret := kproto.Command_Security_ACL_INVALID_PERMISSION
+	switch perm {
+	case ACL_PERMISSION_READ:
+		ret = kproto.Command_Security_ACL_READ
+	case ACL_PERMISSION_WRITE:
+		ret = kproto.Command_Security_ACL_WRITE
+	case ACL_PERMISSION_DELETE:
+		ret = kproto.Command_Security_ACL_DELETE
+	case ACL_PERMISSION_RANGE:
+		ret = kproto.Command_Security_ACL_RANGE
+	case ACL_PERMISSION_SETUP:
+		ret = kproto.Command_Security_ACL_SETUP
+	case ACL_PERMISSION_P2POP:
+		ret = kproto.Command_Security_ACL_P2POP
+	case ACL_PERMISSION_GETLOG:
+		ret = kproto.Command_Security_ACL_GETLOG
+	case ACL_PERMISSION_SECURITY:
+		ret = kproto.Command_Security_ACL_SECURITY
+	}
+	return ret
+}
+
+func convertACLPermissionFromProto(perm kproto.Command_Security_ACL_Permission) ACLPermission {
+	var ret ACLPermission
+	switch perm {
+	case kproto.Command_Security_ACL_READ:
+		ret = ACL_PERMISSION_READ
+	case kproto.Command_Security_ACL_WRITE:
+		ret = ACL_PERMISSION_WRITE
+	case kproto.Command_Security_ACL_DELETE:
+		ret = ACL_PERMISSION_DELETE
+	case kproto.Command_Security_ACL_RANGE:
+		ret = ACL_PERMISSION_RANGE
+	case kproto.Command_Security_ACL_SETUP:
+		ret = ACL_PERMISSION_SETUP
+	case kproto.Command_Security_ACL_P2POP:
+		ret = ACL_PERMISSION_P2POP
+	case kproto.Command_Security_ACL_GETLOG:
+		ret = ACL_PERMISSION_GETLOG
+	case kproto.Command_Security_ACL_SECURITY:
+		ret = ACL_PERMISSION_SECURITY
+	}
+	return ret
+}
+
+type ACLAlgorithm int32
+
+const (
+	_                      ACLAlgorithm = iota
+	ACL_ALGORITHM_HMACSHA1 ACLAlgorithm = iota
+)
+
+var strACLAlgorithm = map[ACLAlgorithm]string{
+	ACL_ALGORITHM_HMACSHA1: "ACL_ALGORITHM_HMACSHA1",
+}
+
+func (p ACLAlgorithm) String() string {
+	str, ok := strACLAlgorithm[p]
+	if ok {
+		return str
+	}
+	return "Unknown ACL HMAC Algorithm"
+}
+
+func convertACLAlgorithmToProto(algo ACLAlgorithm) kproto.Command_Security_ACL_HMACAlgorithm {
+	ret := kproto.Command_Security_ACL_INVALID_HMAC_ALGORITHM
+	switch algo {
+	case ACL_ALGORITHM_HMACSHA1:
+		ret = kproto.Command_Security_ACL_HmacSHA1
+	}
+	return ret
+}
+
+type SecurityACLScope struct {
+	Offset      int64
+	Value       []byte
+	Permission  []ACLPermission
+	TlsRequired bool
+}
+
+type SecurityACL struct {
+	Identify    int64
+	Key         []byte
+	Algo        ACLAlgorithm
+	Scope       []SecurityACLScope
+	MaxPriority Priority
 }

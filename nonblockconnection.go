@@ -236,8 +236,43 @@ func (conn *NonBlockConnection) SetErasePin(currentPin []byte, newPin []byte, h 
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) SetACL(h *ResponseHandler) error {
-	return nil
+func (conn *NonBlockConnection) SetACL(acls []SecurityACL, h *ResponseHandler) error {
+	msg := newMessage(kproto.Message_HMACAUTH)
+	cmd := newCommand(kproto.Command_SECURITY)
+
+	cmd_acl := make([]*kproto.Command_Security_ACL, len(acls))
+	for ka, acl := range acls {
+		cmd_scope := make([]*kproto.Command_Security_ACL_Scope, len(acl.Scope))
+		for ks, scope := range acl.Scope {
+			cmd_permission := make([]kproto.Command_Security_ACL_Permission, len(scope.Permission))
+			for kp, permission := range scope.Permission {
+				cmd_permission[kp] = convertACLPermissionToProto(permission)
+			}
+			cmd_scope[ks] = &kproto.Command_Security_ACL_Scope{
+				Offset:      &scope.Offset,
+				Value:       scope.Value,
+				Permission:  cmd_permission,
+				TlsRequired: &scope.TlsRequired,
+			}
+		}
+		cmd_acl_algo := convertACLAlgorithmToProto(acl.Algo)
+		cmd_priority := convertPriorityToProto(acl.MaxPriority)
+		cmd_acl[ka] = &kproto.Command_Security_ACL{
+			Identity:      &acl.Identify,
+			Key:           acl.Key,
+			HmacAlgorithm: &cmd_acl_algo,
+			Scope:         cmd_scope,
+			MaxPriority:   &cmd_priority,
+		}
+	}
+
+	cmd.Body = &kproto.Command_Body{
+		Security: &kproto.Command_Security{
+			Acl: cmd_acl,
+		},
+	}
+
+	return conn.service.submit(msg, cmd, nil, h)
 }
 
 func (conn *NonBlockConnection) MediaScan(op *MediaOperation, pri Priority, h *ResponseHandler) error {

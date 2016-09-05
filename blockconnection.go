@@ -262,6 +262,21 @@ func (conn *BlockConnection) SetErasePin(currentPin []byte, newPin []byte) (Stat
 	return callback.Status(), nil
 }
 
+func (conn *BlockConnection) SetACL(acls []SecurityACL) (Status, error) {
+	callback := &GenericCallback{}
+	h := NewResponseHandler(callback)
+	err := conn.nbc.SetACL(acls, h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	for callback.Done() == false {
+		conn.nbc.Run()
+	}
+
+	return callback.Status(), nil
+}
+
 func (conn *BlockConnection) MediaScan(op *MediaOperation, pri Priority) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
