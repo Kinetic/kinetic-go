@@ -262,6 +262,36 @@ func (conn *BlockConnection) SetErasePin(currentPin []byte, newPin []byte) (Stat
 	return callback.Status(), nil
 }
 
+func (conn *BlockConnection) MediaScan(op *MediaOperation, pri Priority) (Status, error) {
+	callback := &GenericCallback{}
+	h := NewResponseHandler(callback)
+	err := conn.nbc.MediaScan(op, pri, h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	for callback.Done() == false {
+		conn.nbc.Run()
+	}
+
+	return callback.Status(), nil
+}
+
+func (conn *BlockConnection) MediaOptimize(op *MediaOperation, pri Priority) (Status, error) {
+	callback := &GenericCallback{}
+	h := NewResponseHandler(callback)
+	err := conn.nbc.MediaOptimize(op, pri, h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	for callback.Done() == false {
+		conn.nbc.Run()
+	}
+
+	return callback.Status(), nil
+}
+
 func (conn *BlockConnection) Close() {
 	conn.nbc.Close()
 }

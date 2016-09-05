@@ -240,12 +240,44 @@ func (conn *NonBlockConnection) SetACL(h *ResponseHandler) error {
 	return nil
 }
 
-func (conn *NonBlockConnection) MediaScan(h *ResponseHandler) error {
-	return nil
+func (conn *NonBlockConnection) MediaScan(op *MediaOperation, pri Priority, h *ResponseHandler) error {
+	msg := newMessage(kproto.Message_HMACAUTH)
+
+	cmd := newCommand(kproto.Command_MEDIASCAN)
+
+	cmd.Body = &kproto.Command_Body{
+		Range: &kproto.Command_Range{
+			StartKey:          op.StartKey,
+			EndKey:            op.EndKey,
+			StartKeyInclusive: &op.StartKeyInclusive,
+			EndKeyInclusive:   &op.EndKeyInclusive,
+		},
+	}
+
+	cmd_pri := convertPriorityToProto(pri)
+	cmd.Header.Priority = &cmd_pri
+
+	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) MediaOptimize(h *ResponseHandler) error {
-	return nil
+func (conn *NonBlockConnection) MediaOptimize(op *MediaOperation, pri Priority, h *ResponseHandler) error {
+	msg := newMessage(kproto.Message_HMACAUTH)
+
+	cmd := newCommand(kproto.Command_MEDIAOPTIMIZE)
+
+	cmd.Body = &kproto.Command_Body{
+		Range: &kproto.Command_Range{
+			StartKey:          op.StartKey,
+			EndKey:            op.EndKey,
+			StartKeyInclusive: &op.StartKeyInclusive,
+			EndKeyInclusive:   &op.EndKeyInclusive,
+		},
+	}
+
+	cmd_pri := convertPriorityToProto(pri)
+	cmd.Header.Priority = &cmd_pri
+
+	return conn.service.submit(msg, cmd, nil, h)
 }
 
 func (conn *NonBlockConnection) Run() error {

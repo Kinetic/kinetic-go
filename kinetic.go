@@ -505,3 +505,10 @@ type KeyRange struct {
 	Reverse           bool
 	Max               int32
 }
+
+type MediaOperation struct {
+	StartKey          []byte
+	EndKey            []byte
+	StartKeyInclusive bool
+	EndKeyInclusive   bool
+}
