@@ -601,3 +601,18 @@ type SecurityACL struct {
 	Scope       []SecurityACLScope
 	MaxPriority Priority
 }
+
+type P2PPushOperation struct {
+	Key     []byte
+	Version []byte
+	NewKey  []byte
+	Force   bool
+	Request *P2PPushRequest
+}
+
+type P2PPushRequest struct {
+	HostName   string
+	Port       int32
+	Tls        bool
+	Operations []P2PPushOperation
+}

@@ -75,6 +75,21 @@ func (c *GetVersionCallback) Success(resp *kproto.Command, value []byte) {
 	c.Version = resp.GetBody().GetKeyValue().GetDbVersion()
 }
 
+// Callback for Command_PEER2PEERPUSH
+type P2PPushCallback struct {
+	GenericCallback
+	Statuses []Status
+}
+
+func (c *P2PPushCallback) Success(resp *kproto.Command, value []byte) {
+	c.GenericCallback.Success(resp, value)
+	c.Statuses = make([]Status, len(resp.GetBody().GetP2POperation().GetOperation()))
+	for k, op := range resp.GetBody().GetP2POperation().GetOperation() {
+		c.Statuses[k].Code = convertStatusCodeFromProto(op.GetStatus().GetCode())
+		c.Statuses[k].ErrorMsg = op.GetStatus().GetStatusMessage()
+	}
+}
+
 // Callback for Command_GETLOG Message
 type GetLogCallback struct {
 	GenericCallback

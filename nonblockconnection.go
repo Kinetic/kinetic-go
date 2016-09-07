@@ -1,6 +1,8 @@
 package kinetic
 
 import (
+	"bytes"
+
 	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
@@ -128,6 +130,44 @@ func (conn *NonBlockConnection) Put(entry *Record, h *ResponseHandler) error {
 	}
 
 	return conn.service.submit(msg, cmd, entry.Value, h)
+}
+
+func (conn *NonBlockConnection) buildP2PMessage(request *P2PPushRequest) *kproto.Command_P2POperation {
+	var p2pop *kproto.Command_P2POperation = nil
+	if request != nil {
+		p2pop = &kproto.Command_P2POperation{
+			Peer: &kproto.Command_P2POperation_Peer{
+				Hostname: &request.HostName,
+				Port:     &request.Port,
+				Tls:      &request.Tls,
+			},
+			Operation: make([]*kproto.Command_P2POperation_Operation, len(request.Operations)),
+		}
+		for k, op := range request.Operations {
+			p2pop.Operation[k] = &kproto.Command_P2POperation_Operation{
+				Key:     op.Key,
+				Version: op.Version,
+				NewKey:  nil,
+				Force:   &op.Force,
+				P2Pop:   conn.buildP2PMessage(op.Request),
+			}
+			if op.NewKey != nil && !bytes.Equal(op.NewKey, op.Key) {
+				p2pop.Operation[k].NewKey = op.NewKey
+			}
+		}
+	}
+	return p2pop
+}
+
+func (conn *NonBlockConnection) P2PPush(request *P2PPushRequest, h *ResponseHandler) error {
+	msg := newMessage(kproto.Message_HMACAUTH)
+	cmd := newCommand(kproto.Command_PEER2PEERPUSH)
+
+	cmd.Body = &kproto.Command_Body{
+		P2POperation: conn.buildP2PMessage(request),
+	}
+
+	return conn.service.submit(msg, cmd, nil, h)
 }
 
 func (conn *NonBlockConnection) GetLog(logs []LogType, h *ResponseHandler) error {

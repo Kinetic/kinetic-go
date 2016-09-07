@@ -144,6 +144,21 @@ func (conn *BlockConnection) Put(entry *Record) (Status, error) {
 	return callback.Status(), nil
 }
 
+func (conn *BlockConnection) P2PPush(request *P2PPushRequest) ([]Status, Status, error) {
+	callback := &P2PPushCallback{}
+	h := NewResponseHandler(callback)
+	err := conn.nbc.P2PPush(request, h)
+	if err != nil {
+		return nil, callback.Status(), err
+	}
+
+	for callback.Done() == false {
+		conn.nbc.Run()
+	}
+
+	return callback.Statuses, callback.Status(), nil
+}
+
 func (conn *BlockConnection) GetLog(logs []LogType) (Log, Status, error) {
 	callback := &GetLogCallback{}
 	h := NewResponseHandler(callback)
