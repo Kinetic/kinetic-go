@@ -8,6 +8,7 @@ type BlockConnection struct {
 	nbc *NonBlockConnection
 }
 
+// Helper function to establish block connection to device.
 func NewBlockConnection(op ClientOptions) (*BlockConnection, error) {
 	nbc, err := NewNonBlockConnection(op)
 	if err != nil {

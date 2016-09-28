@@ -4,6 +4,7 @@ import (
 	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
+// ResponseHandler is the handler for XXXXX_RESPONSE message from drive.
 type ResponseHandler struct {
 	callback Callback
 }
@@ -36,6 +37,7 @@ func (h *ResponseHandler) SetCallback(call Callback) {
 	h.callback = call
 }
 
+// Helper function to build a ResponseHandler with call as the Callback.
 func NewResponseHandler(call Callback) *ResponseHandler {
 	h := &ResponseHandler{callback: call}
 	return h

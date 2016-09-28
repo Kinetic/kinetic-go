@@ -7,6 +7,8 @@ import (
 	"os"
 )
 
+// UpdateFirmware is the utility function to update drive firmware.
+// conn is BlockConnection to drive, and file is the full path to the firmware file.
 func UpdateFirmware(conn *BlockConnection, file string) error {
 	_, err := os.Stat(file)
 	if err != nil {
@@ -30,7 +32,13 @@ func UpdateFirmware(conn *BlockConnection, file string) error {
 	return err
 }
 
-func UploadAppletFile(conn *BlockConnection, file, key string) ([][]byte, error) {
+// UploadAppletFile is the utility function to upload applet file to drive.
+// conn is BlockConnection to drive, file is the full path to the applet file,
+// and prefix is the key prefix. The applet file may stored into multiple object files
+// on drive depends on its size.
+// Upon succeed, objects' keys are returned, output key pattern is "prefix-DDDDDDDDDD",
+// where DDDDDDDDDD is the starting byte offset from the orginal file.
+func UploadAppletFile(conn *BlockConnection, file, prefix string) ([][]byte, error) {
 	info, err := os.Stat(file)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -67,7 +75,7 @@ func UploadAppletFile(conn *BlockConnection, file, key string) ([][]byte, error)
 				return nil, err
 			}
 		}
-		keys[cnt] = []byte(fmt.Sprintf("%s-%010d", key, offset))
+		keys[cnt] = []byte(fmt.Sprintf("%s-%010d", prefix, offset))
 
 		entry := Record{
 			Key:   keys[cnt],

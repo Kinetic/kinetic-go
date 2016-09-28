@@ -1,3 +1,10 @@
+/*
+
+Package kinetic is golang kinetic client implementation.
+
+For details about kinetic protocol, please refer to https://github.com/Kinetic/kinetic-protocol
+
+*/
 package kinetic
 
 import (
@@ -14,6 +21,7 @@ func init() {
 	klog.Out = os.Stdout
 }
 
+// ClientOptions
 type ClientOptions struct {
 	Host string
 	Port int
@@ -484,14 +492,14 @@ type ACLPermission int32
 
 const (
 	_                       ACLPermission = iota
-	ACL_PERMISSION_READ     ACLPermission = iota
-	ACL_PERMISSION_WRITE    ACLPermission = iota
-	ACL_PERMISSION_DELETE   ACLPermission = iota
-	ACL_PERMISSION_RANGE    ACLPermission = iota
-	ACL_PERMISSION_SETUP    ACLPermission = iota
-	ACL_PERMISSION_P2POP    ACLPermission = iota
-	ACL_PERMISSION_GETLOG   ACLPermission = iota
-	ACL_PERMISSION_SECURITY ACLPermission = iota
+	ACL_PERMISSION_READ     ACLPermission = iota // Can read key/values
+	ACL_PERMISSION_WRITE    ACLPermission = iota // Can write key/values
+	ACL_PERMISSION_DELETE   ACLPermission = iota // Can delete key/values
+	ACL_PERMISSION_RANGE    ACLPermission = iota // Can do a range
+	ACL_PERMISSION_SETUP    ACLPermission = iota // Can setup a device
+	ACL_PERMISSION_P2POP    ACLPermission = iota // Can do a peer to peer operation
+	ACL_PERMISSION_GETLOG   ACLPermission = iota // Can get log
+	ACL_PERMISSION_SECURITY ACLPermission = iota // Can set up the security of device
 )
 
 var strACLPermission = map[ACLPermission]string{

@@ -10,6 +10,7 @@ type NonBlockConnection struct {
 	service *networkService
 }
 
+// Helper function to establish non-block connection to device.
 func NewNonBlockConnection(op ClientOptions) (*NonBlockConnection, error) {
 	if op.Hmac == nil {
 		klog.Panic("HMAC is required for ClientOptions")

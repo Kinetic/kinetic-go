@@ -4,6 +4,8 @@ import (
 	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
+// Status code for kinetic message.
+// Including status code get from device, or client internal error code.
 type StatusCode int32
 
 const (
@@ -72,6 +74,8 @@ var statusName = map[StatusCode]string{
 	REMOTE_EXECUTE_COMPLETE:                 "REMOTE_EXECUTE_COMPLETE",
 }
 
+// Status for each kinetic message.
+// Code is the status code and ErrorMsg is the detail message
 type Status struct {
 	Code     StatusCode
 	ErrorMsg string

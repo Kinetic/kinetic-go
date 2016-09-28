@@ -83,47 +83,53 @@ func convertLogTypeFromProto(l kproto.Command_GetLog_Type) LogType {
 	return ret
 }
 
+// UtilizationLog for kinetic drive utilization information
 type UtilizationLog struct {
-	Name  string
-	Value float32
+	Name  string  // Name of the device utlity
+	Value float32 // Value of device utility
 }
 
 type TemperatureLog struct {
-	Name    string
-	Current float32
-	Minimum float32
-	Maximum float32
-	Target  float32
+	Name    string  // Name of the drive
+	Current float32 // Current Temperature
+	Minimum float32 // Minimum Temperature for drive
+	Maximum float32 // Maximum Tempture for drive
+	Target  float32 // Target Temperature for drive
 }
 
 type CapacityLog struct {
-	CapacityInBytes uint64
-	PortionFull     float32
+	CapacityInBytes uint64  // total capacity of hard disk, in bytes
+	PortionFull     float32 // remaining capacity of hard disk
 }
 
 type ConfigurationInterface struct {
-	Name     string
-	MAC      []byte
-	Ipv4Addr []byte
-	Ipv6Addr []byte
+	Name     string // network device name
+	MAC      []byte // network device mac address
+	Ipv4Addr []byte // network device ipv4 address
+	Ipv6Addr []byte // network device ipv6 address
 }
 
 type ConfigurationLog struct {
-	Vendor                  string
-	Model                   string
-	SerialNumber            []byte
-	WorldWideName           []byte
-	Version                 string
-	CompilationDate         string
-	SourceHash              string
-	ProtocolVersion         string
-	ProtocolCompilationDate string
-	ProtocolSourceHash      string
-	Interface               []ConfigurationInterface
-	Port                    int32
-	TlsPort                 int32
+	Vendor                  string                   // Vendor name
+	Model                   string                   // Device model
+	SerialNumber            []byte                   // Device serial number
+	WorldWideName           []byte                   // Device world wide name
+	Version                 string                   // Device version
+	CompilationDate         string                   // Device service code compilation date
+	SourceHash              string                   // Device service source code repository hash value
+	ProtocolVersion         string                   // Device supported protocol version
+	ProtocolCompilationDate string                   // Device supported protocol compilation date
+	ProtocolSourceHash      string                   // Device supported protocol source code repository hash value
+	Interface               []ConfigurationInterface // Device interfaces as list
+	Port                    int32                    // Service port
+	TlsPort                 int32                    // TLS service port
 }
 
+// Statistic information for each type of MessageType.
+// Count is total number of Type message processed.
+// Bytes is the sum of the data that is in the data portion.
+// This does not include the command description.
+// For P2P operations, this is the amount of data moved between drives
 type StatisticsLog struct {
 	// TODO: Would it better just use the protocol Command_MessageType?
 	Type  MessageType
@@ -132,19 +138,19 @@ type StatisticsLog struct {
 }
 
 type LimitsLog struct {
-	MaxKeySize                  uint32
-	MaxValueSize                uint32
-	MaxVersionSize              uint32
-	MaxTagSize                  uint32
-	MaxConnections              uint32
-	MaxOutstandingReadRequests  uint32
-	MaxOutstandingWriteRequests uint32
-	MaxMessageSize              uint32
-	MaxKeyRangeCount            uint32
-	MaxIdentityCount            uint32
-	MaxPinSize                  uint32
-	MaxOperationCountPerBatch   uint32
-	MaxBatchCountPerDevice      uint32
+	MaxKeySize                  uint32 // max key size
+	MaxValueSize                uint32 // max value size
+	MaxVersionSize              uint32 // max version size
+	MaxTagSize                  uint32 // max tag size
+	MaxConnections              uint32 // max connection
+	MaxOutstandingReadRequests  uint32 // max out standing read request
+	MaxOutstandingWriteRequests uint32 // max out standing write request
+	MaxMessageSize              uint32 // max message size
+	MaxKeyRangeCount            uint32 // max key range count
+	MaxIdentityCount            uint32 // max identity count
+	MaxPinSize                  uint32 //
+	MaxOperationCountPerBatch   uint32 //
+	MaxBatchCountPerDevice      uint32 //
 }
 
 type DeviceLog struct {
@@ -152,13 +158,13 @@ type DeviceLog struct {
 }
 
 type Log struct {
-	Utilizations  []UtilizationLog
-	Temperatures  []TemperatureLog
-	Capacity      CapacityLog
-	Configuration ConfigurationLog
-	Statistics    []StatisticsLog
-	Messages      []byte
-	Limits        LimitsLog
+	Utilizations  []UtilizationLog // List of utilization information of the drive
+	Temperatures  []TemperatureLog // List of tempeture inforamtion of the drive
+	Capacity      CapacityLog      // Capacity information of the drive
+	Configuration ConfigurationLog // Configuration information of the drive
+	Statistics    []StatisticsLog  // List of statistic information from the drive
+	Messages      []byte           // Kinetic log messages from the drive
+	Limits        LimitsLog        // Limits information from the drive
 	Device        DeviceLog
 }
 
