@@ -52,12 +52,14 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 		return nil, err
 	}
 
-	ns := &networkService{conn: conn,
+	ns := &networkService{
+		conn:   conn,
 		seq:    0,
 		connId: 0,
 		option: op,
 		hmap:   make(map[int64]*ResponseHandler),
-		fatal:  false}
+		fatal:  false,
+	}
 
 	_, _, _, err = ns.receive()
 	if err != nil {
@@ -68,7 +70,8 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 	return ns, nil
 }
 
-// When client network service has error, call error handling from all Messagehandler current in Queue.
+// When client network service has error, call error handling
+// from all Messagehandler current in Queue.
 func (ns *networkService) clientError(s Status, mh *ResponseHandler) {
 	for ack, h := range ns.hmap {
 		if h.callback != nil {
@@ -140,7 +143,7 @@ func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value
 
 	err = ns.send(msg, value)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	klog.Info("Kinetic message send ", cmd.GetHeader().GetMessageType().String())
@@ -151,9 +154,10 @@ func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value
 	}
 
 	// update sequence number
+	// TODO: Need mutex protection here
 	ns.seq++
 
-	return err
+	return nil
 }
 
 func (ns *networkService) send(msg *kproto.Message, value []byte) error {

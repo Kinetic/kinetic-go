@@ -114,7 +114,37 @@ func TestNonBlockGetKeyRange(t *testing.T) {
 	}
 }
 
-func TestNonBlockGetLog(t *testing.T) {
+func TestNonBlockGetLogCapacity(t *testing.T) {
+	logs := []LogType{
+		LOG_CAPACITIES,
+	}
+	klogs, status, err := blockConn.GetLog(logs)
+	if err != nil || status.Code != OK {
+		t.Fatal("Nonblocking GetLog Failure")
+	}
+	if !(klogs.Capacity.CapacityInBytes > 0 &&
+		klogs.Capacity.PortionFull > 0) {
+		t.Logf("%#v", klogs.Capacity)
+		t.Fatal("Nonblocking GetLog for Capacity Failure")
+	}
+}
+
+func TestNonBlockGetLogLimit(t *testing.T) {
+	logs := []LogType{
+		LOG_LIMITS,
+	}
+	klogs, status, err := blockConn.GetLog(logs)
+	if err != nil || status.Code != OK {
+		t.Fatal("Nonblocking GetLog Failure")
+	}
+	if klogs.Limits.MaxKeySize != 4096 ||
+		klogs.Limits.MaxValueSize != 1024*1024 {
+		t.Logf("%#v", klogs.Limits)
+		t.Fatal("Nonblocking GetLog for Limits Failure")
+	}
+}
+
+func TestNonBlockGetLogAll(t *testing.T) {
 	logs := []LogType{
 		LOG_UTILIZATIONS,
 		LOG_TEMPERATURES,
@@ -129,4 +159,30 @@ func TestNonBlockGetLog(t *testing.T) {
 		t.Fatal("Nonblocking GetLog Failure")
 	}
 	t.Logf("GetLog %+v", klogs)
+}
+
+func TestNonBlockMediaScan(t *testing.T) {
+	op := MediaOperation{
+		StartKey:          []byte("object000"),
+		EndKey:            []byte("object999"),
+		StartKeyInclusive: true,
+		EndKeyInclusive:   true,
+	}
+	status, err := blockConn.MediaScan(&op, PRIORITY_NORMAL)
+	if err != nil || status.Code != OK {
+		t.Fatal("Nonblocking MediaScan Failure: ", status.Error())
+	}
+}
+
+func TestNonBlockMediaOptimize(t *testing.T) {
+	op := MediaOperation{
+		StartKey:          []byte("object000"),
+		EndKey:            []byte("object999"),
+		StartKeyInclusive: true,
+		EndKeyInclusive:   true,
+	}
+	status, err := blockConn.MediaOptimize(&op, PRIORITY_NORMAL)
+	if err != nil || status.Code != OK {
+		t.Fatal("Nonblocking MediaOptimize Failure: ", status.Error())
+	}
 }

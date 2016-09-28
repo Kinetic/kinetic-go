@@ -33,7 +33,7 @@ func (conn *BlockConnection) NoOp() (Status, error) {
 	return callback.Status(), nil
 }
 
-func (conn *BlockConnection) get(key []byte, getCmd kproto.Command_MessageType) (Record, Status, error) {
+func (conn *BlockConnection) get(key []byte, getCmd kproto.Command_MessageType) (*Record, Status, error) {
 	callback := &GetCallback{}
 	h := NewResponseHandler(callback)
 
@@ -47,25 +47,25 @@ func (conn *BlockConnection) get(key []byte, getCmd kproto.Command_MessageType) 
 		err = conn.nbc.GetNext(key, h)
 	}
 	if err != nil {
-		return Record{}, callback.Status(), err
+		return nil, callback.Status(), err
 	}
 
 	for callback.Done() == false {
 		conn.nbc.Run()
 	}
 
-	return callback.Entry, callback.Status(), nil
+	return &callback.Entry, callback.Status(), nil
 }
 
-func (conn *BlockConnection) Get(key []byte) (Record, Status, error) {
+func (conn *BlockConnection) Get(key []byte) (*Record, Status, error) {
 	return conn.get(key, kproto.Command_GET)
 }
 
-func (conn *BlockConnection) GetNext(key []byte) (Record, Status, error) {
+func (conn *BlockConnection) GetNext(key []byte) (*Record, Status, error) {
 	return conn.get(key, kproto.Command_GETNEXT)
 }
 
-func (conn *BlockConnection) GetPrevious(key []byte) (Record, Status, error) {
+func (conn *BlockConnection) GetPrevious(key []byte) (*Record, Status, error) {
 	return conn.get(key, kproto.Command_GETPREVIOUS)
 }
 
@@ -159,19 +159,19 @@ func (conn *BlockConnection) P2PPush(request *P2PPushRequest) ([]Status, Status,
 	return callback.Statuses, callback.Status(), nil
 }
 
-func (conn *BlockConnection) GetLog(logs []LogType) (Log, Status, error) {
+func (conn *BlockConnection) GetLog(logs []LogType) (*Log, Status, error) {
 	callback := &GetLogCallback{}
 	h := NewResponseHandler(callback)
 	err := conn.nbc.GetLog(logs, h)
 	if err != nil {
-		return Log{}, callback.Status(), err
+		return nil, callback.Status(), err
 	}
 
 	for callback.Done() == false {
 		conn.nbc.Run()
 	}
 
-	return callback.Logs, callback.Status(), nil
+	return &callback.Logs, callback.Status(), nil
 }
 
 func (conn *BlockConnection) pinop(pin []byte, op kproto.Command_PinOperation_PinOpType) (Status, error) {
