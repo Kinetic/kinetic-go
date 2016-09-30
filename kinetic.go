@@ -380,6 +380,12 @@ func convertAlgoFromProto(a kproto.Command_Algorithm) Algorithm {
 	return ret
 }
 
+// Synchronization allows the puts and deletes to determine if they are to be
+// SYNC_WRITETHROUGH: This request is made persistent before returning. This does not effect any other pending operations.
+// SYNC_WRITEBACK: They can be made persistent when the device chooses, or when a subsequent FLUSH is give to the device.
+// SYNC_FLUSH: All pending information that has not been written is pushed to the disk and the command that
+//    specifies FLUSH is written last and then returned. All WRITEBACK writes that have received ending
+//    status will be guaranteed to be written before the FLUSH operation is returned completed.
 type Synchronization int32
 
 const (
