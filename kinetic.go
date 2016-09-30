@@ -8,10 +8,10 @@ For details about kinetic protocol, please refer to https://github.com/Kinetic/k
 package kinetic
 
 import (
-	"os"
-
 	"github.com/Sirupsen/logrus"
 	kproto "github.com/yongzhy/kinetic-go/proto"
+	"io"
+	"os"
 )
 
 // Create logger for Kinetic package
@@ -19,6 +19,35 @@ var klog = logrus.New()
 
 func init() {
 	klog.Out = os.Stdout
+}
+
+type LogLevel logrus.Level
+
+const (
+	LogLevelPanic LogLevel = LogLevel(logrus.PanicLevel)
+	// FatalLevel level. Logs and then calls `os.Exit(1)`. It will exit even if the
+	// logging level is set to Panic.
+	LogLevelFatal LogLevel = LogLevel(logrus.FatalLevel)
+	// ErrorLevel level. Logs. Used for errors that should definitely be noted.
+	// Commonly used for hooks to send errors to an error tracking service.
+	LogLevelError LogLevel = LogLevel(logrus.ErrorLevel)
+	// WarnLevel level. Non-critical entries that deserve eyes.
+	LogLevelWarn LogLevel = LogLevel(logrus.WarnLevel)
+	// InfoLevel level. General operational entries about what's going on inside the
+	// application.
+	LogLevelInfo LogLevel = LogLevel(logrus.InfoLevel)
+	// DebugLevel level. Usually only enabled when debugging. Very verbose logging.
+	LogLevelDebug LogLevel = LogLevel(logrus.DebugLevel)
+)
+
+// Set kinetic libary log level
+func SetLogLevel(l LogLevel) {
+	klog.Level = logrus.Level(l)
+}
+
+// Set kinetic libary log output
+func SetLogOutput(out io.Writer) {
+	klog.Out = out
 }
 
 // ClientOptions
