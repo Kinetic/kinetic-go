@@ -12,29 +12,21 @@ import (
 type Callback interface {
 	Success(resp *kproto.Command, value []byte)
 	Failure(status Status)
-	Done() bool
 	Status() Status
 }
 
 // Generic Callback, can be used for all MessageType which doesn't require data from Kinetic drive.
 // And for MessageType that require data from drive, a new struct need to be defined GenericCallback
 type GenericCallback struct {
-	done   bool
 	status Status
 }
 
 func (c *GenericCallback) Success(resp *kproto.Command, value []byte) {
-	c.done = true
 	c.status = Status{Code: OK}
 }
 
 func (c *GenericCallback) Failure(status Status) {
-	c.done = true
 	c.status = status
-}
-
-func (c *GenericCallback) Done() bool {
-	return c.done
 }
 
 func (c *GenericCallback) Status() Status {
