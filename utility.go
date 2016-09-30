@@ -1,8 +1,8 @@
 package kinetic
 
 import (
-	"fmt"
-	"io"
+	//"fmt"
+	//"io"
 	"io/ioutil"
 	"os"
 )
