@@ -10,7 +10,6 @@ type ResponseHandler struct {
 }
 
 func (h *ResponseHandler) Handle(cmd *kproto.Command, value []byte) error {
-	klog.Info("Message handler called")
 	if h.callback != nil {
 		if cmd.Status != nil && cmd.Status.Code != nil {
 			if cmd.GetStatus().GetCode() == kproto.Command_Status_SUCCESS {

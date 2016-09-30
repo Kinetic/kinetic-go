@@ -26,13 +26,11 @@ type GenericCallback struct {
 func (c *GenericCallback) Success(resp *kproto.Command, value []byte) {
 	c.done = true
 	c.status = Status{Code: OK}
-	klog.Info("Callback Success")
 }
 
 func (c *GenericCallback) Failure(status Status) {
 	c.done = true
 	c.status = status
-	klog.Info("Callback Failure")
 }
 
 func (c *GenericCallback) Done() bool {

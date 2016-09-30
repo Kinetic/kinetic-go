@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"sync"
 	"time"
 
 	proto "github.com/golang/protobuf/proto"
@@ -36,6 +37,8 @@ func newCommand(t kproto.Command_MessageType) *kproto.Command {
 }
 
 type networkService struct {
+	rmutex sync.Mutex
+	wmutex sync.Mutex
 	conn   net.Conn
 	seq    int64                      // Operation sequence ID
 	connId int64                      // current conection ID
@@ -61,7 +64,10 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 		fatal:  false,
 	}
 
+	ns.rmutex.Lock()
 	_, _, _, err = ns.receive()
+	ns.rmutex.Unlock()
+
 	if err != nil {
 		klog.Error("Can't establish connection to %s", op.Host)
 		return nil, err
@@ -79,6 +85,7 @@ func (ns *networkService) clientError(s Status, mh *ResponseHandler) {
 		}
 		delete(ns.hmap, ack)
 	}
+
 	if mh != nil && mh.callback != nil {
 		mh.callback.Failure(s)
 	}
@@ -86,20 +93,24 @@ func (ns *networkService) clientError(s Status, mh *ResponseHandler) {
 
 func (ns *networkService) listen() error {
 	if ns.fatal {
-		return errors.New("Network service has fatal error")
+		return errors.New("Can't listen, network service has fatal error")
 	}
 
 	if len(ns.hmap) == 0 {
 		return nil
 	}
 
+	ns.rmutex.Lock()
 	msg, cmd, value, err := ns.receive()
+	ns.rmutex.Unlock()
 	if err != nil {
 		klog.Error("Network Service listen error")
 		return err
 	}
 
-	klog.Info("Kinetic response received ", cmd.GetHeader().GetMessageType().String())
+	klog.Info("Kinetic response received ", cmd.GetHeader().GetMessageType().String(),
+		", AckSeq = ", cmd.GetHeader().GetAckSequence(),
+		", Code = ", cmd.GetStatus().GetCode())
 
 	if msg.GetAuthType() == kproto.Message_UNSOLICITEDSTATUS {
 		if cmd.GetHeader() != nil {
@@ -116,15 +127,23 @@ func (ns *networkService) listen() error {
 
 	(*h).Handle(cmd, value)
 
+	ns.wmutex.Lock()
 	delete(ns.hmap, ack)
+	ns.wmutex.Unlock()
 
 	return nil
 }
 
 func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value []byte, h *ResponseHandler) error {
 	if ns.fatal {
-		return errors.New("Network service has fatal error")
+		return errors.New("Can't submit, network service has fatal error")
 	}
+	if h == nil {
+		return errors.New("Valid ResponseHandler is required")
+	}
+
+	ns.wmutex.Lock()
+
 	cmd.GetHeader().ConnectionID = &ns.connId
 	cmd.GetHeader().Sequence = &ns.seq
 	cmdBytes, err := proto.Marshal(cmd)
@@ -141,21 +160,17 @@ func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value
 		msg.GetHmacAuth().Hmac = compute_hmac(msg.CommandBytes, ns.option.Hmac)
 	}
 
+	klog.Info("Kinetic message send ", cmd.GetHeader().GetMessageType().String(), " Seq = ", ns.seq)
+
 	err = ns.send(msg, value)
 	if err != nil {
 		return err
 	}
 
-	klog.Info("Kinetic message send ", cmd.GetHeader().GetMessageType().String())
-
-	if h != nil {
-		ns.hmap[ns.seq] = h
-		klog.Info("Insert handler for ACK ", ns.seq)
-	}
-
-	// update sequence number
-	// TODO: Need mutex protection here
+	ns.hmap[ns.seq] = h
 	ns.seq++
+
+	ns.wmutex.Unlock()
 
 	return nil
 }

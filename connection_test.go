@@ -6,7 +6,8 @@ import (
 )
 
 var (
-	blockConn *BlockConnection = nil
+	blockConn    *BlockConnection    = nil
+	nonblockConn *NonBlockConnection = nil
 )
 
 var option = ClientOptions{
@@ -26,50 +27,50 @@ func TestMain(m *testing.M) {
 	}
 }
 
-func TestNonBlockNoOp(t *testing.T) {
+func TestBlockNoOp(t *testing.T) {
 	status, err := blockConn.NoOp()
 	if err != nil || status.Code != OK {
-		t.Fatal("Nonblocking NoOp Failure")
+		t.Fatal("Blocking NoOp Failure")
 	}
 }
 
-func TestNonBlockGet(t *testing.T) {
+func TestBlockGet(t *testing.T) {
 	_, status, err := blockConn.Get([]byte("object000"))
 	if err != nil || status.Code != OK {
-		t.Fatal("Nonblocking Get Failure")
+		t.Fatal("Blocking Get Failure")
 	}
 }
 
-func TestNonBlockGetNext(t *testing.T) {
+func TestBlockGetNext(t *testing.T) {
 	_, status, err := blockConn.GetNext([]byte("object000"))
 	if err != nil || status.Code != OK {
-		t.Fatal("Nonblocking GetNext Failure")
+		t.Fatal("Blocking GetNext Failure")
 	}
 }
 
-func TestNonBlockGetPrevious(t *testing.T) {
+func TestBlockGetPrevious(t *testing.T) {
 	_, status, err := blockConn.GetPrevious([]byte("object000"))
 	if err != nil || status.Code != OK {
-		t.Fatal("Nonblocking GetPrevious Failure")
+		t.Fatal("Blocking GetPrevious Failure")
 	}
 }
 
-func TestNonBlockGetVersion(t *testing.T) {
+func TestBlockGetVersion(t *testing.T) {
 	version, status, err := blockConn.GetVersion([]byte("object000"))
 	if err != nil || status.Code != OK {
-		t.Fatal("Nonblocking GetVersion Failure")
+		t.Fatal("Blocking GetVersion Failure")
 	}
 	t.Logf("Object version = %x", version)
 }
 
-func TestNonBlockFlush(t *testing.T) {
+func TestBlockFlush(t *testing.T) {
 	status, err := blockConn.Flush()
 	if err != nil || status.Code != OK {
-		t.Fatal("Nonblocking Flush Failure")
+		t.Fatal("Blocking Flush Failure")
 	}
 }
 
-func TestNonBlockPut(t *testing.T) {
+func TestBlockPut(t *testing.T) {
 	entry := Record{
 		Key:   []byte("object001"),
 		Value: []byte("ABCDEFG"),
@@ -80,11 +81,11 @@ func TestNonBlockPut(t *testing.T) {
 	}
 	status, err := blockConn.Put(&entry)
 	if err != nil || status.Code != OK {
-		t.Fatal("Nonblocking Put Failure")
+		t.Fatal("Blocking Put Failure")
 	}
 }
 
-func TestNonBlockDelete(t *testing.T) {
+func TestBlockDelete(t *testing.T) {
 	entry := Record{
 		Key:   []byte("object001"),
 		Sync:  SYNC_WRITETHROUGH,
@@ -93,11 +94,11 @@ func TestNonBlockDelete(t *testing.T) {
 	}
 	status, err := blockConn.Delete(&entry)
 	if err != nil || status.Code != OK {
-		t.Fatal("Nonblocking Delete Failure")
+		t.Fatal("Blocking Delete Failure")
 	}
 }
 
-func TestNonBlockGetKeyRange(t *testing.T) {
+func TestBlockGetKeyRange(t *testing.T) {
 	r := KeyRange{
 		StartKey:          []byte("object000"),
 		EndKey:            []byte("object999"),
@@ -107,44 +108,44 @@ func TestNonBlockGetKeyRange(t *testing.T) {
 	}
 	keys, status, err := blockConn.GetKeyRange(&r)
 	if err != nil || status.Code != OK {
-		t.Fatal("Nonblocking GetKeyRange Failure: ", status.Error())
+		t.Fatal("Blocking GetKeyRange Failure: ", status.Error())
 	}
 	for k, key := range keys {
 		t.Logf("key[%d] = %s", k, string(key))
 	}
 }
 
-func TestNonBlockGetLogCapacity(t *testing.T) {
+func TestBlockGetLogCapacity(t *testing.T) {
 	logs := []LogType{
 		LOG_CAPACITIES,
 	}
 	klogs, status, err := blockConn.GetLog(logs)
 	if err != nil || status.Code != OK {
-		t.Fatal("Nonblocking GetLog Failure")
+		t.Fatal("Blocking GetLog Failure")
 	}
 	if !(klogs.Capacity.CapacityInBytes > 0 &&
 		klogs.Capacity.PortionFull > 0) {
 		t.Logf("%#v", klogs.Capacity)
-		t.Fatal("Nonblocking GetLog for Capacity Failure")
+		t.Fatal("Blocking GetLog for Capacity Failure")
 	}
 }
 
-func TestNonBlockGetLogLimit(t *testing.T) {
+func TestBlockGetLogLimit(t *testing.T) {
 	logs := []LogType{
 		LOG_LIMITS,
 	}
 	klogs, status, err := blockConn.GetLog(logs)
 	if err != nil || status.Code != OK {
-		t.Fatal("Nonblocking GetLog Failure")
+		t.Fatal("Blocking GetLog Failure")
 	}
 	if klogs.Limits.MaxKeySize != 4096 ||
 		klogs.Limits.MaxValueSize != 1024*1024 {
 		t.Logf("%#v", klogs.Limits)
-		t.Fatal("Nonblocking GetLog for Limits Failure")
+		t.Fatal("Blocking GetLog for Limits Failure")
 	}
 }
 
-func TestNonBlockGetLogAll(t *testing.T) {
+func TestBlockGetLogAll(t *testing.T) {
 	logs := []LogType{
 		LOG_UTILIZATIONS,
 		LOG_TEMPERATURES,
@@ -156,12 +157,12 @@ func TestNonBlockGetLogAll(t *testing.T) {
 	}
 	klogs, status, err := blockConn.GetLog(logs)
 	if err != nil || status.Code != OK {
-		t.Fatal("Nonblocking GetLog Failure")
+		t.Fatal("Blocking GetLog Failure")
 	}
 	t.Logf("GetLog %+v", klogs)
 }
 
-func TestNonBlockMediaScan(t *testing.T) {
+func TestBlockMediaScan(t *testing.T) {
 	op := MediaOperation{
 		StartKey:          []byte("object000"),
 		EndKey:            []byte("object999"),
@@ -170,11 +171,11 @@ func TestNonBlockMediaScan(t *testing.T) {
 	}
 	status, err := blockConn.MediaScan(&op, PRIORITY_NORMAL)
 	if err != nil || status.Code != OK {
-		t.Fatal("Nonblocking MediaScan Failure: ", status.Error())
+		t.Fatal("Blocking MediaScan Failure: ", status.Error())
 	}
 }
 
-func TestNonBlockMediaOptimize(t *testing.T) {
+func TestBlockMediaOptimize(t *testing.T) {
 	op := MediaOperation{
 		StartKey:          []byte("object000"),
 		EndKey:            []byte("object999"),
@@ -183,6 +184,6 @@ func TestNonBlockMediaOptimize(t *testing.T) {
 	}
 	status, err := blockConn.MediaOptimize(&op, PRIORITY_NORMAL)
 	if err != nil || status.Code != OK {
-		t.Fatal("Nonblocking MediaOptimize Failure: ", status.Error())
+		t.Fatal("Blocking MediaOptimize Failure: ", status.Error())
 	}
 }
