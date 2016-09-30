@@ -356,8 +356,10 @@ func (conn *NonBlockConnection) MediaOptimize(op *MediaOperation, pri Priority, 
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) Run() error {
-	return conn.service.listen()
+func (conn *NonBlockConnection) Listen(h *ResponseHandler) error {
+	err := conn.service.listen()
+	h.wait()
+	return err
 }
 
 func (conn *NonBlockConnection) Close() {

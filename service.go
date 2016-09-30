@@ -37,8 +37,9 @@ func newCommand(t kproto.Command_MessageType) *kproto.Command {
 }
 
 type networkService struct {
-	rmutex sync.Mutex
-	wmutex sync.Mutex
+	rxMu   sync.Mutex
+	txMu   sync.Mutex
+	mapMu  sync.Mutex
 	conn   net.Conn
 	seq    int64                      // Operation sequence ID
 	connId int64                      // current conection ID
@@ -64,9 +65,11 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 		fatal:  false,
 	}
 
-	ns.rmutex.Lock()
+	ns.rxMu.Lock()
+	// Do the handshake.
+	// TODO: we can store the Device Configuration and Limits from handshake
 	_, _, _, err = ns.receive()
-	ns.rmutex.Unlock()
+	ns.rxMu.Unlock()
 
 	if err != nil {
 		klog.Error("Can't establish connection to %s", op.Host)
@@ -79,15 +82,15 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 // When client network service has error, call error handling
 // from all Messagehandler current in Queue.
 func (ns *networkService) clientError(s Status, mh *ResponseHandler) {
+	ns.mapMu.Lock()
 	for ack, h := range ns.hmap {
-		if h.callback != nil {
-			h.callback.Failure(s)
-		}
+		h.fail(s)
 		delete(ns.hmap, ack)
 	}
+	ns.mapMu.Unlock()
 
-	if mh != nil && mh.callback != nil {
-		mh.callback.Failure(s)
+	if mh != nil {
+		mh.fail(s)
 	}
 }
 
@@ -96,19 +99,22 @@ func (ns *networkService) listen() error {
 		return errors.New("Can't listen, network service has fatal error")
 	}
 
+	ns.mapMu.Lock()
 	if len(ns.hmap) == 0 {
+		ns.mapMu.Unlock()
 		return nil
 	}
+	ns.mapMu.Unlock()
 
-	ns.rmutex.Lock()
+	ns.rxMu.Lock()
 	msg, cmd, value, err := ns.receive()
-	ns.rmutex.Unlock()
+	ns.rxMu.Unlock()
 	if err != nil {
 		klog.Error("Network Service listen error")
 		return err
 	}
 
-	klog.Info("Kinetic response received ", cmd.GetHeader().GetMessageType().String(),
+	klog.Debug("Kinetic response received ", cmd.GetHeader().GetMessageType().String(),
 		", AckSeq = ", cmd.GetHeader().GetAckSequence(),
 		", Code = ", cmd.GetStatus().GetCode())
 
@@ -119,17 +125,19 @@ func (ns *networkService) listen() error {
 	}
 
 	ack := cmd.GetHeader().GetAckSequence()
+	ns.mapMu.Lock()
 	h, ok := ns.hmap[ack]
+	ns.mapMu.Unlock()
 	if ok == false {
-		klog.Warn("Couldn't find a handler for acksequence ", ack)
+		klog.Error("Couldn't find a handler for acksequence ", ack)
 		return nil
 	}
 
-	(*h).Handle(cmd, value)
+	h.handle(cmd, value)
 
-	ns.wmutex.Lock()
+	ns.mapMu.Lock()
 	delete(ns.hmap, ack)
-	ns.wmutex.Unlock()
+	ns.mapMu.Unlock()
 
 	return nil
 }
@@ -142,7 +150,7 @@ func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value
 		return errors.New("Valid ResponseHandler is required")
 	}
 
-	ns.wmutex.Lock()
+	ns.txMu.Lock()
 
 	cmd.GetHeader().ConnectionID = &ns.connId
 	cmd.GetHeader().Sequence = &ns.seq
@@ -160,17 +168,20 @@ func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value
 		msg.GetHmacAuth().Hmac = compute_hmac(msg.CommandBytes, ns.option.Hmac)
 	}
 
-	klog.Info("Kinetic message send ", cmd.GetHeader().GetMessageType().String(), " Seq = ", ns.seq)
+	klog.Debug("Kinetic message send ", cmd.GetHeader().GetMessageType().String(), " Seq = ", ns.seq)
 
 	err = ns.send(msg, value)
+
 	if err != nil {
 		return err
 	}
 
+	ns.mapMu.Lock()
 	ns.hmap[ns.seq] = h
-	ns.seq++
+	ns.mapMu.Unlock()
 
-	ns.wmutex.Unlock()
+	ns.seq++
+	ns.txMu.Unlock()
 
 	return nil
 }
@@ -296,5 +307,5 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 
 func (ns *networkService) close() {
 	ns.conn.Close()
-	klog.Infof("Connection to %s closed", ns.option.Host)
+	klog.Debug("Connection to %s closed", ns.option.Host)
 }

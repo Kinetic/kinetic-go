@@ -27,11 +27,9 @@ func (conn *BlockConnection) NoOp() (Status, error) {
 		return callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return callback.Status(), nil
+	return callback.Status(), err
 }
 
 func (conn *BlockConnection) get(key []byte, getCmd kproto.Command_MessageType) (*Record, Status, error) {
@@ -51,11 +49,9 @@ func (conn *BlockConnection) get(key []byte, getCmd kproto.Command_MessageType) 
 		return nil, callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return &callback.Entry, callback.Status(), nil
+	return &callback.Entry, callback.Status(), err
 }
 
 func (conn *BlockConnection) Get(key []byte) (*Record, Status, error) {
@@ -78,11 +74,9 @@ func (conn *BlockConnection) GetKeyRange(r *KeyRange) ([][]byte, Status, error) 
 		return nil, callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return callback.Keys, callback.Status(), nil
+	return callback.Keys, callback.Status(), err
 }
 
 func (conn *BlockConnection) GetVersion(key []byte) ([]byte, Status, error) {
@@ -93,11 +87,9 @@ func (conn *BlockConnection) GetVersion(key []byte) ([]byte, Status, error) {
 		return nil, callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return callback.Version, callback.Status(), nil
+	return callback.Version, callback.Status(), err
 }
 
 func (conn *BlockConnection) Flush() (Status, error) {
@@ -108,11 +100,9 @@ func (conn *BlockConnection) Flush() (Status, error) {
 		return callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return callback.Status(), nil
+	return callback.Status(), err
 }
 
 func (conn *BlockConnection) Delete(entry *Record) (Status, error) {
@@ -123,11 +113,9 @@ func (conn *BlockConnection) Delete(entry *Record) (Status, error) {
 		return callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return callback.Status(), nil
+	return callback.Status(), err
 }
 
 func (conn *BlockConnection) Put(entry *Record) (Status, error) {
@@ -138,11 +126,9 @@ func (conn *BlockConnection) Put(entry *Record) (Status, error) {
 		return callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return callback.Status(), nil
+	return callback.Status(), err
 }
 
 func (conn *BlockConnection) P2PPush(request *P2PPushRequest) ([]Status, Status, error) {
@@ -153,11 +139,9 @@ func (conn *BlockConnection) P2PPush(request *P2PPushRequest) ([]Status, Status,
 		return nil, callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return callback.Statuses, callback.Status(), nil
+	return callback.Statuses, callback.Status(), err
 }
 
 func (conn *BlockConnection) GetLog(logs []LogType) (*Log, Status, error) {
@@ -168,11 +152,9 @@ func (conn *BlockConnection) GetLog(logs []LogType) (*Log, Status, error) {
 		return nil, callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return &callback.Logs, callback.Status(), nil
+	return &callback.Logs, callback.Status(), err
 }
 
 func (conn *BlockConnection) pinop(pin []byte, op kproto.Command_PinOperation_PinOpType) (Status, error) {
@@ -194,11 +176,9 @@ func (conn *BlockConnection) pinop(pin []byte, op kproto.Command_PinOperation_Pi
 		return callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return callback.Status(), nil
+	return callback.Status(), err
 }
 
 func (conn *BlockConnection) SecureErase(pin []byte) (Status, error) {
@@ -226,11 +206,9 @@ func (conn *BlockConnection) UpdateFirmware(code []byte) (Status, error) {
 		return callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return callback.Status(), nil
+	return callback.Status(), err
 }
 
 func (conn *BlockConnection) SetClusterVersion(version int64) (Status, error) {
@@ -241,11 +219,9 @@ func (conn *BlockConnection) SetClusterVersion(version int64) (Status, error) {
 		return callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return callback.Status(), nil
+	return callback.Status(), err
 }
 
 func (conn *BlockConnection) SetLockPin(currentPin []byte, newPin []byte) (Status, error) {
@@ -256,11 +232,9 @@ func (conn *BlockConnection) SetLockPin(currentPin []byte, newPin []byte) (Statu
 		return callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return callback.Status(), nil
+	return callback.Status(), err
 }
 
 func (conn *BlockConnection) SetErasePin(currentPin []byte, newPin []byte) (Status, error) {
@@ -271,11 +245,9 @@ func (conn *BlockConnection) SetErasePin(currentPin []byte, newPin []byte) (Stat
 		return callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return callback.Status(), nil
+	return callback.Status(), err
 }
 
 func (conn *BlockConnection) SetACL(acls []SecurityACL) (Status, error) {
@@ -286,11 +258,9 @@ func (conn *BlockConnection) SetACL(acls []SecurityACL) (Status, error) {
 		return callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return callback.Status(), nil
+	return callback.Status(), err
 }
 
 func (conn *BlockConnection) MediaScan(op *MediaOperation, pri Priority) (Status, error) {
@@ -301,11 +271,9 @@ func (conn *BlockConnection) MediaScan(op *MediaOperation, pri Priority) (Status
 		return callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return callback.Status(), nil
+	return callback.Status(), err
 }
 
 func (conn *BlockConnection) MediaOptimize(op *MediaOperation, pri Priority) (Status, error) {
@@ -316,11 +284,9 @@ func (conn *BlockConnection) MediaOptimize(op *MediaOperation, pri Priority) (St
 		return callback.Status(), err
 	}
 
-	for callback.Done() == false {
-		conn.nbc.Run()
-	}
+	err = conn.nbc.Listen(h)
 
-	return callback.Status(), nil
+	return callback.Status(), err
 }
 
 func (conn *BlockConnection) Close() {
