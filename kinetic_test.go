@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func ExampleBlockPutGetDelete() {
+func ExampleBlockConnection_putGetDelete() {
 	// Set the log leverl to debug
 	SetLogLevel(LogLevelDebug)
 
@@ -62,7 +62,27 @@ func ExampleBlockPutGetDelete() {
 	}
 }
 
-func ExampleNonBlockPutGetDelete() {
+func ExampleBlockConnection_ssl() {
+	// Set the log leverl to debug
+	SetLogLevel(LogLevelDebug)
+
+	// Client options, use SSL connection
+	var option = ClientOptions{
+		Host:   "10.29.24.55",
+		Port:   8443,
+		User:   1,
+		Hmac:   []byte("asdfasdf"),
+		UseSSL: true,
+	}
+
+	conn, err := NewBlockConnection(option)
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+}
+
+func ExampleNonBlockConnection_putGetDelete() {
 	// Set the log leverl to debug
 	SetLogLevel(LogLevelDebug)
 
@@ -131,7 +151,7 @@ func ExampleNonBlockPutGetDelete() {
 	conn.Listen(dh)
 }
 
-func ExampleNonBlockMuliplePut() {
+func ExampleNonBlockConnection_multiplePut() {
 	// Set the log leverl to debug
 	SetLogLevel(LogLevelDebug)
 
@@ -214,5 +234,4 @@ func ExampleNonBlockMuliplePut() {
 	for id := 1; id <= 200; id++ {
 		<-done
 	}
-
 }

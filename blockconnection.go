@@ -4,7 +4,7 @@ import (
 	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
-// BlockConnection still use NonBlockConnection to connect to kinetic device.
+// BlockConnection is block version of connection to kinetic drvice.
 // For all API fucntions, it will only return after get response from kinetic drvice.
 type BlockConnection struct {
 	nbc *NonBlockConnection
@@ -21,6 +21,8 @@ func NewBlockConnection(op ClientOptions) (*BlockConnection, error) {
 	return &BlockConnection{nbc: nbc}, err
 }
 
+// NoOp does nothing but wait for drive to return response.
+// On success, Status.Code will be OK
 func (conn *BlockConnection) NoOp() (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
@@ -56,18 +58,26 @@ func (conn *BlockConnection) get(key []byte, getCmd kproto.Command_MessageType) 
 	return &callback.Entry, callback.Status(), err
 }
 
+// Get gets the object from kinetic drive with key.
+// On success, object Record will return and Status.Code = OK
 func (conn *BlockConnection) Get(key []byte) (*Record, Status, error) {
 	return conn.get(key, kproto.Command_GET)
 }
 
+// GetNext gets the next object with key after the passed in key.
+// On success, object Record will return and Status.Code = OK
 func (conn *BlockConnection) GetNext(key []byte) (*Record, Status, error) {
 	return conn.get(key, kproto.Command_GETNEXT)
 }
 
+// GetPrevious gets the previous object with key before the passed in key.
+// On success, object Record will return and Status.Code = OK
 func (conn *BlockConnection) GetPrevious(key []byte) (*Record, Status, error) {
 	return conn.get(key, kproto.Command_GETPREVIOUS)
 }
 
+// GetKeyRange gets list of objects' keys, which meet the criteria defined by KeyRange.
+// On success, list of objects's keys returned, and Status.Code = OK
 func (conn *BlockConnection) GetKeyRange(r *KeyRange) ([][]byte, Status, error) {
 	callback := &GetKeyRangeCallback{}
 	h := NewResponseHandler(callback)
