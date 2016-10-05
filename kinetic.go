@@ -52,10 +52,11 @@ func SetLogOutput(out io.Writer) {
 
 // ClientOptions
 type ClientOptions struct {
-	Host string
-	Port int
-	User int64
-	Hmac []byte
+	Host   string // Kinetic device IP address
+	Port   int    // Network port to connect, if UseSSL is true, this port should be the TlsPort
+	User   int64  // User Id
+	Hmac   []byte
+	UseSSL bool // Use SSL connection, or plain connection
 }
 
 // message type

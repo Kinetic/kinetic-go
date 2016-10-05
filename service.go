@@ -1,6 +1,7 @@
 package kinetic
 
 import (
+	"crypto/tls"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -55,10 +56,19 @@ type networkService struct {
 }
 
 func newNetworkService(op ClientOptions) (*networkService, error) {
+	var conn net.Conn
+	var err error
 	target := fmt.Sprintf("%s:%d", op.Host, op.Port)
-	conn, err := net.DialTimeout("tcp", target, networkTimeout)
+	if op.UseSSL {
+		// TODO: Need to enable verify certification later
+		config := tls.Config{InsecureSkipVerify: true}
+		conn, err = tls.Dial("tcp", target, &config)
+	} else {
+		conn, err = net.DialTimeout("tcp", target, networkTimeout)
+	}
+
 	if err != nil {
-		klog.Panic("Can't establish connection to ", op.Host)
+		klog.Panic("Can't establish connection to ", op.Host, err)
 		return nil, err
 	}
 
@@ -83,13 +93,15 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 		return nil, err
 	}
 
-	klog.Debugf("Connected to %s", op.Host)
+	klog.Debugf("Connected to %s:%d", op.Host, op.Port)
 	klog.Debugf("\tVendor: %s", ns.device.Configuration.Vendor)
 	klog.Debugf("\tModel: %s", ns.device.Configuration.Model)
 	klog.Debugf("\tWorldWideName: %s", ns.device.Configuration.WorldWideName)
 	klog.Debugf("\tSerial Number: %s", ns.device.Configuration.SerialNumber)
 	klog.Debugf("\tFirmware Version: %s", ns.device.Configuration.Version)
 	klog.Debugf("\tKinetic Protocol Version: %s", ns.device.Configuration.ProtocolVersion)
+	klog.Debugf("\tPort: %d", ns.device.Configuration.Port)
+	klog.Debugf("\tTlsPort: %d", ns.device.Configuration.TlsPort)
 
 	return ns, nil
 }
