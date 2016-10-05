@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	blockConn    *BlockConnection    = nil
-	nonblockConn *NonBlockConnection = nil
+	blockConn    *BlockConnection
+	nonblockConn *NonBlockConnection
 )
 
 var option = ClientOptions{

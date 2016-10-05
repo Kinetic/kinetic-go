@@ -15,7 +15,7 @@ type Callback interface {
 	Status() Status
 }
 
-// Generic Callback, can be used for all MessageType which doesn't require data from Kinetic drive.
+// GenericCallback can be used for all MessageType which doesn't require data from Kinetic drive.
 // And for MessageType that require data from drive, a new struct need to be defined GenericCallback
 type GenericCallback struct {
 	status Status
@@ -33,7 +33,7 @@ func (c *GenericCallback) Status() Status {
 	return c.status
 }
 
-// Callback for Command_GET Message
+// GetCallback is the Callback for Command_GET Message
 type GetCallback struct {
 	GenericCallback
 	Entry Record // Entity information
@@ -51,7 +51,7 @@ func (c *GetCallback) Success(resp *kproto.Command, value []byte) {
 	c.Entry.Value = value
 }
 
-// Callback for Command_GETKEYRANGE Message
+// GetKeyRangeCallback is the Callback for Command_GETKEYRANGE Message
 type GetKeyRangeCallback struct {
 	GenericCallback
 	Keys [][]byte // List of objects' keys within range, get from device
@@ -62,7 +62,7 @@ func (c *GetKeyRangeCallback) Success(resp *kproto.Command, value []byte) {
 	c.Keys = resp.GetBody().GetRange().GetKeys()
 }
 
-// Callback for Command_GETVERSION Message
+// GetVersionCallback is the Callback for Command_GETVERSION Message
 type GetVersionCallback struct {
 	GenericCallback
 	Version []byte // Version of the object on device
@@ -73,7 +73,7 @@ func (c *GetVersionCallback) Success(resp *kproto.Command, value []byte) {
 	c.Version = resp.GetBody().GetKeyValue().GetDbVersion()
 }
 
-// Callback for Command_PEER2PEERPUSH
+// P2PPushCallback is the Callback for Command_PEER2PEERPUSH
 type P2PPushCallback struct {
 	GenericCallback
 	Statuses []Status
@@ -88,7 +88,7 @@ func (c *P2PPushCallback) Success(resp *kproto.Command, value []byte) {
 	}
 }
 
-// Callback for Command_GETLOG Message
+// GetLogCallback is the Callback for Command_GETLOG Message
 type GetLogCallback struct {
 	GenericCallback
 	Logs Log // Device log information

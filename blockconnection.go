@@ -4,11 +4,13 @@ import (
 	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
+// BlockConnection still use NonBlockConnection to connect to kinetic device.
+// For all API fucntions, it will only return after get response from kinetic drvice.
 type BlockConnection struct {
 	nbc *NonBlockConnection
 }
 
-// Helper function to establish block connection to device.
+// NewBlockConnection is helper function to establish block connection to device.
 func NewBlockConnection(op ClientOptions) (*BlockConnection, error) {
 	nbc, err := NewNonBlockConnection(op)
 	if err != nil {
@@ -36,7 +38,7 @@ func (conn *BlockConnection) get(key []byte, getCmd kproto.Command_MessageType) 
 	callback := &GetCallback{}
 	h := NewResponseHandler(callback)
 
-	var err error = nil
+	var err error
 	switch getCmd {
 	case kproto.Command_GET:
 		err = conn.nbc.Get(key, h)
@@ -161,7 +163,7 @@ func (conn *BlockConnection) pinop(pin []byte, op kproto.Command_PinOperation_Pi
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
 
-	var err error = nil
+	var err error
 	switch op {
 	case kproto.Command_PinOperation_SECURE_ERASE_PINOP:
 		err = conn.nbc.SecureErase(pin, h)

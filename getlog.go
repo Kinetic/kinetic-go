@@ -125,7 +125,7 @@ type ConfigurationLog struct {
 	TlsPort                 int32                    // TLS service port
 }
 
-// Statistic information for each type of MessageType.
+// StatisticsLog information for each type of MessageType.
 // Count is total number of Type message processed.
 // Bytes is the sum of the data that is in the data portion.
 // This does not include the command description.
@@ -158,38 +158,38 @@ type DeviceLog struct {
 }
 
 type Log struct {
-	Utilizations  []UtilizationLog // List of utilization information of the drive
-	Temperatures  []TemperatureLog // List of tempeture inforamtion of the drive
-	Capacity      CapacityLog      // Capacity information of the drive
-	Configuration ConfigurationLog // Configuration information of the drive
-	Statistics    []StatisticsLog  // List of statistic information from the drive
-	Messages      []byte           // Kinetic log messages from the drive
-	Limits        LimitsLog        // Limits information from the drive
-	Device        DeviceLog
+	Utilizations  []UtilizationLog  // List of utilization information of the drive
+	Temperatures  []TemperatureLog  // List of tempeture inforamtion of the drive
+	Capacity      *CapacityLog      // Capacity information of the drive
+	Configuration *ConfigurationLog // Configuration information of the drive
+	Statistics    []StatisticsLog   // List of statistic information from the drive
+	Messages      []byte            // Kinetic log messages from the drive
+	Limits        *LimitsLog        // Limits information from the drive
+	Device        *DeviceLog
 }
 
-func getUtilizationLogFromProto(getlog *kproto.Command_GetLog) []UtilizationLog {
+func getUtilizationLogFromProto(getlog *kproto.Command_GetLog) (log []UtilizationLog) {
+	log = nil
 	utils := getlog.GetUtilizations()
 	if utils != nil {
-		ulog := make([]UtilizationLog, len(utils))
+		log = make([]UtilizationLog, len(utils))
 		for k, v := range utils {
-			ulog[k] = UtilizationLog{
+			log[k] = UtilizationLog{
 				Name:  v.GetName(),
 				Value: v.GetValue(),
 			}
 		}
-		return ulog
-	} else {
-		return nil
 	}
+	return
 }
 
-func getTemperatureLogFromProto(getlog *kproto.Command_GetLog) []TemperatureLog {
+func getTemperatureLogFromProto(getlog *kproto.Command_GetLog) (log []TemperatureLog) {
+	log = nil
 	temps := getlog.GetTemperatures()
 	if temps != nil {
-		templog := make([]TemperatureLog, len(temps))
+		log = make([]TemperatureLog, len(temps))
 		for k, v := range temps {
-			templog[k] = TemperatureLog{
+			log[k] = TemperatureLog{
 				Name:    v.GetName(),
 				Current: v.GetCurrent(),
 				Minimum: v.GetMinimum(),
@@ -197,28 +197,27 @@ func getTemperatureLogFromProto(getlog *kproto.Command_GetLog) []TemperatureLog 
 				Target:  v.GetTarget(),
 			}
 		}
-		return templog
-	} else {
-		return nil
 	}
+	return
 }
 
-func getCapacityLogFromProto(getlog *kproto.Command_GetLog) CapacityLog {
-	var log CapacityLog
+func getCapacityLogFromProto(getlog *kproto.Command_GetLog) (log *CapacityLog) {
+	log = nil
 	capacity := getlog.GetCapacity()
 	if capacity != nil {
-		log = CapacityLog{
+		log = &CapacityLog{
 			CapacityInBytes: capacity.GetNominalCapacityInBytes(),
 			PortionFull:     capacity.GetPortionFull(),
 		}
 	}
-	return log
+	return
 }
 
-func getConfigurationInterfaceFromProto(conf *kproto.Command_GetLog_Configuration) []ConfigurationInterface {
+func getConfigurationInterfaceFromProto(conf *kproto.Command_GetLog_Configuration) (inf []ConfigurationInterface) {
+	inf = nil
 	pinf := conf.GetInterface()
 	if pinf != nil {
-		inf := make([]ConfigurationInterface, len(pinf))
+		inf = make([]ConfigurationInterface, len(pinf))
 		for k, v := range pinf {
 			inf[k] = ConfigurationInterface{
 				Name:     v.GetName(),
@@ -227,17 +226,15 @@ func getConfigurationInterfaceFromProto(conf *kproto.Command_GetLog_Configuratio
 				Ipv6Addr: v.GetIpv6Address(),
 			}
 		}
-		return inf
-	} else {
-		return nil
 	}
+	return
 }
 
-func getConfigurationLogFromProto(getlog *kproto.Command_GetLog) ConfigurationLog {
-	var log ConfigurationLog
+func getConfigurationLogFromProto(getlog *kproto.Command_GetLog) (log *ConfigurationLog) {
+	log = nil
 	conf := getlog.GetConfiguration()
 	if conf != nil {
-		log = ConfigurationLog{
+		log = &ConfigurationLog{
 			Vendor:                  conf.GetVendor(),
 			Model:                   conf.GetModel(),
 			SerialNumber:            conf.GetSerialNumber(),
@@ -253,35 +250,34 @@ func getConfigurationLogFromProto(getlog *kproto.Command_GetLog) ConfigurationLo
 			TlsPort:                 conf.GetTlsPort(),
 		}
 	}
-	return log
+	return
 }
 
-func getStatisticsLogFromProto(getlog *kproto.Command_GetLog) []StatisticsLog {
+func getStatisticsLogFromProto(getlog *kproto.Command_GetLog) (log []StatisticsLog) {
+	log = nil
 	statics := getlog.GetStatistics()
 	if statics != nil {
-		slog := make([]StatisticsLog, len(statics))
+		log := make([]StatisticsLog, len(statics))
 		for k, v := range statics {
-			slog[k] = StatisticsLog{
+			log[k] = StatisticsLog{
 				Type:  convertMessageTypeFromProto(v.GetMessageType()),
 				Count: v.GetCount(),
 				Bytes: v.GetBytes(),
 			}
 		}
-		return slog
-	} else {
-		return nil
 	}
+	return
 }
 
 func getLogMessageFromProto(getlog *kproto.Command_GetLog) []byte {
 	return getlog.GetMessages()
 }
 
-func getLimitsLogFromProto(getlog *kproto.Command_GetLog) LimitsLog {
-	var log LimitsLog
+func getLimitsLogFromProto(getlog *kproto.Command_GetLog) (log *LimitsLog) {
+	log = nil
 	limits := getlog.GetLimits()
 	if limits != nil {
-		log = LimitsLog{
+		log = &LimitsLog{
 			MaxKeySize:                  limits.GetMaxKeySize(),
 			MaxValueSize:                limits.GetMaxValueSize(),
 			MaxVersionSize:              limits.GetMaxVersionSize(),
@@ -297,12 +293,12 @@ func getLimitsLogFromProto(getlog *kproto.Command_GetLog) LimitsLog {
 			MaxBatchCountPerDevice:      limits.GetMaxBatchCountPerDevice(),
 		}
 	}
-	return log
+	return
 }
 
-func getDeviceLogFromProto(getlog *kproto.Command_GetLog) DeviceLog {
+func getDeviceLogFromProto(getlog *kproto.Command_GetLog) *DeviceLog {
 	//TODO: Need more details
-	return DeviceLog{
+	return &DeviceLog{
 		Name: getlog.GetDevice().GetName(),
 	}
 }

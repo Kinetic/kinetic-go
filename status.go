@@ -1,11 +1,12 @@
 package kinetic
 
 import (
-	kproto "github.com/yongzhy/kinetic-go/proto"
 	"strconv"
+
+	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
-// Status code for kinetic message.
+// StatusCode for kinetic message.
 // Including status code get from device, or client internal error code.
 type StatusCode int32
 

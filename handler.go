@@ -1,8 +1,9 @@
 package kinetic
 
 import (
-	kproto "github.com/yongzhy/kinetic-go/proto"
 	"sync"
+
+	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
 // ResponseHandler is the handler for XXXXX_RESPONSE message from drive.
@@ -52,7 +53,7 @@ func (h *ResponseHandler) wait() {
 	h.cond.L.Unlock()
 }
 
-// Helper function to build a ResponseHandler with call as the Callback.
+// NewResponseHandler is helper function to build a ResponseHandler with call as the Callback.
 // For each operation, a unique ResponseHandler is requried
 func NewResponseHandler(call Callback) *ResponseHandler {
 	h := &ResponseHandler{callback: call, done: false, cond: sync.NewCond(&sync.Mutex{})}

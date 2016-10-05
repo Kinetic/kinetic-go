@@ -134,7 +134,7 @@ func (conn *NonBlockConnection) Put(entry *Record, h *ResponseHandler) error {
 }
 
 func (conn *NonBlockConnection) buildP2PMessage(request *P2PPushRequest) *kproto.Command_P2POperation {
-	var p2pop *kproto.Command_P2POperation = nil
+	var p2pop *kproto.Command_P2POperation
 	if request != nil {
 		p2pop = &kproto.Command_P2POperation{
 			Peer: &kproto.Command_P2POperation_Peer{
@@ -226,7 +226,7 @@ func (conn *NonBlockConnection) UpdateFirmware(code []byte, h *ResponseHandler) 
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_SETUP)
 
-	var download bool = true
+	var download = true
 	cmd.Body = &kproto.Command_Body{
 		Setup: &kproto.Command_Setup{
 			FirmwareDownload: &download,
@@ -285,35 +285,35 @@ func (conn *NonBlockConnection) SetACL(acls []SecurityACL, h *ResponseHandler) e
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_SECURITY)
 
-	cmd_acl := make([]*kproto.Command_Security_ACL, len(acls))
+	cmdACL := make([]*kproto.Command_Security_ACL, len(acls))
 	for ka, acl := range acls {
-		cmd_scope := make([]*kproto.Command_Security_ACL_Scope, len(acl.Scope))
+		cmdScope := make([]*kproto.Command_Security_ACL_Scope, len(acl.Scope))
 		for ks, scope := range acl.Scope {
-			cmd_permission := make([]kproto.Command_Security_ACL_Permission, len(scope.Permission))
+			cmdPermission := make([]kproto.Command_Security_ACL_Permission, len(scope.Permission))
 			for kp, permission := range scope.Permission {
-				cmd_permission[kp] = convertACLPermissionToProto(permission)
+				cmdPermission[kp] = convertACLPermissionToProto(permission)
 			}
-			cmd_scope[ks] = &kproto.Command_Security_ACL_Scope{
+			cmdScope[ks] = &kproto.Command_Security_ACL_Scope{
 				Offset:      &scope.Offset,
 				Value:       scope.Value,
-				Permission:  cmd_permission,
+				Permission:  cmdPermission,
 				TlsRequired: &scope.TlsRequired,
 			}
 		}
-		cmd_acl_algo := convertACLAlgorithmToProto(acl.Algo)
-		cmd_priority := convertPriorityToProto(acl.MaxPriority)
-		cmd_acl[ka] = &kproto.Command_Security_ACL{
+		cmdAlgo := convertACLAlgorithmToProto(acl.Algo)
+		cmdPriority := convertPriorityToProto(acl.MaxPriority)
+		cmdACL[ka] = &kproto.Command_Security_ACL{
 			Identity:      &acl.Identify,
 			Key:           acl.Key,
-			HmacAlgorithm: &cmd_acl_algo,
-			Scope:         cmd_scope,
-			MaxPriority:   &cmd_priority,
+			HmacAlgorithm: &cmdAlgo,
+			Scope:         cmdScope,
+			MaxPriority:   &cmdPriority,
 		}
 	}
 
 	cmd.Body = &kproto.Command_Body{
 		Security: &kproto.Command_Security{
-			Acl: cmd_acl,
+			Acl: cmdACL,
 		},
 	}
 
@@ -334,8 +334,8 @@ func (conn *NonBlockConnection) MediaScan(op *MediaOperation, pri Priority, h *R
 		},
 	}
 
-	cmd_pri := convertPriorityToProto(pri)
-	cmd.Header.Priority = &cmd_pri
+	p := convertPriorityToProto(pri)
+	cmd.Header.Priority = &p
 
 	return conn.service.submit(msg, cmd, nil, h)
 }
@@ -354,8 +354,8 @@ func (conn *NonBlockConnection) MediaOptimize(op *MediaOperation, pri Priority, 
 		},
 	}
 
-	cmd_pri := convertPriorityToProto(pri)
-	cmd.Header.Priority = &cmd_pri
+	p := convertPriorityToProto(pri)
+	cmd.Header.Priority = &p
 
 	return conn.service.submit(msg, cmd, nil, h)
 }

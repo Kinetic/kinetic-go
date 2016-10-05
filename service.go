@@ -48,7 +48,7 @@ type networkService struct {
 	conn           net.Conn
 	clusterVersion int64                      // Cluster version
 	seq            int64                      // Operation sequence ID
-	connId         int64                      // current conection ID
+	connID         int64                      // current conection ID
 	option         ClientOptions              // current connection operation
 	hmap           map[int64]*ResponseHandler // Message handler map
 	fatal          bool                       // Network has fatal failure
@@ -76,7 +76,7 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 		conn:           conn,
 		clusterVersion: 0,
 		seq:            0,
-		connId:         -1,
+		connID:         -1,
 		option:         op,
 		hmap:           make(map[int64]*ResponseHandler),
 		fatal:          false,
@@ -180,7 +180,7 @@ func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value
 
 	ns.txMu.Lock()
 
-	cmd.GetHeader().ConnectionID = &ns.connId
+	cmd.GetHeader().ConnectionID = &ns.connID
 	cmd.GetHeader().Sequence = &ns.seq
 	cmd.GetHeader().ClusterVersion = &ns.clusterVersion
 
@@ -195,7 +195,7 @@ func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value
 
 	if msg.GetAuthType() == kproto.Message_HMACAUTH {
 		msg.GetHmacAuth().Identity = &ns.option.User
-		msg.GetHmacAuth().Hmac = compute_hmac(msg.CommandBytes, ns.option.Hmac)
+		msg.GetHmacAuth().Hmac = computeHmac(msg.CommandBytes, ns.option.Hmac)
 	}
 
 	klog.Debug("Kinetic message send ", cmd.GetHeader().GetMessageType().String(), " Seq = ", ns.seq)
@@ -297,7 +297,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 		return nil, nil, nil, err
 	}
 
-	if msg.GetAuthType() == kproto.Message_HMACAUTH && validate_hmac(msg, ns.option.Hmac) == false {
+	if msg.GetAuthType() == kproto.Message_HMACAUTH && validateHmac(msg, ns.option.Hmac) == false {
 		klog.Error("Response HMAC mismatch")
 		s := Status{Code: CLIENT_RESPONSE_HMAC_VERIFICATION_ERROR, ErrorMsg: "Response HMAC mismatch"}
 		ns.clientError(s, nil)
@@ -315,7 +315,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 	}
 
 	if cmd.Header != nil && cmd.Header.ConnectionID != nil {
-		if ns.connId < 0 {
+		if ns.connID < 0 {
 			// This is handshake packet
 			ns.device = getLogFromProto(cmd)
 
@@ -324,7 +324,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 				ns.clusterVersion = cmd.GetHeader().GetClusterVersion()
 			}
 		}
-		ns.connId = cmd.GetHeader().GetConnectionID()
+		ns.connID = cmd.GetHeader().GetConnectionID()
 	}
 
 	if valueLen > 0 {
