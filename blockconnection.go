@@ -224,6 +224,10 @@ func (conn *BlockConnection) SetClusterVersion(version int64) (Status, error) {
 	return callback.Status(), err
 }
 
+func (conn *BlockConnection) SetClientClusterVersion(version int64) {
+	conn.nbc.SetClientClusterVersion(version)
+}
+
 func (conn *BlockConnection) SetLockPin(currentPin []byte, newPin []byte) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)

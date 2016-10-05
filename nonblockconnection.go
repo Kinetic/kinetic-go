@@ -249,6 +249,10 @@ func (conn *NonBlockConnection) SetClusterVersion(version int64, h *ResponseHand
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+func (conn *NonBlockConnection) SetClientClusterVersion(version int64) {
+	conn.service.clusterVersion = version
+}
+
 func (conn *NonBlockConnection) SetLockPin(currentPin []byte, newPin []byte, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_SECURITY)

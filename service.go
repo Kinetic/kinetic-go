@@ -17,6 +17,10 @@ var (
 	networkTimeout = 20 * time.Second
 )
 
+//const (
+//	seq_UNSOLICITEDSTATUS = -1
+//)
+
 func newMessage(t kproto.Message_AuthType) *kproto.Message {
 	msg := &kproto.Message{
 		AuthType: t.Enum(),
@@ -37,15 +41,17 @@ func newCommand(t kproto.Command_MessageType) *kproto.Command {
 }
 
 type networkService struct {
-	rxMu   sync.Mutex
-	txMu   sync.Mutex
-	mapMu  sync.Mutex
-	conn   net.Conn
-	seq    int64                      // Operation sequence ID
-	connId int64                      // current conection ID
-	option ClientOptions              // current connection operation
-	hmap   map[int64]*ResponseHandler // Message handler map
-	fatal  bool                       // Network has fatal failure
+	rxMu           sync.Mutex
+	txMu           sync.Mutex
+	mapMu          sync.Mutex
+	conn           net.Conn
+	clusterVersion int64                      // Cluster version
+	seq            int64                      // Operation sequence ID
+	connId         int64                      // current conection ID
+	option         ClientOptions              // current connection operation
+	hmap           map[int64]*ResponseHandler // Message handler map
+	fatal          bool                       // Network has fatal failure
+	device         Log                        // Store device inforamtion from handshake package
 }
 
 func newNetworkService(op ClientOptions) (*networkService, error) {
@@ -57,17 +63,18 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 	}
 
 	ns := &networkService{
-		conn:   conn,
-		seq:    0,
-		connId: 0,
-		option: op,
-		hmap:   make(map[int64]*ResponseHandler),
-		fatal:  false,
+		conn:           conn,
+		clusterVersion: 0,
+		seq:            0,
+		connId:         -1,
+		option:         op,
+		hmap:           make(map[int64]*ResponseHandler),
+		fatal:          false,
 	}
 
 	ns.rxMu.Lock()
 	// Do the handshake.
-	// TODO: we can store the Device Configuration and Limits from handshake
+	// Device Configuration and Limits from handshake will be stored in networkService.device
 	_, _, _, err = ns.receive()
 	ns.rxMu.Unlock()
 
@@ -75,6 +82,14 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 		klog.Error("Can't establish connection to %s", op.Host)
 		return nil, err
 	}
+
+	klog.Debugf("Connected to %s", op.Host)
+	klog.Debugf("\tVendor: %s", ns.device.Configuration.Vendor)
+	klog.Debugf("\tModel: %s", ns.device.Configuration.Model)
+	klog.Debugf("\tWorldWideName: %s", ns.device.Configuration.WorldWideName)
+	klog.Debugf("\tSerial Number: %s", ns.device.Configuration.SerialNumber)
+	klog.Debugf("\tFirmware Version: %s", ns.device.Configuration.Version)
+	klog.Debugf("\tKinetic Protocol Version: %s", ns.device.Configuration.ProtocolVersion)
 
 	return ns, nil
 }
@@ -107,7 +122,7 @@ func (ns *networkService) listen() error {
 	ns.mapMu.Unlock()
 
 	ns.rxMu.Lock()
-	msg, cmd, value, err := ns.receive()
+	_, cmd, value, err := ns.receive()
 	ns.rxMu.Unlock()
 	if err != nil {
 		klog.Error("Network Service listen error")
@@ -118,11 +133,12 @@ func (ns *networkService) listen() error {
 		", AckSeq = ", cmd.GetHeader().GetAckSequence(),
 		", Code = ", cmd.GetStatus().GetCode())
 
-	if msg.GetAuthType() == kproto.Message_UNSOLICITEDSTATUS {
-		if cmd.GetHeader() != nil {
-			*(cmd.GetHeader().AckSequence) = -1
-		}
-	}
+	// TODO: Need to review this code block, is it necessary to set the AckSeq for UNSOLICITEDSTATUS
+	//if msg.GetAuthType() == kproto.Message_UNSOLICITEDSTATUS {
+	//	if cmd.GetHeader() != nil {
+	//		*(cmd.GetHeader().AckSequence) = seq_UNSOLICITEDSTATUS
+	//	}
+	//}
 
 	ack := cmd.GetHeader().GetAckSequence()
 	ns.mapMu.Lock()
@@ -154,10 +170,12 @@ func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value
 
 	cmd.GetHeader().ConnectionID = &ns.connId
 	cmd.GetHeader().Sequence = &ns.seq
+	cmd.GetHeader().ClusterVersion = &ns.clusterVersion
+
 	cmdBytes, err := proto.Marshal(cmd)
 	if err != nil {
 		klog.Error("Error marshl Kinetic Command")
-		s := Status{CLIENT_INTERNAL_ERROR, "Error marshl Kinetic Command"}
+		s := Status{Code: CLIENT_INTERNAL_ERROR, ErrorMsg: "Error marshl Kinetic Command"}
 		ns.clientError(s, h)
 		return err
 	}
@@ -189,7 +207,7 @@ func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value
 func (ns *networkService) send(msg *kproto.Message, value []byte) error {
 	msgBytes, err := proto.Marshal(msg)
 	if err != nil {
-		s := Status{CLIENT_INTERNAL_ERROR, "Error marshl Kinetic Message"}
+		s := Status{Code: CLIENT_INTERNAL_ERROR, ErrorMsg: "Error marshl Kinetic Message"}
 		ns.clientError(s, nil)
 		return err
 	}
@@ -211,7 +229,7 @@ func (ns *networkService) send(msg *kproto.Message, value []byte) error {
 	_, err = ns.conn.Write(packet)
 	if err != nil {
 		klog.Error("Network I/O write error")
-		s := Status{CLIENT_IO_ERROR, "Network I/O write error"}
+		s := Status{Code: CLIENT_IO_ERROR, ErrorMsg: "Network I/O write error"}
 		ns.clientError(s, nil)
 		ns.fatal = true
 		return err
@@ -229,7 +247,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 	_, err := io.ReadFull(ns.conn, header[0:])
 	if err != nil {
 		klog.Error("Network I/O read error")
-		s := Status{CLIENT_IO_ERROR, "Network I/O read error"}
+		s := Status{Code: CLIENT_IO_ERROR, ErrorMsg: "Network I/O read error"}
 		ns.clientError(s, nil)
 		ns.fatal = true
 		return nil, nil, nil, err
@@ -238,7 +256,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 	magic := header[0]
 	if magic != 'F' {
 		klog.Error("Network I/O read error Header wrong magic")
-		s := Status{CLIENT_IO_ERROR, "Network I/O read error Header wrong magic"}
+		s := Status{Code: CLIENT_IO_ERROR, ErrorMsg: "Network I/O read error Header wrong magic"}
 		ns.clientError(s, nil)
 		ns.fatal = true
 		return nil, nil, nil, errors.New("Network I/O read error Header wrong magic")
@@ -251,7 +269,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 	_, err = io.ReadFull(ns.conn, protoBuf)
 	if err != nil {
 		klog.Error("Network I/O read error receive Kinetic Header")
-		s := Status{CLIENT_IO_ERROR, "Network I/O read error receive Kinetic Header"}
+		s := Status{Code: CLIENT_IO_ERROR, ErrorMsg: "Network I/O read error receive Kinetic Header"}
 		ns.clientError(s, nil)
 		ns.fatal = true
 		return nil, nil, nil, err
@@ -261,7 +279,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 	err = proto.Unmarshal(protoBuf, msg)
 	if err != nil {
 		klog.Error("Network I/O read error receive Kinetic Header")
-		s := Status{CLIENT_IO_ERROR, "Network I/O read error reaceive Kinetic Message"}
+		s := Status{Code: CLIENT_IO_ERROR, ErrorMsg: "Network I/O read error reaceive Kinetic Message"}
 		ns.clientError(s, nil)
 		ns.fatal = true
 		return nil, nil, nil, err
@@ -269,7 +287,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 
 	if msg.GetAuthType() == kproto.Message_HMACAUTH && validate_hmac(msg, ns.option.Hmac) == false {
 		klog.Error("Response HMAC mismatch")
-		s := Status{CLIENT_RESPONSE_HMAC_VERIFICATION_ERROR, "Response HMAC mismatch"}
+		s := Status{Code: CLIENT_RESPONSE_HMAC_VERIFICATION_ERROR, ErrorMsg: "Response HMAC mismatch"}
 		ns.clientError(s, nil)
 		return nil, nil, nil, err
 	}
@@ -278,13 +296,22 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 	err = proto.Unmarshal(msg.CommandBytes, cmd)
 	if err != nil {
 		klog.Error("Network I/O read error parsing Kinetic Command")
-		s := Status{CLIENT_IO_ERROR, "Network I/O read error parsing Kinetic Command"}
+		s := Status{Code: CLIENT_IO_ERROR, ErrorMsg: "Network I/O read error parsing Kinetic Command"}
 		ns.clientError(s, nil)
 		ns.fatal = true
 		return nil, nil, nil, err
 	}
 
 	if cmd.Header != nil && cmd.Header.ConnectionID != nil {
+		if ns.connId < 0 {
+			// This is handshake packet
+			ns.device = getLogFromProto(cmd)
+
+			// Only update client cluster version during Handshake
+			if cmd.Header.ClusterVersion != nil {
+				ns.clusterVersion = cmd.GetHeader().GetClusterVersion()
+			}
+		}
 		ns.connId = cmd.GetHeader().GetConnectionID()
 	}
 
@@ -293,7 +320,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 		_, err = io.ReadFull(ns.conn, valueBuf)
 		if err != nil {
 			klog.Error("Network I/O read error parsing Kinetic Value")
-			s := Status{CLIENT_IO_ERROR, "Network I/O read error parsing Kinetic Value"}
+			s := Status{Code: CLIENT_IO_ERROR, ErrorMsg: "Network I/O read error parsing Kinetic Value"}
 			ns.clientError(s, nil)
 			ns.fatal = true
 			return nil, nil, nil, err
@@ -307,5 +334,5 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 
 func (ns *networkService) close() {
 	ns.conn.Close()
-	klog.Debug("Connection to %s closed", ns.option.Host)
+	klog.Debugf("Connection to %s closed", ns.option.Host)
 }

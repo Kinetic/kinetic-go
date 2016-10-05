@@ -72,7 +72,7 @@ func TestBlockFlush(t *testing.T) {
 
 func TestBlockPut(t *testing.T) {
 	entry := Record{
-		Key:   []byte("object001"),
+		Key:   []byte("object000"),
 		Value: []byte("ABCDEFG"),
 		Sync:  SYNC_WRITETHROUGH,
 		Algo:  ALGO_SHA1,
@@ -87,7 +87,7 @@ func TestBlockPut(t *testing.T) {
 
 func TestBlockDelete(t *testing.T) {
 	entry := Record{
-		Key:   []byte("object001"),
+		Key:   []byte("object000"),
 		Sync:  SYNC_WRITETHROUGH,
 		Algo:  ALGO_SHA1,
 		Force: true,
@@ -195,4 +195,18 @@ func TestBlockMediaOptimize(t *testing.T) {
 	if err != nil || status.Code != OK {
 		t.Fatal("Blocking MediaOptimize Failure: ", err, status.String())
 	}
+}
+
+func TestBlockSetClusterVersion(t *testing.T) {
+	status, err := blockConn.SetClusterVersion(1)
+	if err != nil || status.Code != OK {
+		t.Fatal("Blocking SetClusterVersion Failure: ", err, status.String())
+	}
+
+	blockConn.SetClientClusterVersion(2)
+	_, status, err = blockConn.Get([]byte("object000"))
+	if err != nil || status.Code != REMOTE_CLUSTER_VERSION_MISMATCH {
+		t.Fatal("Blocking Get expected REMOTE_CLUSTER_VERSION_MISMATCH. ", err, status.String())
+	}
+	t.Log(status.String())
 }
