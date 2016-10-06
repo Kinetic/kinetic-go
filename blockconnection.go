@@ -4,7 +4,7 @@ import (
 	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
-// BlockConnection is block version of connection to kinetic drvice.
+// BlockConnection sends kinetic message to devices and wait for response message from device.
 // For all API fucntions, it will only return after response from kinetic device handled.
 // If no data required from kinetic device, API function will return Status and error.
 // If any data required from kinetic device, the data will be one of the return values.
