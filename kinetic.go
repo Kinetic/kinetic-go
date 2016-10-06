@@ -20,8 +20,10 @@ var klog = logrus.New()
 
 func init() {
 	klog.Out = os.Stdout
+	klog.Level = logrus.InfoLevel
 }
 
+// LogLevel defines the logging level for kinetic Go library. Default is LogLevelInfo.
 type LogLevel logrus.Level
 
 const (

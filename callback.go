@@ -21,14 +21,17 @@ type GenericCallback struct {
 	status Status
 }
 
+// Success is called by ResponseHandler when response message received from kinetic device has OK status.
 func (c *GenericCallback) Success(resp *kproto.Command, value []byte) {
 	c.status = Status{Code: OK}
 }
 
+// Failure is called ResponseHandler when response message received from kinetic device with status code other than OK.
 func (c *GenericCallback) Failure(status Status) {
 	c.status = status
 }
 
+// Status returns the status after ResponseHandler processed response message from kinetic device.
 func (c *GenericCallback) Status() Status {
 	return c.status
 }
@@ -39,7 +42,7 @@ type GetCallback struct {
 	Entry Record // Entity information
 }
 
-// Success function extracts object information from kinetic message protocol and
+// Success function extracts object information from response message and
 // store into GetCallback.Entry.
 func (c *GetCallback) Success(resp *kproto.Command, value []byte) {
 	c.GenericCallback.Success(resp, value)
@@ -57,6 +60,7 @@ type GetKeyRangeCallback struct {
 	Keys [][]byte // List of objects' keys within range, get from device
 }
 
+// Success extracts objects' keys within range, from response message.
 func (c *GetKeyRangeCallback) Success(resp *kproto.Command, value []byte) {
 	c.GenericCallback.Success(resp, value)
 	c.Keys = resp.GetBody().GetRange().GetKeys()
@@ -68,6 +72,7 @@ type GetVersionCallback struct {
 	Version []byte // Version of the object on device
 }
 
+// Success extracts object's version information from response message.
 func (c *GetVersionCallback) Success(resp *kproto.Command, value []byte) {
 	c.GenericCallback.Success(resp, value)
 	c.Version = resp.GetBody().GetKeyValue().GetDbVersion()
@@ -79,6 +84,7 @@ type P2PPushCallback struct {
 	Statuses []Status
 }
 
+// Success extracts P2Push operation status from response message.
 func (c *P2PPushCallback) Success(resp *kproto.Command, value []byte) {
 	c.GenericCallback.Success(resp, value)
 	c.Statuses = make([]Status, len(resp.GetBody().GetP2POperation().GetOperation()))
@@ -94,6 +100,7 @@ type GetLogCallback struct {
 	Logs Log // Device log information
 }
 
+// Success extracts kientic device's Log information from response message.
 func (c *GetLogCallback) Success(resp *kproto.Command, value []byte) {
 	c.GenericCallback.Success(resp, value)
 	c.Logs = getLogFromProto(resp)

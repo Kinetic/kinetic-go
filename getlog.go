@@ -4,6 +4,7 @@ import (
 	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
+// LogType defines what type of information to retrieve by GetLog.
 type LogType int32
 
 const (

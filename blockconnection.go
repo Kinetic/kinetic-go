@@ -153,6 +153,7 @@ func (conn *BlockConnection) Put(entry *Record) (Status, error) {
 	return callback.Status(), err
 }
 
+// P2Push
 func (conn *BlockConnection) P2PPush(request *P2PPushRequest) ([]Status, Status, error) {
 	callback := &P2PPushCallback{}
 	h := NewResponseHandler(callback)
