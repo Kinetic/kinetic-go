@@ -84,6 +84,7 @@ type Status struct {
 	ExpectedClusterVersion int64
 }
 
+// Error returns the detail status message if Status.Code != OK
 func (s Status) Error() string {
 	return s.ErrorMsg
 }

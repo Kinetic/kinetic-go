@@ -1,23 +1,51 @@
 package kinetic
 
-import (
-	"testing"
-)
+import "fmt"
 
-func TestUploadAppletFile(t *testing.T) {
-	t.Skip("Skip UploadAppletFile Test")
+func ExampleUploadAppletFile() {
+	// Set the log leverl to debug
+	SetLogLevel(LogLevelDebug)
+
+	// Client options
+	var option = ClientOptions{
+		Host: "10.29.24.55",
+		Port: 8123,
+		User: 1,
+		Hmac: []byte("asdfasdf")}
+
+	conn, err := NewBlockConnection(option)
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+
 	file := "not/exist/applet/javapplet.jar"
-	keys, err := UploadAppletFile(blockConn, file, "test-applet")
+	keys, err := UploadAppletFile(conn, file, "test-applet")
 	if err != nil || len(keys) <= 0 {
-		t.Fatal("Upload applet file fail: ", file)
+		fmt.Println("Upload applet file fail: ", file, err)
 	}
 }
 
-func TestUpdateFirmware(t *testing.T) {
-	t.Skip("Danger: Skip UpdateFirmware Test")
-	file := "not/exist/firmare/unknown-version.slod"
-	err := UpdateFirmware(blockConn, file)
+func ExampleUpdateFirmware() {
+	// Set the log leverl to debug
+	SetLogLevel(LogLevelDebug)
+
+	// Client options
+	var option = ClientOptions{
+		Host: "10.29.24.55",
+		Port: 8123,
+		User: 1,
+		Hmac: []byte("asdfasdf")}
+
+	conn, err := NewBlockConnection(option)
 	if err != nil {
-		t.Fatal("Firmware update fail: ", file)
+		panic(err)
+	}
+	defer conn.Close()
+
+	file := "not/exist/firmare/unknown-version.slod"
+	err = UpdateFirmware(conn, file)
+	if err != nil {
+		fmt.Println("Firmware update fail: ", file, err)
 	}
 }

@@ -37,7 +37,7 @@ func UpdateFirmware(conn *BlockConnection, file string) error {
 // and prefix is the key prefix. The applet file may stored into multiple object files
 // on drive depends on its size.
 // Upon succeed, objects' keys are returned, output key pattern is "prefix-DDDDDDDDDD",
-// where DDDDDDDDDD is the starting byte offset from the orginal file.
+// where DDDDDDDDDD is 10 digits byte offset from starting of the orginal file.
 func UploadAppletFile(conn *BlockConnection, file, prefix string) ([][]byte, error) {
 	info, err := os.Stat(file)
 	if err != nil {

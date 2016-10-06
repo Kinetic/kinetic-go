@@ -5,7 +5,9 @@ import (
 )
 
 // BlockConnection is block version of connection to kinetic drvice.
-// For all API fucntions, it will only return after get response from kinetic drvice.
+// For all API fucntions, it will only return after response from kinetic device handled.
+// If no data required from kinetic device, API function will return Status and error.
+// If any data required from kinetic device, the data will be one of the return values.
 type BlockConnection struct {
 	nbc *NonBlockConnection
 }
@@ -91,6 +93,8 @@ func (conn *BlockConnection) GetKeyRange(r *KeyRange) ([][]byte, Status, error) 
 	return callback.Keys, callback.Status(), err
 }
 
+// GetVersion gets object DB version information.
+// On success, version information will return and Status.Code = OK
 func (conn *BlockConnection) GetVersion(key []byte) ([]byte, Status, error) {
 	callback := &GetVersionCallback{}
 	h := NewResponseHandler(callback)
@@ -104,6 +108,8 @@ func (conn *BlockConnection) GetVersion(key []byte) ([]byte, Status, error) {
 	return callback.Version, callback.Status(), err
 }
 
+// Flush requests kinetic device to write all cached data to persistent media.
+// On success, Status.Code = OK
 func (conn *BlockConnection) Flush() (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
@@ -117,6 +123,8 @@ func (conn *BlockConnection) Flush() (Status, error) {
 	return callback.Status(), err
 }
 
+// Delete deletes object from kinetic device.
+// On success, Status.Code = OK
 func (conn *BlockConnection) Delete(entry *Record) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
@@ -130,6 +138,8 @@ func (conn *BlockConnection) Delete(entry *Record) (Status, error) {
 	return callback.Status(), err
 }
 
+// Put store object to kinetic device.
+// On success, Status.Code = OK
 func (conn *BlockConnection) Put(entry *Record) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
@@ -156,6 +166,8 @@ func (conn *BlockConnection) P2PPush(request *P2PPushRequest) ([]Status, Status,
 	return callback.Statuses, callback.Status(), err
 }
 
+// GetLog gets kinetic device Log information. Can request single LogType or multiple LogType.
+// On success, device Log information will return, and Status.Code = OK
 func (conn *BlockConnection) GetLog(logs []LogType) (*Log, Status, error) {
 	callback := &GetLogCallback{}
 	h := NewResponseHandler(callback)
@@ -193,23 +205,38 @@ func (conn *BlockConnection) pinop(pin []byte, op kproto.Command_PinOperation_Pi
 	return callback.Status(), err
 }
 
+// SecureErase request kinetic device to perform secure erase.
+// SSL connection is requested to perform this operation, and the erase pin is needed.
+// On success, Status.Code = OK
 func (conn *BlockConnection) SecureErase(pin []byte) (Status, error) {
 	return conn.pinop(pin, kproto.Command_PinOperation_SECURE_ERASE_PINOP)
 }
 
+// InstantErase request kinetic device to perform instant erase.
+// SSL connection is requested to perform this operation, and the erase pin is needed.
+// On success, Status.Code = OK
 func (conn *BlockConnection) InstantErase(pin []byte) (Status, error) {
 	return conn.pinop(pin, kproto.Command_PinOperation_ERASE_PINOP)
 
 }
 
+// LockDevice locks the kinetic device.
+// SSL connection is requested to perform this operation, and the lock pin is needed.
+// On success, Status.Code = OK
 func (conn *BlockConnection) LockDevice(pin []byte) (Status, error) {
 	return conn.pinop(pin, kproto.Command_PinOperation_LOCK_PINOP)
 }
 
+// UnlockDevice unlocks the kinetic device.
+// SSL connection is requested to perform this operation, and the lock pin is needed.
+// On success, Status.Code = OK
 func (conn *BlockConnection) UnlockDevice(pin []byte) (Status, error) {
 	return conn.pinop(pin, kproto.Command_PinOperation_UNLOCK_PINOP)
 }
 
+// UpdateFirmware requests to update kientic device firmware.
+// Status.OK will return if firmware data received by kinetic device.
+// Then drive will reboot and perform the firmware update process.
 func (conn *BlockConnection) UpdateFirmware(code []byte) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
@@ -223,6 +250,8 @@ func (conn *BlockConnection) UpdateFirmware(code []byte) (Status, error) {
 	return callback.Status(), err
 }
 
+// SetClusterVersion sets the cluster version on kinetic drive.
+// On success, Status.Code = OK.
 func (conn *BlockConnection) SetClusterVersion(version int64) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
@@ -236,10 +265,14 @@ func (conn *BlockConnection) SetClusterVersion(version int64) (Status, error) {
 	return callback.Status(), err
 }
 
+// SetClientClusterVersion sets the cluster version for all following message to kinetic device.
 func (conn *BlockConnection) SetClientClusterVersion(version int64) {
 	conn.nbc.SetClientClusterVersion(version)
 }
 
+// SetLockPin changes kinetic device lock pin. Both current pin and new pin needed.
+// SSL connection is required to perform this operation.
+// On success, Status.Code = OK.
 func (conn *BlockConnection) SetLockPin(currentPin []byte, newPin []byte) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
@@ -253,6 +286,9 @@ func (conn *BlockConnection) SetLockPin(currentPin []byte, newPin []byte) (Statu
 	return callback.Status(), err
 }
 
+// SetErasePin changes kinetic device erase pin. Both current pin and new pin needed.
+// SSL connection is required to perform this operation.
+// On success, Status.Code = OK.
 func (conn *BlockConnection) SetErasePin(currentPin []byte, newPin []byte) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
@@ -266,6 +302,8 @@ func (conn *BlockConnection) SetErasePin(currentPin []byte, newPin []byte) (Stat
 	return callback.Status(), err
 }
 
+// SetACL sets Permission for particular user Identify.
+// On success, Status.Code = OK.
 func (conn *BlockConnection) SetACL(acls []SecurityACL) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
@@ -279,6 +317,7 @@ func (conn *BlockConnection) SetACL(acls []SecurityACL) (Status, error) {
 	return callback.Status(), err
 }
 
+// MediaScan
 func (conn *BlockConnection) MediaScan(op *MediaOperation, pri Priority) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
@@ -292,6 +331,7 @@ func (conn *BlockConnection) MediaScan(op *MediaOperation, pri Priority) (Status
 	return callback.Status(), err
 }
 
+// MediaOptimize
 func (conn *BlockConnection) MediaOptimize(op *MediaOperation, pri Priority) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
@@ -305,6 +345,7 @@ func (conn *BlockConnection) MediaOptimize(op *MediaOperation, pri Priority) (St
 	return callback.Status(), err
 }
 
+// Close the connection to kientic device
 func (conn *BlockConnection) Close() {
 	conn.nbc.Close()
 }

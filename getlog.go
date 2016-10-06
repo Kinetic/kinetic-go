@@ -83,25 +83,28 @@ func convertLogTypeFromProto(l kproto.Command_GetLog_Type) LogType {
 	return ret
 }
 
-// UtilizationLog for kinetic drive utilization information
+// UtilizationLog for kinetic device utilization information.
 type UtilizationLog struct {
 	Name  string  // Name of the device utlity
 	Value float32 // Value of device utility
 }
 
+// TemperatureLog for kinetic device tempture.
 type TemperatureLog struct {
-	Name    string  // Name of the drive
+	Name    string  // Name of the device
 	Current float32 // Current Temperature
 	Minimum float32 // Minimum Temperature for drive
 	Maximum float32 // Maximum Tempture for drive
 	Target  float32 // Target Temperature for drive
 }
 
+// CapacityLog for kinetic device capacity information.
 type CapacityLog struct {
 	CapacityInBytes uint64  // total capacity of hard disk, in bytes
 	PortionFull     float32 // remaining capacity of hard disk
 }
 
+// ConfigurationInterface for kinetic device network interfaces information.
 type ConfigurationInterface struct {
 	Name     string // network device name
 	MAC      []byte // network device mac address
@@ -109,6 +112,7 @@ type ConfigurationInterface struct {
 	Ipv6Addr []byte // network device ipv6 address
 }
 
+// ConfigurationLog for kinetic device configuration information.
 type ConfigurationLog struct {
 	Vendor                  string                   // Vendor name
 	Model                   string                   // Device model
@@ -137,6 +141,7 @@ type StatisticsLog struct {
 	Bytes uint64
 }
 
+// LimitsLog defines max values.
 type LimitsLog struct {
 	MaxKeySize                  uint32 // max key size
 	MaxValueSize                uint32 // max value size
@@ -157,6 +162,7 @@ type DeviceLog struct {
 	Name []byte
 }
 
+// Log is the top level structure that groups all the log information
 type Log struct {
 	Utilizations  []UtilizationLog  // List of utilization information of the drive
 	Temperatures  []TemperatureLog  // List of tempeture inforamtion of the drive
