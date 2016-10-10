@@ -8,10 +8,11 @@ For details about kinetic protocol, please refer to https://github.com/Kinetic/k
 package kinetic
 
 import (
-	"github.com/Sirupsen/logrus"
-	kproto "github.com/yongzhy/kinetic-go/proto"
 	"io"
 	"os"
+
+	"github.com/Sirupsen/logrus"
+	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
 // Create logger for Kinetic package
@@ -19,46 +20,49 @@ var klog = logrus.New()
 
 func init() {
 	klog.Out = os.Stdout
+	klog.Level = logrus.InfoLevel
 }
 
+// LogLevel defines the logging level for kinetic Go library. Default is LogLevelInfo.
 type LogLevel logrus.Level
 
 const (
 	LogLevelPanic LogLevel = LogLevel(logrus.PanicLevel)
-	// FatalLevel level. Logs and then calls `os.Exit(1)`. It will exit even if the
+	// LogLevelFatal level. Logs and then calls `os.Exit(1)`. It will exit even if the
 	// logging level is set to Panic.
 	LogLevelFatal LogLevel = LogLevel(logrus.FatalLevel)
-	// ErrorLevel level. Logs. Used for errors that should definitely be noted.
+	// LogLevelError level. Logs. Used for errors that should definitely be noted.
 	// Commonly used for hooks to send errors to an error tracking service.
 	LogLevelError LogLevel = LogLevel(logrus.ErrorLevel)
-	// WarnLevel level. Non-critical entries that deserve eyes.
+	// LogLevelWarn level. Non-critical entries that deserve eyes.
 	LogLevelWarn LogLevel = LogLevel(logrus.WarnLevel)
-	// InfoLevel level. General operational entries about what's going on inside the
+	// LogLevelInfo level. General operational entries about what's going on inside the
 	// application.
 	LogLevelInfo LogLevel = LogLevel(logrus.InfoLevel)
-	// DebugLevel level. Usually only enabled when debugging. Very verbose logging.
+	// LogLevelDebug level. Usually only enabled when debugging. Very verbose logging.
 	LogLevelDebug LogLevel = LogLevel(logrus.DebugLevel)
 )
 
-// Set kinetic libary log level
+// SetLogLevel sets kinetic libary log level
 func SetLogLevel(l LogLevel) {
 	klog.Level = logrus.Level(l)
 }
 
-// Set kinetic libary log output
+// SetLogOutput sets kinetic libary log output
 func SetLogOutput(out io.Writer) {
 	klog.Out = out
 }
 
-// ClientOptions
+// ClientOptions specify connection options to kinetic device.
 type ClientOptions struct {
-	Host string
-	Port int
-	User int64
-	Hmac []byte
+	Host   string // Kinetic device IP address
+	Port   int    // Network port to connect, if UseSSL is true, this port should be the TlsPort
+	User   int64  // User Id
+	Hmac   []byte
+	UseSSL bool // Use SSL connection, or plain connection
 }
 
-// message type
+// MessageType are the top level kinetic command message type.
 type MessageType int32
 
 const (
@@ -318,7 +322,7 @@ func convertMessageTypeFromProto(m kproto.Command_MessageType) MessageType {
 	return ret
 }
 
-// algorithm
+// Algorithm
 type Algorithm int32
 
 const (
@@ -383,9 +387,9 @@ func convertAlgoFromProto(a kproto.Command_Algorithm) Algorithm {
 // Synchronization allows the puts and deletes to determine if they are to be
 // SYNC_WRITETHROUGH: This request is made persistent before returning. This does not effect any other pending operations.
 // SYNC_WRITEBACK: They can be made persistent when the device chooses, or when a subsequent FLUSH is give to the device.
-// SYNC_FLUSH: All pending information that has not been written is pushed to the disk and the command that
-//    specifies FLUSH is written last and then returned. All WRITEBACK writes that have received ending
-//    status will be guaranteed to be written before the FLUSH operation is returned completed.
+// SYNC_FLUSH: All pending information that has not been written is pushed to the disk and the command that specifies
+// FLUSH is written last and then returned. All WRITEBACK writes that have received ending status will be guaranteed
+// to be written before the FLUSH operation is returned completed.
 type Synchronization int32
 
 const (
@@ -630,18 +634,18 @@ func convertACLAlgorithmToProto(algo ACLAlgorithm) kproto.Command_Security_ACL_H
 	return ret
 }
 
-type SecurityACLScope struct {
+type ACLScope struct {
 	Offset      int64
 	Value       []byte
-	Permission  []ACLPermission
+	Permissions []ACLPermission
 	TlsRequired bool
 }
 
-type SecurityACL struct {
+type ACL struct {
 	Identify    int64
 	Key         []byte
 	Algo        ACLAlgorithm
-	Scope       []SecurityACLScope
+	Scopes      []ACLScope
 	MaxPriority Priority
 }
 

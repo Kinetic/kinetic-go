@@ -8,7 +8,7 @@ import (
 	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
-func compute_hmac(data []byte, key []byte) []byte {
+func computeHmac(data []byte, key []byte) []byte {
 	mac := hmac.New(sha1.New, key)
 
 	if data != nil && len(data) > 0 {
@@ -22,9 +22,9 @@ func compute_hmac(data []byte, key []byte) []byte {
 	return mac.Sum(nil)
 }
 
-func validate_hmac(mesg *kproto.Message, key []byte) bool {
+func validateHmac(mesg *kproto.Message, key []byte) bool {
 	if mesg != nil {
-		real := compute_hmac(mesg.GetCommandBytes(), key)
+		real := computeHmac(mesg.GetCommandBytes(), key)
 
 		if mesg.GetHmacAuth() != nil {
 			expect := mesg.GetHmacAuth().GetHmac()

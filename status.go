@@ -1,10 +1,12 @@
 package kinetic
 
 import (
+	"strconv"
+
 	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
-// Status code for kinetic message.
+// StatusCode for kinetic message.
 // Including status code get from device, or client internal error code.
 type StatusCode int32
 
@@ -77,20 +79,26 @@ var statusName = map[StatusCode]string{
 // Status for each kinetic message.
 // Code is the status code and ErrorMsg is the detail message
 type Status struct {
-	Code     StatusCode
-	ErrorMsg string
+	Code                   StatusCode
+	ErrorMsg               string
+	ExpectedClusterVersion int64
 }
 
+// Error returns the detail status message if Status.Code != OK
 func (s Status) Error() string {
 	return s.ErrorMsg
 }
 
 func (s Status) String() string {
+	ret := "Unknown Status"
 	str, ok := statusName[s.Code]
 	if ok {
-		return str + " : " + s.ErrorMsg
+		ret = str + " : " + s.ErrorMsg
+		if s.Code == REMOTE_CLUSTER_VERSION_MISMATCH {
+			ret = ret + ", Expected cluster version =" + strconv.Itoa(int(s.ExpectedClusterVersion))
+		}
 	}
-	return "Unknown Status"
+	return ret
 }
 
 func convertStatusCodeToProto(s StatusCode) kproto.Command_Status_StatusCode {
@@ -198,6 +206,7 @@ func convertStatusCodeFromProto(s kproto.Command_Status_StatusCode) StatusCode {
 func getStatusFromProto(cmd *kproto.Command) Status {
 	code := convertStatusCodeFromProto(cmd.GetStatus().GetCode())
 	msg := cmd.GetStatus().GetStatusMessage()
+	version := cmd.GetHeader().GetClusterVersion()
 
-	return Status{code, msg}
+	return Status{code, msg, version}
 }

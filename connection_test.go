@@ -6,17 +6,21 @@ import (
 )
 
 var (
-	blockConn    *BlockConnection    = nil
-	nonblockConn *NonBlockConnection = nil
+	blockConn    *BlockConnection
+	nonblockConn *NonBlockConnection
 )
 
 var option = ClientOptions{
 	Host: "127.0.0.1",
 	Port: 8123,
+	//Port:   8443, // For SSL connection
 	User: 1,
-	Hmac: []byte("asdfasdf")}
+	Hmac: []byte("asdfasdf"),
+	//UseSSL: true,
+}
 
 func TestMain(m *testing.M) {
+	SetLogLevel(LogLevelDebug)
 	blockConn, _ = NewBlockConnection(option)
 	if blockConn != nil {
 		code := m.Run()
@@ -72,7 +76,7 @@ func TestBlockFlush(t *testing.T) {
 
 func TestBlockPut(t *testing.T) {
 	entry := Record{
-		Key:   []byte("object001"),
+		Key:   []byte("object000"),
 		Value: []byte("ABCDEFG"),
 		Sync:  SYNC_WRITETHROUGH,
 		Algo:  ALGO_SHA1,
@@ -87,7 +91,7 @@ func TestBlockPut(t *testing.T) {
 
 func TestBlockDelete(t *testing.T) {
 	entry := Record{
-		Key:   []byte("object001"),
+		Key:   []byte("object000"),
 		Sync:  SYNC_WRITETHROUGH,
 		Algo:  ALGO_SHA1,
 		Force: true,
@@ -194,5 +198,51 @@ func TestBlockMediaOptimize(t *testing.T) {
 	status, err := blockConn.MediaOptimize(&op, PRIORITY_NORMAL)
 	if err != nil || status.Code != OK {
 		t.Fatal("Blocking MediaOptimize Failure: ", err, status.String())
+	}
+}
+
+func TestBlockSetClusterVersion(t *testing.T) {
+	status, err := blockConn.SetClusterVersion(1)
+	if err != nil || status.Code != OK {
+		t.Fatal("Blocking SetClusterVersion Failure: ", err, status.String())
+	}
+
+	blockConn.SetClientClusterVersion(2)
+	_, status, err = blockConn.Get([]byte("object000"))
+	if err != nil || status.Code != REMOTE_CLUSTER_VERSION_MISMATCH {
+		t.Fatal("Blocking Get expected REMOTE_CLUSTER_VERSION_MISMATCH. ", err, status.String())
+	}
+	t.Log(status.String())
+}
+
+func TestBlockInstantErase(t *testing.T) {
+	t.Skip("Danger: Skip InstanceErase Test")
+	status, err := blockConn.InstantErase([]byte("PIN"))
+	if err != nil || status.Code != OK {
+		t.Fatal("Blocking InstantErase Failure: ", err, status.String())
+	}
+}
+
+func TestBlockSecureErase(t *testing.T) {
+	t.Skip("Danger: Skip SecureErase Test")
+	status, err := blockConn.SecureErase([]byte(""))
+	if err != nil || status.Code != OK {
+		t.Fatal("Blocking SecureErase Failure: ", err, status.String())
+	}
+}
+
+func TestBlockSetErasePin(t *testing.T) {
+	t.Skip("Danger: Skip SetErasePin Test")
+	status, err := blockConn.SetErasePin([]byte(""), []byte("PIN"))
+	if err != nil || status.Code != OK {
+		t.Fatal("Blocking SetErasePin Failure: ", err, status.String())
+	}
+}
+
+func TestBlockSetLockPin(t *testing.T) {
+	t.Skip("Danger: Skip SetLockPin Test")
+	status, err := blockConn.SetLockPin([]byte(""), []byte("PIN"))
+	if err != nil || status.Code != OK {
+		t.Fatal("Blocking SetLockPin Failure: ", err, status.String())
 	}
 }

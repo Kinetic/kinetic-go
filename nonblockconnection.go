@@ -6,6 +6,8 @@ import (
 	kproto "github.com/yongzhy/kinetic-go/proto"
 )
 
+// NonBlockConnection send kinetic message to devices and doesn't wait for
+// response message from device.
 type NonBlockConnection struct {
 	service *networkService
 }
@@ -24,6 +26,7 @@ func NewNonBlockConnection(op ClientOptions) (*NonBlockConnection, error) {
 	return &NonBlockConnection{service}, nil
 }
 
+// NoOp does nothing but wait for drive to return response.
 func (conn *NonBlockConnection) NoOp(h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 
@@ -45,18 +48,22 @@ func (conn *NonBlockConnection) get(key []byte, getType kproto.Command_MessageTy
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+// Get gets the object from kinetic drive with key.
 func (conn *NonBlockConnection) Get(key []byte, h *ResponseHandler) error {
 	return conn.get(key, kproto.Command_GET, h)
 }
 
+// GetNext gets the next object with key after the passed in key.
 func (conn *NonBlockConnection) GetNext(key []byte, h *ResponseHandler) error {
 	return conn.get(key, kproto.Command_GETNEXT, h)
 }
 
+// GetPrevious gets the previous object with key before the passed in key.
 func (conn *NonBlockConnection) GetPrevious(key []byte, h *ResponseHandler) error {
 	return conn.get(key, kproto.Command_GETPREVIOUS, h)
 }
 
+// GetKeyRange gets list of objects' keys, which meet the criteria defined by KeyRange.
 func (conn *NonBlockConnection) GetKeyRange(r *KeyRange, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 
@@ -75,6 +82,7 @@ func (conn *NonBlockConnection) GetKeyRange(r *KeyRange, h *ResponseHandler) err
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+// GetVersion gets object DB version information.
 func (conn *NonBlockConnection) GetVersion(key []byte, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 
@@ -88,6 +96,7 @@ func (conn *NonBlockConnection) GetVersion(key []byte, h *ResponseHandler) error
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+// Flush requests kinetic device to write all cached data to persistent media.
 func (conn *NonBlockConnection) Flush(h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 
@@ -96,6 +105,7 @@ func (conn *NonBlockConnection) Flush(h *ResponseHandler) error {
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+// Delete deletes object from kinetic device.
 func (conn *NonBlockConnection) Delete(entry *Record, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_DELETE)
@@ -114,6 +124,7 @@ func (conn *NonBlockConnection) Delete(entry *Record, h *ResponseHandler) error 
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+// Put store object to kinetic device.
 func (conn *NonBlockConnection) Put(entry *Record, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_PUT)
@@ -134,7 +145,7 @@ func (conn *NonBlockConnection) Put(entry *Record, h *ResponseHandler) error {
 }
 
 func (conn *NonBlockConnection) buildP2PMessage(request *P2PPushRequest) *kproto.Command_P2POperation {
-	var p2pop *kproto.Command_P2POperation = nil
+	var p2pop *kproto.Command_P2POperation
 	if request != nil {
 		p2pop = &kproto.Command_P2POperation{
 			Peer: &kproto.Command_P2POperation_Peer{
@@ -160,6 +171,7 @@ func (conn *NonBlockConnection) buildP2PMessage(request *P2PPushRequest) *kproto
 	return p2pop
 }
 
+// P2Push
 func (conn *NonBlockConnection) P2PPush(request *P2PPushRequest, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_PEER2PEERPUSH)
@@ -171,6 +183,7 @@ func (conn *NonBlockConnection) P2PPush(request *P2PPushRequest, h *ResponseHand
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+// GetLog gets kinetic device Log information. Can request single LogType or multiple LogType.
 func (conn *NonBlockConnection) GetLog(logs []LogType, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 
@@ -205,28 +218,38 @@ func (conn *NonBlockConnection) pinop(pin []byte, op kproto.Command_PinOperation
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+// SecureErase request kinetic device to perform secure erase.
+// SSL connection is requested to perform this operation, and the erase pin is needed.
 func (conn *NonBlockConnection) SecureErase(pin []byte, h *ResponseHandler) error {
 	return conn.pinop(pin, kproto.Command_PinOperation_SECURE_ERASE_PINOP, h)
 }
 
+// InstantErase request kinetic device to perform instant erase.
+// SSL connection is requested to perform this operation, and the erase pin is needed.
 func (conn *NonBlockConnection) InstantErase(pin []byte, h *ResponseHandler) error {
 	return conn.pinop(pin, kproto.Command_PinOperation_ERASE_PINOP, h)
 
 }
 
+// LockDevice locks the kinetic device.
+// SSL connection is requested to perform this operation, and the lock pin is needed.
 func (conn *NonBlockConnection) LockDevice(pin []byte, h *ResponseHandler) error {
 	return conn.pinop(pin, kproto.Command_PinOperation_LOCK_PINOP, h)
 }
 
+// UnlockDevice unlocks the kinetic device.
+// SSL connection is requested to perform this operation, and the lock pin is needed.
 func (conn *NonBlockConnection) UnlockDevice(pin []byte, h *ResponseHandler) error {
 	return conn.pinop(pin, kproto.Command_PinOperation_UNLOCK_PINOP, h)
 }
 
+// UpdateFirmware requests to update kientic device firmware.
+// Then drive will reboot and perform the firmware update process.
 func (conn *NonBlockConnection) UpdateFirmware(code []byte, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_SETUP)
 
-	var download bool = true
+	var download = true
 	cmd.Body = &kproto.Command_Body{
 		Setup: &kproto.Command_Setup{
 			FirmwareDownload: &download,
@@ -236,6 +259,7 @@ func (conn *NonBlockConnection) UpdateFirmware(code []byte, h *ResponseHandler) 
 	return conn.service.submit(msg, cmd, code, h)
 }
 
+// SetClusterVersion sets the cluster version on kinetic drive.
 func (conn *NonBlockConnection) SetClusterVersion(version int64, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_SETUP)
@@ -249,6 +273,13 @@ func (conn *NonBlockConnection) SetClusterVersion(version int64, h *ResponseHand
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+// SetClientClusterVersion sets the cluster version for all following message to kinetic device.
+func (conn *NonBlockConnection) SetClientClusterVersion(version int64) {
+	conn.service.clusterVersion = version
+}
+
+// SetLockPin changes kinetic device lock pin. Both current pin and new pin needed.
+// SSL connection is required to perform this operation.
 func (conn *NonBlockConnection) SetLockPin(currentPin []byte, newPin []byte, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_SECURITY)
@@ -263,6 +294,8 @@ func (conn *NonBlockConnection) SetLockPin(currentPin []byte, newPin []byte, h *
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+// SetErasePin changes kinetic device erase pin. Both current pin and new pin needed.
+// SSL connection is required to perform this operation.
 func (conn *NonBlockConnection) SetErasePin(currentPin []byte, newPin []byte, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_SECURITY)
@@ -277,39 +310,40 @@ func (conn *NonBlockConnection) SetErasePin(currentPin []byte, newPin []byte, h 
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) SetACL(acls []SecurityACL, h *ResponseHandler) error {
+// SetACL sets Permission for particular user Identify.
+func (conn *NonBlockConnection) SetACL(acls []ACL, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_SECURITY)
 
-	cmd_acl := make([]*kproto.Command_Security_ACL, len(acls))
+	cmdACL := make([]*kproto.Command_Security_ACL, len(acls))
 	for ka, acl := range acls {
-		cmd_scope := make([]*kproto.Command_Security_ACL_Scope, len(acl.Scope))
-		for ks, scope := range acl.Scope {
-			cmd_permission := make([]kproto.Command_Security_ACL_Permission, len(scope.Permission))
-			for kp, permission := range scope.Permission {
-				cmd_permission[kp] = convertACLPermissionToProto(permission)
+		cmdScope := make([]*kproto.Command_Security_ACL_Scope, len(acl.Scopes))
+		for ks, scope := range acl.Scopes {
+			cmdPermission := make([]kproto.Command_Security_ACL_Permission, len(scope.Permissions))
+			for kp, permission := range scope.Permissions {
+				cmdPermission[kp] = convertACLPermissionToProto(permission)
 			}
-			cmd_scope[ks] = &kproto.Command_Security_ACL_Scope{
+			cmdScope[ks] = &kproto.Command_Security_ACL_Scope{
 				Offset:      &scope.Offset,
 				Value:       scope.Value,
-				Permission:  cmd_permission,
+				Permission:  cmdPermission,
 				TlsRequired: &scope.TlsRequired,
 			}
 		}
-		cmd_acl_algo := convertACLAlgorithmToProto(acl.Algo)
-		cmd_priority := convertPriorityToProto(acl.MaxPriority)
-		cmd_acl[ka] = &kproto.Command_Security_ACL{
+		cmdAlgo := convertACLAlgorithmToProto(acl.Algo)
+		cmdPriority := convertPriorityToProto(acl.MaxPriority)
+		cmdACL[ka] = &kproto.Command_Security_ACL{
 			Identity:      &acl.Identify,
 			Key:           acl.Key,
-			HmacAlgorithm: &cmd_acl_algo,
-			Scope:         cmd_scope,
-			MaxPriority:   &cmd_priority,
+			HmacAlgorithm: &cmdAlgo,
+			Scope:         cmdScope,
+			MaxPriority:   &cmdPriority,
 		}
 	}
 
 	cmd.Body = &kproto.Command_Body{
 		Security: &kproto.Command_Security{
-			Acl: cmd_acl,
+			Acl: cmdACL,
 		},
 	}
 
@@ -330,8 +364,8 @@ func (conn *NonBlockConnection) MediaScan(op *MediaOperation, pri Priority, h *R
 		},
 	}
 
-	cmd_pri := convertPriorityToProto(pri)
-	cmd.Header.Priority = &cmd_pri
+	p := convertPriorityToProto(pri)
+	cmd.Header.Priority = &p
 
 	return conn.service.submit(msg, cmd, nil, h)
 }
@@ -350,18 +384,21 @@ func (conn *NonBlockConnection) MediaOptimize(op *MediaOperation, pri Priority, 
 		},
 	}
 
-	cmd_pri := convertPriorityToProto(pri)
-	cmd.Header.Priority = &cmd_pri
+	p := convertPriorityToProto(pri)
+	cmd.Header.Priority = &p
 
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+// Listen waits and read response message from device, then call ResponseHandler
+// in queue to process received message.
 func (conn *NonBlockConnection) Listen(h *ResponseHandler) error {
 	err := conn.service.listen()
 	h.wait()
 	return err
 }
 
+// Close the connection to kientic device
 func (conn *NonBlockConnection) Close() {
 	conn.service.close()
 }
