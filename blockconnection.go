@@ -167,6 +167,73 @@ func (conn *BlockConnection) P2PPush(request *P2PPushRequest) ([]Status, Status,
 	return callback.Statuses, callback.Status(), err
 }
 
+func (conn *BlockConnection) BatchStart() (Status, error) {
+	callback := &GenericCallback{}
+	h := NewResponseHandler(callback)
+	err := conn.nbc.BatchStart(h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	err = conn.nbc.Listen(h)
+
+	return callback.Status(), err
+}
+
+func (conn *BlockConnection) BatchPut(entry *Record) (Status, error) {
+	// TODO: combine normal Put and BatchPut
+	callback := &GenericCallback{}
+	h := NewResponseHandler(callback)
+	err := conn.nbc.BatchPut(entry, h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	err = conn.nbc.Listen(h)
+
+	return callback.Status(), err
+}
+
+func (conn *BlockConnection) BatchDelete(entry *Record) (Status, error) {
+	// TODO: combine normal Delete and BatchDelete
+	callback := &GenericCallback{}
+	h := NewResponseHandler(callback)
+	err := conn.nbc.BatchDelete(entry, h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	err = conn.nbc.Listen(h)
+
+	return callback.Status(), err
+}
+
+func (conn *BlockConnection) BatchEnd() (Status, error) {
+	callback := &GenericCallback{}
+	h := NewResponseHandler(callback)
+	err := conn.nbc.BatchEnd(h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	err = conn.nbc.Listen(h)
+
+	return callback.Status(), err
+}
+
+func (conn *BlockConnection) BatchAbort() (Status, error) {
+	callback := &GenericCallback{}
+	h := NewResponseHandler(callback)
+	err := conn.nbc.BatchAbort(h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	err = conn.nbc.Listen(h)
+
+	return callback.Status(), err
+}
+
 // GetLog gets kinetic device Log information. Can request single LogType or multiple LogType.
 // On success, device Log information will return, and Status.Code = OK
 func (conn *BlockConnection) GetLog(logs []LogType) (*Log, Status, error) {
