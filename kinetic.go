@@ -634,18 +634,18 @@ func convertACLAlgorithmToProto(algo ACLAlgorithm) kproto.Command_Security_ACL_H
 	return ret
 }
 
-type SecurityACLScope struct {
+type ACLScope struct {
 	Offset      int64
 	Value       []byte
-	Permission  []ACLPermission
+	Permissions []ACLPermission
 	TlsRequired bool
 }
 
-type SecurityACL struct {
+type ACL struct {
 	Identify    int64
 	Key         []byte
 	Algo        ACLAlgorithm
-	Scope       []SecurityACLScope
+	Scopes      []ACLScope
 	MaxPriority Priority
 }
 

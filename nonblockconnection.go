@@ -311,16 +311,16 @@ func (conn *NonBlockConnection) SetErasePin(currentPin []byte, newPin []byte, h 
 }
 
 // SetACL sets Permission for particular user Identify.
-func (conn *NonBlockConnection) SetACL(acls []SecurityACL, h *ResponseHandler) error {
+func (conn *NonBlockConnection) SetACL(acls []ACL, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_SECURITY)
 
 	cmdACL := make([]*kproto.Command_Security_ACL, len(acls))
 	for ka, acl := range acls {
-		cmdScope := make([]*kproto.Command_Security_ACL_Scope, len(acl.Scope))
-		for ks, scope := range acl.Scope {
-			cmdPermission := make([]kproto.Command_Security_ACL_Permission, len(scope.Permission))
-			for kp, permission := range scope.Permission {
+		cmdScope := make([]*kproto.Command_Security_ACL_Scope, len(acl.Scopes))
+		for ks, scope := range acl.Scopes {
+			cmdPermission := make([]kproto.Command_Security_ACL_Permission, len(scope.Permissions))
+			for kp, permission := range scope.Permissions {
 				cmdPermission[kp] = convertACLPermissionToProto(permission)
 			}
 			cmdScope[ks] = &kproto.Command_Security_ACL_Scope{

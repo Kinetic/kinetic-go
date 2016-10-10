@@ -305,7 +305,7 @@ func (conn *BlockConnection) SetErasePin(currentPin []byte, newPin []byte) (Stat
 
 // SetACL sets Permission for particular user Identify.
 // On success, Status.Code = OK.
-func (conn *BlockConnection) SetACL(acls []SecurityACL) (Status, error) {
+func (conn *BlockConnection) SetACL(acls []ACL) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
 	err := conn.nbc.SetACL(acls, h)

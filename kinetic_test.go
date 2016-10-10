@@ -235,3 +235,87 @@ func ExampleNonBlockConnection_multiplePut() {
 		<-done
 	}
 }
+
+func ExampleBlockConnection_SetACL() {
+	// Set the log leverl to debug
+	SetLogLevel(LogLevelDebug)
+
+	// Client options
+	var option = ClientOptions{
+		Host:   "10.29.24.55",
+		Port:   8443, // Must be SSL connection here
+		User:   1,
+		Hmac:   []byte("asdfasdf"),
+		UseSSL: true, // Set ACL must use SSL connection
+	}
+
+	conn, err := NewBlockConnection(option)
+	if err != nil {
+		panic(err)
+	}
+
+	perms := []ACLPermission{
+		ACL_PERMISSION_GETLOG,
+	}
+	scope := []ACLScope{
+		ACLScope{
+			Permissions: perms,
+		},
+	}
+	acls := []ACL{
+		ACL{
+			Identify: 100,
+			Key:      []byte("asdfasdf"),
+			Algo:     ACL_ALGORITHM_HMACSHA1,
+			Scopes:   scope,
+		},
+	}
+
+	status, err := conn.SetACL(acls)
+	if err != nil || status.Code != OK {
+		fmt.Println("SetACL failure: ", err, status)
+	}
+
+	// Close the SET ACL connection
+	conn.Close()
+
+	// Next, do the verifiation on the SET ACL
+	// Client options
+	option = ClientOptions{
+		Host: "10.29.24.55",
+		Port: 8123,
+		User: 100,
+		Hmac: []byte("asdfasdf")}
+
+	conn, err = NewBlockConnection(option)
+	if err != nil {
+		panic(err)
+	}
+
+	logs := []LogType{
+		LOG_UTILIZATIONS,
+		LOG_TEMPERATURES,
+		LOG_CAPACITIES,
+		LOG_CONFIGURATION,
+		LOG_STATISTICS,
+		LOG_MESSAGES,
+		LOG_LIMITS,
+	}
+
+	_, status, err = conn.GetLog(logs)
+	if err != nil || status.Code != OK {
+		fmt.Println("GetLog Failure: ", err, status)
+	}
+
+	_, status, err = conn.Get([]byte("object000"))
+	if err != nil {
+		fmt.Println("Get Failure: ", err)
+	}
+
+	if status.Code != REMOTE_NOT_AUTHORIZED {
+		fmt.Println("SET ACL not effective, ", status)
+	}
+
+	// Close the verify connection
+	conn.Close()
+}
