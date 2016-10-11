@@ -176,12 +176,11 @@ func (ns *networkService) listen() error {
 	return nil
 }
 
+// submit will send the message to kinetic device, insert ResponseHandler for this message sequence number.
+// ResponseHandler can be nil if the message no require for Ack, eg batch PUT / DELETE.
 func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value []byte, h *ResponseHandler) error {
 	if ns.fatal {
 		return errors.New("Can't submit, network service has fatal error: " + ns.fatalError.Error())
-	}
-	if h == nil {
-		return errors.New("Valid ResponseHandler is required")
 	}
 
 	ns.txMu.Lock()
@@ -212,9 +211,11 @@ func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value
 		return err
 	}
 
-	ns.mapMu.Lock()
-	ns.hmap[ns.seq] = h
-	ns.mapMu.Unlock()
+	if h != nil {
+		ns.mapMu.Lock()
+		ns.hmap[ns.seq] = h
+		ns.mapMu.Unlock()
+	}
 
 	ns.seq++
 	ns.txMu.Unlock()

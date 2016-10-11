@@ -2,6 +2,7 @@ package kinetic
 
 import (
 	"bytes"
+	"sync"
 
 	kproto "github.com/yongzhy/kinetic-go/proto"
 )
@@ -9,7 +10,10 @@ import (
 // NonBlockConnection send kinetic message to devices and doesn't wait for
 // response message from device.
 type NonBlockConnection struct {
-	service *networkService
+	service    *networkService
+	batchID    uint32 // Current batch Operation ID
+	batchCount int32  // Current batch operation count
+	batchMu    sync.Mutex
 }
 
 // Helper function to establish non-block connection to device.
@@ -23,7 +27,7 @@ func NewNonBlockConnection(op ClientOptions) (*NonBlockConnection, error) {
 		return nil, err
 	}
 
-	return &NonBlockConnection{service}, nil
+	return &NonBlockConnection{service: service, batchID: 0, batchCount: 0}, nil
 }
 
 // NoOp does nothing but wait for drive to return response.
@@ -105,10 +109,14 @@ func (conn *NonBlockConnection) Flush(h *ResponseHandler) error {
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-// Delete deletes object from kinetic device.
-func (conn *NonBlockConnection) Delete(entry *Record, h *ResponseHandler) error {
+func (conn *NonBlockConnection) delete(entry *Record, batch bool, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_DELETE)
+
+	// Bathc operation, batchID needed
+	if batch {
+		cmd.Header.BatchID = &conn.batchID
+	}
 
 	sync := convertSyncToProto(entry.Sync)
 	//algo := convertAlgoToProto(entry.Algo)
@@ -124,10 +132,20 @@ func (conn *NonBlockConnection) Delete(entry *Record, h *ResponseHandler) error 
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-// Put store object to kinetic device.
-func (conn *NonBlockConnection) Put(entry *Record, h *ResponseHandler) error {
+// Delete deletes object from kinetic device.
+func (conn *NonBlockConnection) Delete(entry *Record, h *ResponseHandler) error {
+	// Normal DELETE operation, not batch operation.
+	return conn.delete(entry, false, h)
+}
+
+func (conn *NonBlockConnection) put(entry *Record, batch bool, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_PUT)
+
+	// Bathc operation, batchID needed
+	if batch {
+		cmd.Header.BatchID = &conn.batchID
+	}
 
 	sync := convertSyncToProto(entry.Sync)
 	algo := convertAlgoToProto(entry.Algo)
@@ -142,6 +160,12 @@ func (conn *NonBlockConnection) Put(entry *Record, h *ResponseHandler) error {
 	}
 
 	return conn.service.submit(msg, cmd, entry.Value, h)
+}
+
+// Put store object to kinetic device.
+func (conn *NonBlockConnection) Put(entry *Record, h *ResponseHandler) error {
+	// Normal PUT operation, not batch operation
+	return conn.put(entry, false, h)
 }
 
 func (conn *NonBlockConnection) buildP2PMessage(request *P2PPushRequest) *kproto.Command_P2POperation {
@@ -180,6 +204,65 @@ func (conn *NonBlockConnection) P2PPush(request *P2PPushRequest, h *ResponseHand
 		P2POperation: conn.buildP2PMessage(request),
 	}
 
+	return conn.service.submit(msg, cmd, nil, h)
+}
+
+// BatchStart starts new batch operation, all following batch PUT / DELETE share same batch ID until
+// BatchEnd or BatchAbort is called.
+func (conn *NonBlockConnection) BatchStart(h *ResponseHandler) error {
+	msg := newMessage(kproto.Message_HMACAUTH)
+	cmd := newCommand(kproto.Command_START_BATCH)
+
+	// TODO: Need to confirm can start new batch if current one not end / abort yet???
+	conn.batchMu.Lock()
+	conn.batchID++
+	conn.batchCount = 0 // Reset
+	conn.batchMu.Unlock()
+	cmd.Header.BatchID = &conn.batchID
+	return conn.service.submit(msg, cmd, nil, h)
+}
+
+// BatchPut puts objects to kinetic drive, as a batch job. Batch PUT / DELETE won't expect acknowledgement
+// from kinetic device. Status for batch PUT / DELETE will only availabe in response message for BatchEnd.
+func (conn *NonBlockConnection) BatchPut(entry *Record) error {
+	// Batch operation PUT
+	conn.batchMu.Lock()
+	conn.batchCount++
+	conn.batchMu.Unlock()
+	return conn.put(entry, true, nil)
+}
+
+// BatchDelete delete object from kinetic drive, as a batch job. Batch PUT / DELETE won't expect acknowledgement
+// from kinetic device. Status for batch PUT / DELETE will only availabe in response message for BatchEnd.
+func (conn *NonBlockConnection) BatchDelete(entry *Record) error {
+	// Batch operation DELETE
+	conn.batchMu.Lock()
+	conn.batchCount++
+	conn.batchMu.Unlock()
+	return conn.delete(entry, true, nil)
+}
+
+// BatchEnd commits all batch jobs. Response from kinetic device will indicate succeeded jobs sequence number, or
+// the first failed job sequence number if there is a failure.
+func (conn *NonBlockConnection) BatchEnd(h *ResponseHandler) error {
+	msg := newMessage(kproto.Message_HMACAUTH)
+	cmd := newCommand(kproto.Command_END_BATCH)
+
+	cmd.Header.BatchID = &conn.batchID
+	cmd.Body = &kproto.Command_Body{
+		Batch: &kproto.Command_Batch{
+			Count: &conn.batchCount,
+		},
+	}
+	return conn.service.submit(msg, cmd, nil, h)
+}
+
+// BatchAbort aborts jobs in current batch operation.
+func (conn *NonBlockConnection) BatchAbort(h *ResponseHandler) error {
+	msg := newMessage(kproto.Message_HMACAUTH)
+	cmd := newCommand(kproto.Command_ABORT_BATCH)
+
+	cmd.Header.BatchID = &conn.batchID
 	return conn.service.submit(msg, cmd, nil, h)
 }
 

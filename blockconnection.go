@@ -167,6 +167,62 @@ func (conn *BlockConnection) P2PPush(request *P2PPushRequest) (*P2PPushStatus, S
 	return &callback.P2PStatus, callback.Status(), err
 }
 
+// BatchStart starts new batch operation, all following batch PUT / DELETE share same batch ID until
+// BatchEnd or BatchAbort is called.
+func (conn *BlockConnection) BatchStart() (Status, error) {
+	callback := &GenericCallback{}
+	h := NewResponseHandler(callback)
+	err := conn.nbc.BatchStart(h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	err = conn.nbc.Listen(h)
+
+	return callback.Status(), err
+}
+
+// BatchPut puts objects to kinetic drive, as a batch job. Batch PUT / DELETE won't expect acknowledgement
+// from kinetic device. Status for batch PUT / DELETE will only availabe in response message for BatchEnd.
+func (conn *BlockConnection) BatchPut(entry *Record) error {
+	return conn.nbc.BatchPut(entry)
+}
+
+// BatchDelete delete object from kinetic drive, as a batch job. Batch PUT / DELETE won't expect acknowledgement
+// from kinetic device. Status for batch PUT / DELETE will only availabe in response message for BatchEnd.
+func (conn *BlockConnection) BatchDelete(entry *Record) error {
+	return conn.nbc.BatchDelete(entry)
+}
+
+// BatchEnd commits all batch jobs. Response from kinetic device will indicate succeeded jobs sequence number, or
+// the first failed job sequence number if there is a failure.
+func (conn *BlockConnection) BatchEnd() (*BatchStatus, Status, error) {
+	callback := &BatchEndCallback{}
+	h := NewResponseHandler(callback)
+	err := conn.nbc.BatchEnd(h)
+	if err != nil {
+		return nil, callback.Status(), err
+	}
+
+	err = conn.nbc.Listen(h)
+
+	return &callback.BatchStatus, callback.Status(), err
+}
+
+// BatchAbort aborts jobs in current batch operation.
+func (conn *BlockConnection) BatchAbort() (Status, error) {
+	callback := &GenericCallback{}
+	h := NewResponseHandler(callback)
+	err := conn.nbc.BatchAbort(h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	err = conn.nbc.Listen(h)
+
+	return callback.Status(), err
+}
+
 // GetLog gets kinetic device Log information. Can request single LogType or multiple LogType.
 // On success, device Log information will return, and Status.Code = OK
 func (conn *BlockConnection) GetLog(logs []LogType) (*Log, Status, error) {

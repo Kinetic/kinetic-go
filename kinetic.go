@@ -674,3 +674,9 @@ type P2PPushStatus struct {
 	AllOperationsSucceeded bool     // Overall status for all child operations
 	PushStatus             []Status // individual operation status
 }
+
+// BatchStatus indicates status of all operations in a batch commit.
+type BatchStatus struct {
+	DoneSequence   []int64 // All sequence Ids of those commands (PUT/DELETE) performed successfully in the batch
+	FailedSequence int64   // Non 0 value means the first failed operation sequence in the batch, 0 means no failure
+}
