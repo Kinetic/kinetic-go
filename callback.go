@@ -81,16 +81,17 @@ func (c *GetVersionCallback) Success(resp *kproto.Command, value []byte) {
 // P2PPushCallback is the Callback for Command_PEER2PEERPUSH
 type P2PPushCallback struct {
 	GenericCallback
-	Statuses []Status
+	P2PStatus P2PPushStatus
 }
 
 // Success extracts P2Push operation status from response message.
 func (c *P2PPushCallback) Success(resp *kproto.Command, value []byte) {
 	c.GenericCallback.Success(resp, value)
-	c.Statuses = make([]Status, len(resp.GetBody().GetP2POperation().GetOperation()))
+	c.P2PStatus.AllOperationsSucceeded = resp.GetBody().GetP2POperation().GetAllChildOperationsSucceeded()
+	c.P2PStatus.PushStatus = make([]Status, len(resp.GetBody().GetP2POperation().GetOperation()))
 	for k, op := range resp.GetBody().GetP2POperation().GetOperation() {
-		c.Statuses[k].Code = convertStatusCodeFromProto(op.GetStatus().GetCode())
-		c.Statuses[k].ErrorMsg = op.GetStatus().GetStatusMessage()
+		c.P2PStatus.PushStatus[k].Code = convertStatusCodeFromProto(op.GetStatus().GetCode())
+		c.P2PStatus.PushStatus[k].ErrorMsg = op.GetStatus().GetStatusMessage()
 	}
 }
 

@@ -649,17 +649,28 @@ type ACL struct {
 	MaxPriority Priority
 }
 
+// P2PPushOperation
 type P2PPushOperation struct {
-	Key     []byte
+	Key     []byte // Key for the object to push to peer kinetic device
 	Version []byte
-	NewKey  []byte
+	NewKey  []byte // NewKey to be used for the object on peer kinetic device, if not specify, will be same as Key
 	Force   bool
-	Request *P2PPushRequest
+	Request *P2PPushRequest // Chain P2PPushRequest, which will perform on peer kinetic device
 }
 
+// P2PPushRequest
 type P2PPushRequest struct {
-	HostName   string
-	Port       int32
+	HostName   string // Peer kinetic device IP / hostname
+	Port       int32  // Peer kinetic drvice port
 	Tls        bool
-	Operations []P2PPushOperation
+	Operations []P2PPushOperation // List of operations to perform on peer kinetic device
+}
+
+// P2PPushStatus holds the status for P2PPushOperations.
+// AllOperationsSucceeded indicates whether all operations have Status SUCCESS
+// When false, clients should traverse operation status codes to discover error cases.
+// When true, no further error checking should be required.
+type P2PPushStatus struct {
+	AllOperationsSucceeded bool     // Overall status for all child operations
+	PushStatus             []Status // individual operation status
 }

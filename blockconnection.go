@@ -154,7 +154,7 @@ func (conn *BlockConnection) Put(entry *Record) (Status, error) {
 }
 
 // P2Push
-func (conn *BlockConnection) P2PPush(request *P2PPushRequest) ([]Status, Status, error) {
+func (conn *BlockConnection) P2PPush(request *P2PPushRequest) (*P2PPushStatus, Status, error) {
 	callback := &P2PPushCallback{}
 	h := NewResponseHandler(callback)
 	err := conn.nbc.P2PPush(request, h)
@@ -164,7 +164,7 @@ func (conn *BlockConnection) P2PPush(request *P2PPushRequest) ([]Status, Status,
 
 	err = conn.nbc.Listen(h)
 
-	return callback.Statuses, callback.Status(), err
+	return &callback.P2PStatus, callback.Status(), err
 }
 
 // GetLog gets kinetic device Log information. Can request single LogType or multiple LogType.
