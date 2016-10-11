@@ -167,6 +167,8 @@ func (conn *BlockConnection) P2PPush(request *P2PPushRequest) ([]Status, Status,
 	return callback.Statuses, callback.Status(), err
 }
 
+// BatchStart starts new batch operation, all following batch PUT / DELETE share same batch ID until
+// BatchEnd or BatchAbort is called.
 func (conn *BlockConnection) BatchStart() (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
@@ -180,47 +182,34 @@ func (conn *BlockConnection) BatchStart() (Status, error) {
 	return callback.Status(), err
 }
 
-func (conn *BlockConnection) BatchPut(entry *Record) (Status, error) {
-	// TODO: combine normal Put and BatchPut
-	callback := &GenericCallback{}
-	h := NewResponseHandler(callback)
-	err := conn.nbc.BatchPut(entry, h)
-	if err != nil {
-		return callback.Status(), err
-	}
-
-	err = conn.nbc.Listen(h)
-
-	return callback.Status(), err
+// BatchPut puts objects to kinetic drive, as a batch job. Batch PUT / DELETE won't expect acknowledgement
+// from kinetic device. Status for batch PUT / DELETE will only availabe in response message for BatchEnd.
+func (conn *BlockConnection) BatchPut(entry *Record) error {
+	return conn.nbc.BatchPut(entry)
 }
 
-func (conn *BlockConnection) BatchDelete(entry *Record) (Status, error) {
-	// TODO: combine normal Delete and BatchDelete
-	callback := &GenericCallback{}
-	h := NewResponseHandler(callback)
-	err := conn.nbc.BatchDelete(entry, h)
-	if err != nil {
-		return callback.Status(), err
-	}
-
-	err = conn.nbc.Listen(h)
-
-	return callback.Status(), err
+// BatchDelete delete object from kinetic drive, as a batch job. Batch PUT / DELETE won't expect acknowledgement
+// from kinetic device. Status for batch PUT / DELETE will only availabe in response message for BatchEnd.
+func (conn *BlockConnection) BatchDelete(entry *Record) error {
+	return conn.nbc.BatchDelete(entry)
 }
 
-func (conn *BlockConnection) BatchEnd() (Status, error) {
-	callback := &GenericCallback{}
+// BatchEnd commits all batch jobs. Response from kinetic device will indicate succeeded jobs sequence number, or
+// the first failed job sequence number if there is a failure.
+func (conn *BlockConnection) BatchEnd() (*BatchStatus, Status, error) {
+	callback := &BatchEndCallback{}
 	h := NewResponseHandler(callback)
 	err := conn.nbc.BatchEnd(h)
 	if err != nil {
-		return callback.Status(), err
+		return nil, callback.Status(), err
 	}
 
 	err = conn.nbc.Listen(h)
 
-	return callback.Status(), err
+	return &callback.BatchStatus, callback.Status(), err
 }
 
+// BatchAbort aborts jobs in current batch operation.
 func (conn *BlockConnection) BatchAbort() (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)

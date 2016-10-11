@@ -207,27 +207,43 @@ func (conn *NonBlockConnection) P2PPush(request *P2PPushRequest, h *ResponseHand
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-// BatchStart starts batch operations
+// BatchStart starts new batch operation, all following batch PUT / DELETE share same batch ID until
+// BatchEnd or BatchAbort is called.
 func (conn *NonBlockConnection) BatchStart(h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_START_BATCH)
 
+	// TODO: Need to confirm can start new batch if current one not end / abort yet???
+	conn.batchMu.Lock()
+	conn.batchID++
+	conn.batchCount = 0 // Reset
+	conn.batchMu.Unlock()
 	cmd.Header.BatchID = &conn.batchID
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-func (conn *NonBlockConnection) BatchPut(entry *Record, h *ResponseHandler) error {
+// BatchPut puts objects to kinetic drive, as a batch job. Batch PUT / DELETE won't expect acknowledgement
+// from kinetic device. Status for batch PUT / DELETE will only availabe in response message for BatchEnd.
+func (conn *NonBlockConnection) BatchPut(entry *Record) error {
 	// Batch operation PUT
-	return conn.put(entry, true, h)
+	conn.batchMu.Lock()
+	conn.batchCount++
+	conn.batchMu.Unlock()
+	return conn.put(entry, true, nil)
 }
 
-// BatchDelete deletes object from kinetic device.
-func (conn *NonBlockConnection) BatchDelete(entry *Record, h *ResponseHandler) error {
+// BatchDelete delete object from kinetic drive, as a batch job. Batch PUT / DELETE won't expect acknowledgement
+// from kinetic device. Status for batch PUT / DELETE will only availabe in response message for BatchEnd.
+func (conn *NonBlockConnection) BatchDelete(entry *Record) error {
 	// Batch operation DELETE
-	return conn.delete(entry, true, h)
+	conn.batchMu.Lock()
+	conn.batchCount++
+	conn.batchMu.Unlock()
+	return conn.delete(entry, true, nil)
 }
 
-// BatchEnd commits all patch operations.
+// BatchEnd commits all batch jobs. Response from kinetic device will indicate succeeded jobs sequence number, or
+// the first failed job sequence number if there is a failure.
 func (conn *NonBlockConnection) BatchEnd(h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_END_BATCH)
@@ -241,7 +257,7 @@ func (conn *NonBlockConnection) BatchEnd(h *ResponseHandler) error {
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-// BatchAbort abort current batch operations.
+// BatchAbort aborts jobs in current batch operation.
 func (conn *NonBlockConnection) BatchAbort(h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_ABORT_BATCH)

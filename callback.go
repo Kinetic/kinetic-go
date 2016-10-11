@@ -11,7 +11,7 @@ import (
 // Status return the MessateType operation status.
 type Callback interface {
 	Success(resp *kproto.Command, value []byte)
-	Failure(status Status)
+	Failure(resp *kproto.Command, status Status)
 	Status() Status
 }
 
@@ -27,7 +27,7 @@ func (c *GenericCallback) Success(resp *kproto.Command, value []byte) {
 }
 
 // Failure is called ResponseHandler when response message received from kinetic device with status code other than OK.
-func (c *GenericCallback) Failure(status Status) {
+func (c *GenericCallback) Failure(resp *kproto.Command, status Status) {
 	c.status = status
 }
 
@@ -104,4 +104,21 @@ type GetLogCallback struct {
 func (c *GetLogCallback) Success(resp *kproto.Command, value []byte) {
 	c.GenericCallback.Success(resp, value)
 	c.Logs = getLogFromProto(resp)
+}
+
+type BatchEndCallback struct {
+	GenericCallback
+	BatchStatus BatchStatus
+}
+
+func (c *BatchEndCallback) Success(resp *kproto.Command, value []byte) {
+	c.GenericCallback.Success(resp, value)
+	c.BatchStatus.DoneSequence = resp.GetBody().GetBatch().GetSequence()
+	c.BatchStatus.FailedSequence = resp.GetBody().GetBatch().GetFailedSequence()
+}
+
+func (c *BatchEndCallback) Failure(resp *kproto.Command, status Status) {
+	c.GenericCallback.Failure(resp, status)
+	c.BatchStatus.DoneSequence = resp.GetBody().GetBatch().GetSequence()
+	c.BatchStatus.FailedSequence = resp.GetBody().GetBatch().GetFailedSequence()
 }
