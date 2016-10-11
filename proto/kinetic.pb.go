@@ -6,7 +6,7 @@
 Package com_seagate_kinetic_proto is a generated protocol buffer package.
 
 *
-Copyright 2013-2015 Seagate Technology LLC.
+Copyright 2013-2016 Seagate Technology LLC.
 
 This Source Code Form is subject to the terms of the Mozilla
 Public License, v. 2.0. If a copy of the MPL was not

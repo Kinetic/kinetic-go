@@ -1,6 +1,24 @@
+/**
+ * Copyright 2013-2016 Seagate Technology LLC.
+ *
+ * This Source Code Form is subject to the terms of the Mozilla
+ * Public License, v. 2.0. If a copy of the MPL was not
+ * distributed with this file, You can obtain one at
+ * https://mozilla.org/MP:/2.0/.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but is provided AS-IS, WITHOUT ANY WARRANTY; including without
+ * the implied warranty of MERCHANTABILITY, NON-INFRINGEMENT or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the Mozilla Public
+ * License for more details.
+ *
+ * See www.openkinetic.org for more project information
+ */
+
 package kinetic
 
 import (
+	"bytes"
 	"os"
 	"testing"
 )
@@ -81,6 +99,57 @@ func TestBlockPut(t *testing.T) {
 		Sync:  SYNC_WRITETHROUGH,
 		Algo:  ALGO_SHA1,
 		Tag:   []byte(""),
+		Force: true,
+	}
+	status, err := blockConn.Put(&entry)
+	if err != nil || status.Code != OK {
+		t.Fatal("Blocking Put Failure", err, status.String())
+	}
+}
+
+// TestBlockPut_keyOverflow test key buffer length than MaxKeySize
+// TODO: drive implementation using UNSOLICITEDSTATUS for Key too long.
+func TestBlockPut_keyOverflow(t *testing.T) {
+	entry := Record{
+		Key:   bytes.Repeat([]byte("K"), int(blockConn.nbc.service.device.Limits.MaxKeySize+1)),
+		Value: []byte("ABCDEFG"),
+		Sync:  SYNC_WRITETHROUGH,
+		Algo:  ALGO_SHA1,
+		Tag:   []byte(""),
+		Force: true,
+	}
+	status, err := blockConn.Put(&entry)
+	if err != nil || status.Code != OK {
+		t.Fatal("Blocking Put Failure", err, status.String())
+	}
+}
+
+// TestBlockPut_valueOverflow test key buffer length than MaxValueSize
+// TODO: drive implementation using UNSOLICITEDSTATUS.
+func TestBlockPut_valueOverflow(t *testing.T) {
+	entry := Record{
+		Key:   []byte("key"),
+		Value: bytes.Repeat([]byte("V"), int(blockConn.nbc.service.device.Limits.MaxValueSize+1)),
+		Sync:  SYNC_WRITETHROUGH,
+		Algo:  ALGO_SHA1,
+		Tag:   []byte(""),
+		Force: true,
+	}
+	status, err := blockConn.Put(&entry)
+	if err != nil || status.Code != OK {
+		t.Fatal("Blocking Put Failure", err, status.String())
+	}
+}
+
+// TestBlockPut_tagOverflow test key buffer length than MaxTagSize
+// TODO: drive implementation using UNSOLICITEDSTATUS.
+func TestBlockPut_tagOverflow(t *testing.T) {
+	entry := Record{
+		Key:   []byte("key"),
+		Value: []byte("value"),
+		Sync:  SYNC_WRITETHROUGH,
+		Algo:  ALGO_SHA1,
+		Tag:   bytes.Repeat([]byte("T"), int(blockConn.nbc.service.device.Limits.MaxTagSize+1)),
 		Force: true,
 	}
 	status, err := blockConn.Put(&entry)
