@@ -11,7 +11,7 @@ import (
 // Status return the MessateType operation status.
 type Callback interface {
 	Success(resp *kproto.Command, value []byte)
-	Failure(status Status)
+	Failure(resp *kproto.Command, status Status)
 	Status() Status
 }
 
@@ -27,7 +27,7 @@ func (c *GenericCallback) Success(resp *kproto.Command, value []byte) {
 }
 
 // Failure is called ResponseHandler when response message received from kinetic device with status code other than OK.
-func (c *GenericCallback) Failure(status Status) {
+func (c *GenericCallback) Failure(resp *kproto.Command, status Status) {
 	c.status = status
 }
 
@@ -81,16 +81,17 @@ func (c *GetVersionCallback) Success(resp *kproto.Command, value []byte) {
 // P2PPushCallback is the Callback for Command_PEER2PEERPUSH
 type P2PPushCallback struct {
 	GenericCallback
-	Statuses []Status
+	P2PStatus P2PPushStatus
 }
 
 // Success extracts P2Push operation status from response message.
 func (c *P2PPushCallback) Success(resp *kproto.Command, value []byte) {
 	c.GenericCallback.Success(resp, value)
-	c.Statuses = make([]Status, len(resp.GetBody().GetP2POperation().GetOperation()))
+	c.P2PStatus.AllOperationsSucceeded = resp.GetBody().GetP2POperation().GetAllChildOperationsSucceeded()
+	c.P2PStatus.PushStatus = make([]Status, len(resp.GetBody().GetP2POperation().GetOperation()))
 	for k, op := range resp.GetBody().GetP2POperation().GetOperation() {
-		c.Statuses[k].Code = convertStatusCodeFromProto(op.GetStatus().GetCode())
-		c.Statuses[k].ErrorMsg = op.GetStatus().GetStatusMessage()
+		c.P2PStatus.PushStatus[k].Code = convertStatusCodeFromProto(op.GetStatus().GetCode())
+		c.P2PStatus.PushStatus[k].ErrorMsg = op.GetStatus().GetStatusMessage()
 	}
 }
 
@@ -104,4 +105,21 @@ type GetLogCallback struct {
 func (c *GetLogCallback) Success(resp *kproto.Command, value []byte) {
 	c.GenericCallback.Success(resp, value)
 	c.Logs = getLogFromProto(resp)
+}
+
+type BatchEndCallback struct {
+	GenericCallback
+	BatchStatus BatchStatus
+}
+
+func (c *BatchEndCallback) Success(resp *kproto.Command, value []byte) {
+	c.GenericCallback.Success(resp, value)
+	c.BatchStatus.DoneSequence = resp.GetBody().GetBatch().GetSequence()
+	c.BatchStatus.FailedSequence = resp.GetBody().GetBatch().GetFailedSequence()
+}
+
+func (c *BatchEndCallback) Failure(resp *kproto.Command, status Status) {
+	c.GenericCallback.Failure(resp, status)
+	c.BatchStatus.DoneSequence = resp.GetBody().GetBatch().GetSequence()
+	c.BatchStatus.FailedSequence = resp.GetBody().GetBatch().GetFailedSequence()
 }
