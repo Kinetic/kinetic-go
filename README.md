@@ -1,3 +1,0 @@
-# Kinetic in Go
-
-Soon...
