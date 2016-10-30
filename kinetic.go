@@ -27,7 +27,7 @@ import (
 	"os"
 
 	"github.com/Sirupsen/logrus"
-	kproto "github.com/yongzhy/kinetic-go/proto"
+	kproto "github.com/Kinetic/kinetic-go/proto"
 )
 
 // Create logger for Kinetic package

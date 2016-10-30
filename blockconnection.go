@@ -18,7 +18,7 @@
 package kinetic
 
 import (
-	kproto "github.com/yongzhy/kinetic-go/proto"
+	kproto "github.com/Kinetic/kinetic-go/proto"
 )
 
 // BlockConnection sends kinetic message to devices and wait for response message from device.

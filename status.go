@@ -20,7 +20,7 @@ package kinetic
 import (
 	"strconv"
 
-	kproto "github.com/yongzhy/kinetic-go/proto"
+	kproto "github.com/Kinetic/kinetic-go/proto"
 )
 
 // StatusCode for kinetic message.

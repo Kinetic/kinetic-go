@@ -21,7 +21,7 @@ import (
 	"bytes"
 	"sync"
 
-	kproto "github.com/yongzhy/kinetic-go/proto"
+	kproto "github.com/Kinetic/kinetic-go/proto"
 )
 
 // NonBlockConnection send kinetic message to devices and doesn't wait for

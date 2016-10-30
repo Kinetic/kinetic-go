@@ -18,7 +18,7 @@
 package kinetic
 
 import (
-	kproto "github.com/yongzhy/kinetic-go/proto"
+	kproto "github.com/Kinetic/kinetic-go/proto"
 )
 
 // LogType defines what type of information to retrieve by GetLog.

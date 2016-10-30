@@ -28,7 +28,7 @@ import (
 	"time"
 
 	proto "github.com/golang/protobuf/proto"
-	kproto "github.com/yongzhy/kinetic-go/proto"
+	kproto "github.com/Kinetic/kinetic-go/proto"
 )
 
 var (

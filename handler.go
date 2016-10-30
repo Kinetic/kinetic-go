@@ -20,7 +20,7 @@ package kinetic
 import (
 	"sync"
 
-	kproto "github.com/yongzhy/kinetic-go/proto"
+	kproto "github.com/Kinetic/kinetic-go/proto"
 )
 
 // ResponseHandler is the handler for XXXXX_RESPONSE message from drive.

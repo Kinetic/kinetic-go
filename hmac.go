@@ -22,7 +22,7 @@ import (
 	"crypto/sha1"
 	"encoding/binary"
 
-	kproto "github.com/yongzhy/kinetic-go/proto"
+	kproto "github.com/Kinetic/kinetic-go/proto"
 )
 
 func computeHmac(data []byte, key []byte) []byte {
