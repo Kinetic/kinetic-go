@@ -8,8 +8,10 @@ go:
   - master
 
 before_install:
-  - git clone https://github.com/Kinetic/kinetic-java.git kinetic-java
-  - pushd kinetic-java && mvn clean package && ./bin/startSimulator.sh && popd
+  - git clone https://github.com/Kinetic/kinetic-java.git ~/kinetic-java
+  - pushd ~/kinetic-java && mvn clean package && popd
+  - ( ~/kinetic-java/bin/startSimulator.sh& ) 
+  - sleep 5
 
 install:
   - go get github.com/Kinetic/kinetic-go
