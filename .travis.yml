@@ -1,0 +1,17 @@
+language: go
+
+go:
+  - 1.4
+  - 1.5
+  - 1.6
+  - 1.7
+  - master
+
+before_install:
+  - git clone https://github.com/Kinetic/kinetic-java.git kinetic-java
+  - pushd kinetic-java && mvn clean package && ./bin/startSimulator.sh && popd
+
+install:
+  - go get github.com/Kinetic/kinetic-go
+
+script: go test ./...

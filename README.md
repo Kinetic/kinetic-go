@@ -1,5 +1,7 @@
 # Kinetic-Go 
 
+[![Build Status](https://travis-ci.org/Kinetic/kinetic-go.svg?branch=master)](https://travis-ci.org/Kinetic/kinetic-go)
+
 ## Introduction
 
 Kinetic client library in Golang. 
