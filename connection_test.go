@@ -58,28 +58,32 @@ func TestBlockNoOp(t *testing.T) {
 
 func TestBlockGet(t *testing.T) {
 	_, status, err := blockConn.Get([]byte("object000"))
-	if err != nil || status.Code != OK {
+	// Object might not exist, expect to see OK status, or REMOTE_NOT_FOUND
+	if err != nil || (status.Code != OK && status.Code != REMOTE_NOT_FOUND) {
 		t.Fatal("Blocking Get Failure", err, status.String())
 	}
 }
 
 func TestBlockGetNext(t *testing.T) {
 	_, status, err := blockConn.GetNext([]byte("object000"))
-	if err != nil || status.Code != OK {
+	// Object might not exist, expect to see OK status, or REMOTE_NOT_FOUND
+	if err != nil || (status.Code != OK && status.Code != REMOTE_NOT_FOUND) {
 		t.Fatal("Blocking GetNext Failure", err, status.String())
 	}
 }
 
 func TestBlockGetPrevious(t *testing.T) {
 	_, status, err := blockConn.GetPrevious([]byte("object000"))
-	if err != nil || status.Code != OK {
+	// Object might not exist, expect to see OK status, or REMOTE_NOT_FOUND
+	if err != nil || (status.Code != OK && status.Code != REMOTE_NOT_FOUND) {
 		t.Fatal("Blocking GetPrevious Failure", err, status.String())
 	}
 }
 
 func TestBlockGetVersion(t *testing.T) {
 	version, status, err := blockConn.GetVersion([]byte("object000"))
-	if err != nil || status.Code != OK {
+	// Object might not exist, expect to see OK status, or REMOTE_NOT_FOUND
+	if err != nil || (status.Code != OK && status.Code != REMOTE_NOT_FOUND) {
 		t.Fatal("Blocking GetVersion Failure", err, status.String())
 	}
 	t.Logf("Object version = %x", version)
@@ -119,7 +123,8 @@ func TestBlockPut_keyOverflow(t *testing.T) {
 		Force: true,
 	}
 	status, err := blockConn.Put(&entry)
-	if err != nil || status.Code != OK {
+	// Request with key buffer overflow, expect to see failure code REMOTE_INVALID_REQUEST
+	if err != nil || status.Code != REMOTE_INVALID_REQUEST {
 		t.Fatal("Blocking Put Failure", err, status.String())
 	}
 }
@@ -136,7 +141,8 @@ func TestBlockPut_valueOverflow(t *testing.T) {
 		Force: true,
 	}
 	status, err := blockConn.Put(&entry)
-	if err != nil || status.Code != OK {
+	// Request with value buffer overflow, expect to see failure code REMOTE_INVALID_REQUEST
+	if err != nil || status.Code != REMOTE_INVALID_REQUEST {
 		t.Fatal("Blocking Put Failure", err, status.String())
 	}
 }
@@ -153,7 +159,8 @@ func TestBlockPut_tagOverflow(t *testing.T) {
 		Force: true,
 	}
 	status, err := blockConn.Put(&entry)
-	if err != nil || status.Code != OK {
+	// Request with tag buffer overflow, expect to see failure code REMOTE_INVALID_REQUEST
+	if err != nil || status.Code != REMOTE_INVALID_REQUEST {
 		t.Fatal("Blocking Put Failure", err, status.String())
 	}
 }
