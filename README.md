@@ -1,6 +1,7 @@
 # Kinetic-Go 
 
 [![Build Status](https://travis-ci.org/Kinetic/kinetic-go.svg?branch=master)](https://travis-ci.org/Kinetic/kinetic-go)
+[![GoDoc](https://godoc.org/github.com/Kinetic/kinetic-go?status.svg)](https://godoc.org/github.com/Kinetic/kinetic-go)
 
 ## Introduction
 
@@ -16,7 +17,11 @@ Install with following command:
 
     go get github.com/Kinetic/kinetic-go 
 
-## Usage
+## Documents
+
+Visit [https://godoc.org/github.com/Kinetic/kinetic-go](https://godoc.org/github.com/Kinetic/kinetic-go) to see API documents.
+
+## Usage Examples
 
 Refer to file `kinetic_test.go` and `connection_test.go` for some examples.
 
