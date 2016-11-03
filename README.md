@@ -9,7 +9,7 @@ Kinetic client library in Golang.
 
 ## Kinetic Protocol Version
 
-This client is using version `3.0.6` from [Kinetic-Protocol](https://github.com/Kinetic/kinetic-protocol)
+This client is using version `3.0.7` from [Kinetic-Protocol](https://github.com/Kinetic/kinetic-protocol)
 
 ## Installation
 

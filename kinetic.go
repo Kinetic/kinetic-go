@@ -26,8 +26,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/Sirupsen/logrus"
 	kproto "github.com/Kinetic/kinetic-go/proto"
+	"github.com/Sirupsen/logrus"
 )
 
 // Create logger for Kinetic package
@@ -341,20 +341,22 @@ func convertMessageTypeFromProto(m kproto.Command_MessageType) MessageType {
 type Algorithm int32
 
 const (
-	_          Algorithm = iota
-	ALGO_SHA1  Algorithm = iota
-	ALGO_SHA2  Algorithm = iota
-	ALGO_SHA3  Algorithm = iota
-	ALGO_CRC32 Algorithm = iota
-	ALGO_CRC64 Algorithm = iota
+	_           Algorithm = iota
+	ALGO_SHA1   Algorithm = iota
+	ALGO_SHA2   Algorithm = iota
+	ALGO_SHA3   Algorithm = iota
+	ALGO_CRC32C Algorithm = iota
+	ALGO_CRC64  Algorithm = iota
+	ALGO_CRC32  Algorithm = iota
 )
 
 var strAlgorithm = map[Algorithm]string{
-	ALGO_SHA1:  "ALGO_SHA1",
-	ALGO_SHA2:  "ALGO_SHA2",
-	ALGO_SHA3:  "ALGO_SHA3",
-	ALGO_CRC32: "ALGO_CRC32",
-	ALGO_CRC64: "ALGO_CRC64",
+	ALGO_SHA1:   "ALGO_SHA1",
+	ALGO_SHA2:   "ALGO_SHA2",
+	ALGO_SHA3:   "ALGO_SHA3",
+	ALGO_CRC32C: "ALGO_CRC32C",
+	ALGO_CRC64:  "ALGO_CRC64",
+	ALGO_CRC32:  "ALGO_CRC32",
 }
 
 func (a Algorithm) String() string {
@@ -374,10 +376,12 @@ func convertAlgoToProto(a Algorithm) kproto.Command_Algorithm {
 		ret = kproto.Command_SHA2
 	case ALGO_SHA3:
 		ret = kproto.Command_SHA3
-	case ALGO_CRC32:
-		ret = kproto.Command_CRC32
+	case ALGO_CRC32C:
+		ret = kproto.Command_CRC32C
 	case ALGO_CRC64:
 		ret = kproto.Command_CRC64
+	case ALGO_CRC32:
+		ret = kproto.Command_CRC32
 	}
 	return ret
 }
@@ -391,10 +395,12 @@ func convertAlgoFromProto(a kproto.Command_Algorithm) Algorithm {
 		ret = ALGO_SHA2
 	case kproto.Command_SHA3:
 		ret = ALGO_SHA3
-	case kproto.Command_CRC32:
-		ret = ALGO_CRC32
+	case kproto.Command_CRC32C:
+		ret = ALGO_CRC32C
 	case kproto.Command_CRC64:
 		ret = ALGO_CRC64
+	case kproto.Command_CRC32:
+		ret = ALGO_CRC32
 	}
 	return ret
 }
