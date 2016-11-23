@@ -419,6 +419,20 @@ func (conn *BlockConnection) MediaOptimize(op *MediaOperation, pri Priority) (St
 	return callback.Status(), err
 }
 
+// SetPowerLevel sets device power level
+func (conn *BlockConnection) SetPowerLevel(p PowerLevel) (Status, error) {
+	callback := &GenericCallback{}
+	h := NewResponseHandler(callback)
+	err := conn.nbc.SetPowerLevel(p, h)
+	if err != nil {
+		return callback.Status(), err
+	}
+
+	err = conn.nbc.Listen(h)
+
+	return callback.Status(), err
+}
+
 // Close the connection to kientic device
 func (conn *BlockConnection) Close() {
 	conn.nbc.Close()

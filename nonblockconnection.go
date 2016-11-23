@@ -490,6 +490,22 @@ func (conn *NonBlockConnection) MediaOptimize(op *MediaOperation, pri Priority, 
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+func (conn *NonBlockConnection) SetPowerLevel(p PowerLevel, h *ResponseHandler) error {
+	msg := newMessage(kproto.Message_HMACAUTH)
+
+	cmd := newCommand(kproto.Command_SET_POWER_LEVEL)
+
+	level := convertPowerLevelToProto(p)
+
+	cmd.Body = &kproto.Command_Body{
+		Power: &kproto.Command_PowerManagement{
+			Level: &level,
+		},
+	}
+
+	return conn.service.submit(msg, cmd, nil, h)
+}
+
 // Listen waits and read response message from device, then call ResponseHandler
 // in queue to process received message.
 func (conn *NonBlockConnection) Listen(h *ResponseHandler) error {

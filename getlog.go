@@ -145,6 +145,7 @@ type ConfigurationLog struct {
 	Interface               []ConfigurationInterface // Device interfaces as list
 	Port                    int32                    // Service port
 	TlsPort                 int32                    // TLS service port
+	CurrentPowerLevel       PowerLevel               // Device current power level, valid value only POWER_HIBERNATE or POWER_OPERATIONAL
 }
 
 // StatisticsLog information for each type of MessageType.
@@ -272,6 +273,7 @@ func getConfigurationLogFromProto(getlog *kproto.Command_GetLog) (log *Configura
 			Interface:               getConfigurationInterfaceFromProto(conf),
 			Port:                    conf.GetPort(),
 			TlsPort:                 conf.GetTlsPort(),
+			CurrentPowerLevel:       convertPowerLevelFromProto(conf.GetCurrentPowerLevel()),
 		}
 	}
 	return
