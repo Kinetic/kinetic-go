@@ -81,86 +81,90 @@ type ClientOptions struct {
 type MessageType int32
 
 const (
-	_                             MessageType = iota
-	MESSAGE_GET                   MessageType = iota
-	MESSAGE_GET_RESPONSE          MessageType = iota
-	MESSAGE_PUT                   MessageType = iota
-	MESSAGE_PUT_RESPONSE          MessageType = iota
-	MESSAGE_DELETE                MessageType = iota
-	MESSAGE_DELETE_RESPONSE       MessageType = iota
-	MESSAGE_GETNEXT               MessageType = iota
-	MESSAGE_GETNEXT_RESPONSE      MessageType = iota
-	MESSAGE_GETPREVIOUS           MessageType = iota
-	MESSAGE_GETPREVIOUS_RESPONSE  MessageType = iota
-	MESSAGE_GETKEYRANGE           MessageType = iota
-	MESSAGE_GETKEYRANGE_RESPONSE  MessageType = iota
-	MESSAGE_GETVERSION            MessageType = iota
-	MESSAGE_GETVERSION_RESPONSE   MessageType = iota
-	MESSAGE_SETUP                 MessageType = iota
-	MESSAGE_SETUP_RESPONSE        MessageType = iota
-	MESSAGE_GETLOG                MessageType = iota
-	MESSAGE_GETLOG_RESPONSE       MessageType = iota
-	MESSAGE_SECURITY              MessageType = iota
-	MESSAGE_SECURITY_RESPONSE     MessageType = iota
-	MESSAGE_PEER2PEERPUSH         MessageType = iota
-	MESSAGE_PEER2PEERPUSH_RESPONS MessageType = iota
-	MESSAGE_NOOP                  MessageType = iota
-	MESSAGE_NOOP_RESPONSE         MessageType = iota
-	MESSAGE_FLUSHALLDATA          MessageType = iota
-	MESSAGE_FLUSHALLDATA_RESPONS  MessageType = iota
-	MESSAGE_PINOP                 MessageType = iota
-	MESSAGE_PINOP_RESPONSE        MessageType = iota
-	MESSAGE_MEDIASCAN             MessageType = iota
-	MESSAGE_MEDIASCAN_RESPONSE    MessageType = iota
-	MESSAGE_MEDIAOPTIMIZE         MessageType = iota
-	MESSAGE_MEDIAOPTIMIZE_RESPON  MessageType = iota
-	MESSAGE_START_BATCH           MessageType = iota
-	MESSAGE_START_BATCH_RESPONSE  MessageType = iota
-	MESSAGE_END_BATCH             MessageType = iota
-	MESSAGE_END_BATCH_RESPONSE    MessageType = iota
-	MESSAGE_ABORT_BATCH           MessageType = iota
-	MESSAGE_ABORT_BATCH_RESPONSE  MessageType = iota
+	_                                MessageType = iota
+	MESSAGE_GET                      MessageType = iota
+	MESSAGE_GET_RESPONSE             MessageType = iota
+	MESSAGE_PUT                      MessageType = iota
+	MESSAGE_PUT_RESPONSE             MessageType = iota
+	MESSAGE_DELETE                   MessageType = iota
+	MESSAGE_DELETE_RESPONSE          MessageType = iota
+	MESSAGE_GETNEXT                  MessageType = iota
+	MESSAGE_GETNEXT_RESPONSE         MessageType = iota
+	MESSAGE_GETPREVIOUS              MessageType = iota
+	MESSAGE_GETPREVIOUS_RESPONSE     MessageType = iota
+	MESSAGE_GETKEYRANGE              MessageType = iota
+	MESSAGE_GETKEYRANGE_RESPONSE     MessageType = iota
+	MESSAGE_GETVERSION               MessageType = iota
+	MESSAGE_GETVERSION_RESPONSE      MessageType = iota
+	MESSAGE_SETUP                    MessageType = iota
+	MESSAGE_SETUP_RESPONSE           MessageType = iota
+	MESSAGE_GETLOG                   MessageType = iota
+	MESSAGE_GETLOG_RESPONSE          MessageType = iota
+	MESSAGE_SECURITY                 MessageType = iota
+	MESSAGE_SECURITY_RESPONSE        MessageType = iota
+	MESSAGE_PEER2PEERPUSH            MessageType = iota
+	MESSAGE_PEER2PEERPUSH_RESPONS    MessageType = iota
+	MESSAGE_NOOP                     MessageType = iota
+	MESSAGE_NOOP_RESPONSE            MessageType = iota
+	MESSAGE_FLUSHALLDATA             MessageType = iota
+	MESSAGE_FLUSHALLDATA_RESPONS     MessageType = iota
+	MESSAGE_PINOP                    MessageType = iota
+	MESSAGE_PINOP_RESPONSE           MessageType = iota
+	MESSAGE_MEDIASCAN                MessageType = iota
+	MESSAGE_MEDIASCAN_RESPONSE       MessageType = iota
+	MESSAGE_MEDIAOPTIMIZE            MessageType = iota
+	MESSAGE_MEDIAOPTIMIZE_RESPON     MessageType = iota
+	MESSAGE_START_BATCH              MessageType = iota
+	MESSAGE_START_BATCH_RESPONSE     MessageType = iota
+	MESSAGE_END_BATCH                MessageType = iota
+	MESSAGE_END_BATCH_RESPONSE       MessageType = iota
+	MESSAGE_ABORT_BATCH              MessageType = iota
+	MESSAGE_ABORT_BATCH_RESPONSE     MessageType = iota
+	MESSAGE_SET_POWER_LEVEL          MessageType = iota
+	MESSAGE_SET_POWER_LEVEL_RESPONSE MessageType = iota
 )
 
 var strMessageType = map[MessageType]string{
-	MESSAGE_GET:                   "GET",
-	MESSAGE_GET_RESPONSE:          "GET_RESPONSE",
-	MESSAGE_PUT:                   "PUT",
-	MESSAGE_PUT_RESPONSE:          "PUT_RESPONSE",
-	MESSAGE_DELETE:                "DELETE",
-	MESSAGE_DELETE_RESPONSE:       "DELETE_RESPONSE",
-	MESSAGE_GETNEXT:               "GETNEXT",
-	MESSAGE_GETNEXT_RESPONSE:      "GETNEXT_RESPONSE",
-	MESSAGE_GETPREVIOUS:           "GETPREVIOUS",
-	MESSAGE_GETPREVIOUS_RESPONSE:  "GETPREVIOUS_RESPONSE",
-	MESSAGE_GETKEYRANGE:           "GETKEYRANGE",
-	MESSAGE_GETKEYRANGE_RESPONSE:  "GETKEYRANGE_RESPONSE",
-	MESSAGE_GETVERSION:            "GETVERSION",
-	MESSAGE_GETVERSION_RESPONSE:   "GETVERSION_RESPONSE",
-	MESSAGE_SETUP:                 "SETUP",
-	MESSAGE_SETUP_RESPONSE:        "SETUP_RESPONSE",
-	MESSAGE_GETLOG:                "GETLOG",
-	MESSAGE_GETLOG_RESPONSE:       "GETLOG_RESPONSE",
-	MESSAGE_SECURITY:              "SECURITY",
-	MESSAGE_SECURITY_RESPONSE:     "SECURITY_RESPONSE",
-	MESSAGE_PEER2PEERPUSH:         "PEER2PEERPUSH",
-	MESSAGE_PEER2PEERPUSH_RESPONS: "PEER2PEERPUSH_RESPONS",
-	MESSAGE_NOOP:                  "NOOP",
-	MESSAGE_NOOP_RESPONSE:         "NOOP_RESPONSE",
-	MESSAGE_FLUSHALLDATA:          "FLUSHALLDATA",
-	MESSAGE_FLUSHALLDATA_RESPONS:  "FLUSHALLDATA_RESPONS",
-	MESSAGE_PINOP:                 "PINOP",
-	MESSAGE_PINOP_RESPONSE:        "PINOP_RESPONSE",
-	MESSAGE_MEDIASCAN:             "MEDIASCAN",
-	MESSAGE_MEDIASCAN_RESPONSE:    "MEDIASCAN_RESPONSE",
-	MESSAGE_MEDIAOPTIMIZE:         "MEDIAOPTIMIZE",
-	MESSAGE_MEDIAOPTIMIZE_RESPON:  "MEDIAOPTIMIZE_RESPON",
-	MESSAGE_START_BATCH:           "START_BATCH",
-	MESSAGE_START_BATCH_RESPONSE:  "START_BATCH_RESPONSE",
-	MESSAGE_END_BATCH:             "END_BATCH",
-	MESSAGE_END_BATCH_RESPONSE:    "END_BATCH_RESPONSE",
-	MESSAGE_ABORT_BATCH:           "ABORT_BATCH",
-	MESSAGE_ABORT_BATCH_RESPONSE:  "ABORT_BATCH_RESPONSE",
+	MESSAGE_GET:                      "GET",
+	MESSAGE_GET_RESPONSE:             "GET_RESPONSE",
+	MESSAGE_PUT:                      "PUT",
+	MESSAGE_PUT_RESPONSE:             "PUT_RESPONSE",
+	MESSAGE_DELETE:                   "DELETE",
+	MESSAGE_DELETE_RESPONSE:          "DELETE_RESPONSE",
+	MESSAGE_GETNEXT:                  "GETNEXT",
+	MESSAGE_GETNEXT_RESPONSE:         "GETNEXT_RESPONSE",
+	MESSAGE_GETPREVIOUS:              "GETPREVIOUS",
+	MESSAGE_GETPREVIOUS_RESPONSE:     "GETPREVIOUS_RESPONSE",
+	MESSAGE_GETKEYRANGE:              "GETKEYRANGE",
+	MESSAGE_GETKEYRANGE_RESPONSE:     "GETKEYRANGE_RESPONSE",
+	MESSAGE_GETVERSION:               "GETVERSION",
+	MESSAGE_GETVERSION_RESPONSE:      "GETVERSION_RESPONSE",
+	MESSAGE_SETUP:                    "SETUP",
+	MESSAGE_SETUP_RESPONSE:           "SETUP_RESPONSE",
+	MESSAGE_GETLOG:                   "GETLOG",
+	MESSAGE_GETLOG_RESPONSE:          "GETLOG_RESPONSE",
+	MESSAGE_SECURITY:                 "SECURITY",
+	MESSAGE_SECURITY_RESPONSE:        "SECURITY_RESPONSE",
+	MESSAGE_PEER2PEERPUSH:            "PEER2PEERPUSH",
+	MESSAGE_PEER2PEERPUSH_RESPONS:    "PEER2PEERPUSH_RESPONS",
+	MESSAGE_NOOP:                     "NOOP",
+	MESSAGE_NOOP_RESPONSE:            "NOOP_RESPONSE",
+	MESSAGE_FLUSHALLDATA:             "FLUSHALLDATA",
+	MESSAGE_FLUSHALLDATA_RESPONS:     "FLUSHALLDATA_RESPONS",
+	MESSAGE_PINOP:                    "PINOP",
+	MESSAGE_PINOP_RESPONSE:           "PINOP_RESPONSE",
+	MESSAGE_MEDIASCAN:                "MEDIASCAN",
+	MESSAGE_MEDIASCAN_RESPONSE:       "MEDIASCAN_RESPONSE",
+	MESSAGE_MEDIAOPTIMIZE:            "MEDIAOPTIMIZE",
+	MESSAGE_MEDIAOPTIMIZE_RESPON:     "MEDIAOPTIMIZE_RESPON",
+	MESSAGE_START_BATCH:              "START_BATCH",
+	MESSAGE_START_BATCH_RESPONSE:     "START_BATCH_RESPONSE",
+	MESSAGE_END_BATCH:                "END_BATCH",
+	MESSAGE_END_BATCH_RESPONSE:       "END_BATCH_RESPONSE",
+	MESSAGE_ABORT_BATCH:              "ABORT_BATCH",
+	MESSAGE_ABORT_BATCH_RESPONSE:     "ABORT_BATCH_RESPONSE",
+	MESSAGE_SET_POWER_LEVEL:          "SET_POWER_LEVEL",
+	MESSAGE_SET_POWER_LEVEL_RESPONSE: "SET_POWER_LEVEL_RESPONSE",
 }
 
 func (m MessageType) String() string {
@@ -250,6 +254,10 @@ func convertMessageTypeToProto(m MessageType) kproto.Command_MessageType {
 		ret = kproto.Command_ABORT_BATCH
 	case MESSAGE_ABORT_BATCH_RESPONSE:
 		ret = kproto.Command_ABORT_BATCH_RESPONSE
+	case MESSAGE_SET_POWER_LEVEL:
+		ret = kproto.Command_SET_POWER_LEVEL
+	case MESSAGE_SET_POWER_LEVEL_RESPONSE:
+		ret = kproto.Command_SET_POWER_LEVEL_RESPONSE
 	}
 	return ret
 }
@@ -333,6 +341,10 @@ func convertMessageTypeFromProto(m kproto.Command_MessageType) MessageType {
 		ret = MESSAGE_ABORT_BATCH
 	case kproto.Command_ABORT_BATCH_RESPONSE:
 		ret = MESSAGE_ABORT_BATCH_RESPONSE
+	case kproto.Command_SET_POWER_LEVEL:
+		ret = MESSAGE_SET_POWER_LEVEL
+	case kproto.Command_SET_POWER_LEVEL_RESPONSE:
+		ret = MESSAGE_SET_POWER_LEVEL_RESPONSE
 	}
 	return ret
 }
@@ -551,26 +563,28 @@ type MediaOperation struct {
 type ACLPermission int32
 
 const (
-	_                       ACLPermission = iota
-	ACL_PERMISSION_READ     ACLPermission = iota // Can read key/values
-	ACL_PERMISSION_WRITE    ACLPermission = iota // Can write key/values
-	ACL_PERMISSION_DELETE   ACLPermission = iota // Can delete key/values
-	ACL_PERMISSION_RANGE    ACLPermission = iota // Can do a range
-	ACL_PERMISSION_SETUP    ACLPermission = iota // Can setup a device
-	ACL_PERMISSION_P2POP    ACLPermission = iota // Can do a peer to peer operation
-	ACL_PERMISSION_GETLOG   ACLPermission = iota // Can get log
-	ACL_PERMISSION_SECURITY ACLPermission = iota // Can set up the security of device
+	_                               ACLPermission = iota
+	ACL_PERMISSION_READ             ACLPermission = iota // Can read key/values
+	ACL_PERMISSION_WRITE            ACLPermission = iota // Can write key/values
+	ACL_PERMISSION_DELETE           ACLPermission = iota // Can delete key/values
+	ACL_PERMISSION_RANGE            ACLPermission = iota // Can do a range
+	ACL_PERMISSION_SETUP            ACLPermission = iota // Can setup a device
+	ACL_PERMISSION_P2POP            ACLPermission = iota // Can do a peer to peer operation
+	ACL_PERMISSION_GETLOG           ACLPermission = iota // Can get log
+	ACL_PERMISSION_SECURITY         ACLPermission = iota // Can set up the security of device
+	ACL_PERMISSION_POWER_MANAGEMENT ACLPermission = iota // Can set power level
 )
 
 var strACLPermission = map[ACLPermission]string{
-	ACL_PERMISSION_READ:     "ACL_PERMISSION_READ",
-	ACL_PERMISSION_WRITE:    "ACL_PERMISSION_WRITE",
-	ACL_PERMISSION_DELETE:   "ACL_PERMISSION_DELETE",
-	ACL_PERMISSION_RANGE:    "ACL_PERMISSION_RANGE",
-	ACL_PERMISSION_SETUP:    "ACL_PERMISSION_SETUP",
-	ACL_PERMISSION_P2POP:    "ACL_PERMISSION_P2POP",
-	ACL_PERMISSION_GETLOG:   "ACL_PERMISSION_GETLOG",
-	ACL_PERMISSION_SECURITY: "ACL_PERMISSION_SECURITY",
+	ACL_PERMISSION_READ:             "ACL_PERMISSION_READ",
+	ACL_PERMISSION_WRITE:            "ACL_PERMISSION_WRITE",
+	ACL_PERMISSION_DELETE:           "ACL_PERMISSION_DELETE",
+	ACL_PERMISSION_RANGE:            "ACL_PERMISSION_RANGE",
+	ACL_PERMISSION_SETUP:            "ACL_PERMISSION_SETUP",
+	ACL_PERMISSION_P2POP:            "ACL_PERMISSION_P2POP",
+	ACL_PERMISSION_GETLOG:           "ACL_PERMISSION_GETLOG",
+	ACL_PERMISSION_SECURITY:         "ACL_PERMISSION_SECURITY",
+	ACL_PERMISSION_POWER_MANAGEMENT: "ACL_PERMISSION_POWER_MANAGEMENT",
 }
 
 func (p ACLPermission) String() string {
@@ -600,6 +614,8 @@ func convertACLPermissionToProto(perm ACLPermission) kproto.Command_Security_ACL
 		ret = kproto.Command_Security_ACL_GETLOG
 	case ACL_PERMISSION_SECURITY:
 		ret = kproto.Command_Security_ACL_SECURITY
+	case ACL_PERMISSION_POWER_MANAGEMENT:
+		ret = kproto.Command_Security_ACL_POWER_MANAGEMENT
 	}
 	return ret
 }
@@ -623,6 +639,8 @@ func convertACLPermissionFromProto(perm kproto.Command_Security_ACL_Permission) 
 		ret = ACL_PERMISSION_GETLOG
 	case kproto.Command_Security_ACL_SECURITY:
 		ret = ACL_PERMISSION_SECURITY
+	case kproto.Command_Security_ACL_POWER_MANAGEMENT:
+		ret = ACL_PERMISSION_POWER_MANAGEMENT
 	}
 	return ret
 }
@@ -700,4 +718,60 @@ type P2PPushStatus struct {
 type BatchStatus struct {
 	DoneSequence   []int64 // All sequence Ids of those commands (PUT/DELETE) performed successfully in the batch
 	FailedSequence int64   // Non 0 value means the first failed operation sequence in the batch, 0 means no failure
+}
+
+// PowerLevel
+type PowerLevel int32
+
+const (
+	_                 PowerLevel = iota
+	POWER_OPERATIONAL PowerLevel = iota
+	POWER_HIBERNATE   PowerLevel = iota
+	POWER_SHUTDOWN    PowerLevel = iota
+	POWER_FAIL        PowerLevel = iota
+)
+
+var strPowerLevel = map[PowerLevel]string{
+	POWER_OPERATIONAL: "OPERATIONAL",
+	POWER_HIBERNATE:   "HIBERNATE",
+	POWER_SHUTDOWN:    "SHUTDOWN",
+	POWER_FAIL:        "FAIL",
+}
+
+func (p PowerLevel) String() string {
+	str, ok := strPowerLevel[p]
+	if ok {
+		return str
+	}
+	return "Unknown Power Level"
+}
+
+func convertPowerLevelToProto(p PowerLevel) kproto.Command_PowerLevel {
+	var ret kproto.Command_PowerLevel
+	switch p {
+	case POWER_OPERATIONAL:
+		ret = kproto.Command_OPERATIONAL
+	case POWER_HIBERNATE:
+		ret = kproto.Command_HIBERNATE
+	case POWER_SHUTDOWN:
+		ret = kproto.Command_SHUTDOWN
+	case POWER_FAIL:
+		ret = kproto.Command_FAIL
+	}
+	return ret
+}
+
+func convertPowerLevelFromProto(p kproto.Command_PowerLevel) PowerLevel {
+	var ret PowerLevel
+	switch p {
+	case kproto.Command_OPERATIONAL:
+		ret = POWER_OPERATIONAL
+	case kproto.Command_HIBERNATE:
+		ret = POWER_HIBERNATE
+	case kproto.Command_SHUTDOWN:
+		ret = POWER_SHUTDOWN
+	case kproto.Command_FAIL:
+		ret = POWER_FAIL
+	}
+	return ret
 }

@@ -58,6 +58,8 @@ const (
 	REMOTE_INVALID_BATCH                    StatusCode = iota
 	REMOTE_INVALID_EXECUTE                  StatusCode = iota
 	REMOTE_EXECUTE_COMPLETE                 StatusCode = iota
+	REMOTE_HIBERNATE                        StatusCode = iota
+	REMOTE_SHUTDOWN                         StatusCode = iota
 )
 
 var statusName = map[StatusCode]string{
@@ -91,6 +93,8 @@ var statusName = map[StatusCode]string{
 	REMOTE_INVALID_BATCH:                    "REMOTE_INVALID_BATCH",
 	REMOTE_INVALID_EXECUTE:                  "REMOTE_INVALID_EXECUTE",
 	REMOTE_EXECUTE_COMPLETE:                 "REMOTE_EXECUTE_COMPLETE",
+	REMOTE_HIBERNATE:                        "REMOTE_HIBERNATE",
+	REMOTE_SHUTDOWN:                         "REMOTE_SHUTDOWN",
 }
 
 // Status for each kinetic message.
@@ -165,6 +169,10 @@ func convertStatusCodeToProto(s StatusCode) kproto.Command_Status_StatusCode {
 		ret = kproto.Command_Status_CONNECTION_TERMINATED
 	case REMOTE_INVALID_BATCH:
 		ret = kproto.Command_Status_INVALID_BATCH
+	case REMOTE_HIBERNATE:
+		ret = kproto.Command_Status_HIBERNATE
+	case REMOTE_SHUTDOWN:
+		ret = kproto.Command_Status_SHUTDOWN
 	}
 	return ret
 }
@@ -216,6 +224,10 @@ func convertStatusCodeFromProto(s kproto.Command_Status_StatusCode) StatusCode {
 		ret = REMOTE_CONNECTION_TERMINATED
 	case kproto.Command_Status_INVALID_BATCH:
 		ret = REMOTE_INVALID_BATCH
+	case kproto.Command_Status_HIBERNATE:
+		ret = REMOTE_HIBERNATE
+	case kproto.Command_Status_SHUTDOWN:
+		ret = REMOTE_SHUTDOWN
 	}
 	return ret
 }

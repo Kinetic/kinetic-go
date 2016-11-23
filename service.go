@@ -27,8 +27,8 @@ import (
 	"sync"
 	"time"
 
-	proto "github.com/golang/protobuf/proto"
 	kproto "github.com/Kinetic/kinetic-go/proto"
+	proto "github.com/golang/protobuf/proto"
 )
 
 var (
@@ -117,6 +117,7 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 	klog.Debugf("\tKinetic Protocol Version: %s", ns.device.Configuration.ProtocolVersion)
 	klog.Debugf("\tPort: %d", ns.device.Configuration.Port)
 	klog.Debugf("\tTlsPort: %d", ns.device.Configuration.TlsPort)
+	klog.Debugf("\tCurrentPowerLevel : %s", ns.device.Configuration.CurrentPowerLevel.String())
 
 	return ns, nil
 }

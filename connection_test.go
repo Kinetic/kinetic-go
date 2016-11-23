@@ -150,6 +150,9 @@ func TestBlockPut_valueOverflow(t *testing.T) {
 // TestBlockPut_tagOverflow test key buffer length than MaxTagSize
 // TODO: drive implementation using UNSOLICITEDSTATUS.
 func TestBlockPut_tagOverflow(t *testing.T) {
+	if blockConn.nbc.service.device.Limits.MaxTagSize > 0xFFFF {
+		t.Skip("Max tag checking not implemented yet, skip this test")
+	}
 	entry := Record{
 		Key:   []byte("key"),
 		Value: []byte("value"),
@@ -274,6 +277,17 @@ func TestBlockMediaOptimize(t *testing.T) {
 	status, err := blockConn.MediaOptimize(&op, PRIORITY_NORMAL)
 	if err != nil || status.Code != OK {
 		t.Fatal("Blocking MediaOptimize Failure: ", err, status.String())
+	}
+}
+
+func TestSetPowerLevel(t *testing.T) {
+	status, err := blockConn.SetPowerLevel(POWER_HIBERNATE)
+	if err != nil || status.Code != OK {
+		t.Fatal("Blocking SetPowerLevel Failure: ", err, status.String())
+	}
+	status, err = blockConn.SetPowerLevel(POWER_OPERATIONAL)
+	if err != nil || status.Code != OK {
+		t.Fatal("Blocking SetPowerLevel Failure: ", err, status.String())
 	}
 }
 
