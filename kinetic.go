@@ -58,12 +58,12 @@ const (
 	LogLevelDebug LogLevel = LogLevel(logrus.DebugLevel)
 )
 
-// SetLogLevel sets kinetic libary log level
+// SetLogLevel sets kinetic library log level
 func SetLogLevel(l LogLevel) {
 	klog.Level = logrus.Level(l)
 }
 
-// SetLogOutput sets kinetic libary log output
+// SetLogOutput sets kinetic library log output
 func SetLogOutput(out io.Writer) {
 	klog.Out = out
 }

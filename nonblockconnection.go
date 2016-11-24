@@ -240,7 +240,7 @@ func (conn *NonBlockConnection) BatchStart(h *ResponseHandler) error {
 }
 
 // BatchPut puts objects to kinetic drive, as a batch job. Batch PUT / DELETE won't expect acknowledgement
-// from kinetic device. Status for batch PUT / DELETE will only availabe in response message for BatchEnd.
+// from kinetic device. Status for batch PUT / DELETE will only available in response message for BatchEnd.
 func (conn *NonBlockConnection) BatchPut(entry *Record) error {
 	// Batch operation PUT
 	conn.batchMu.Lock()
@@ -250,7 +250,7 @@ func (conn *NonBlockConnection) BatchPut(entry *Record) error {
 }
 
 // BatchDelete delete object from kinetic drive, as a batch job. Batch PUT / DELETE won't expect acknowledgement
-// from kinetic device. Status for batch PUT / DELETE will only availabe in response message for BatchEnd.
+// from kinetic device. Status for batch PUT / DELETE will only available in response message for BatchEnd.
 func (conn *NonBlockConnection) BatchDelete(entry *Record) error {
 	// Batch operation DELETE
 	conn.batchMu.Lock()

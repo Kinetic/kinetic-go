@@ -22,7 +22,7 @@ import (
 )
 
 // BlockConnection sends kinetic message to devices and wait for response message from device.
-// For all API fucntions, it will only return after response from kinetic device handled.
+// For all API functions, it will only return after response from kinetic device handled.
 // If no data required from kinetic device, API function will return Status and error.
 // If any data required from kinetic device, the data will be one of the return values.
 type BlockConnection struct {
@@ -200,13 +200,13 @@ func (conn *BlockConnection) BatchStart() (Status, error) {
 }
 
 // BatchPut puts objects to kinetic drive, as a batch job. Batch PUT / DELETE won't expect acknowledgement
-// from kinetic device. Status for batch PUT / DELETE will only availabe in response message for BatchEnd.
+// from kinetic device. Status for batch PUT / DELETE will only available in response message for BatchEnd.
 func (conn *BlockConnection) BatchPut(entry *Record) error {
 	return conn.nbc.BatchPut(entry)
 }
 
 // BatchDelete delete object from kinetic drive, as a batch job. Batch PUT / DELETE won't expect acknowledgement
-// from kinetic device. Status for batch PUT / DELETE will only availabe in response message for BatchEnd.
+// from kinetic device. Status for batch PUT / DELETE will only available in response message for BatchEnd.
 func (conn *BlockConnection) BatchDelete(entry *Record) error {
 	return conn.nbc.BatchDelete(entry)
 }

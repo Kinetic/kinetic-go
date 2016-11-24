@@ -61,7 +61,7 @@ type networkService struct {
 	conn           net.Conn
 	clusterVersion int64                      // Cluster version
 	seq            int64                      // Operation sequence ID
-	connID         int64                      // current conection ID
+	connID         int64                      // current connection ID
 	option         ClientOptions              // current connection operation
 	hmap           map[int64]*ResponseHandler // Message handler map
 	fatal          bool                       // Network has fatal failure

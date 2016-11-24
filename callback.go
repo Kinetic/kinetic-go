@@ -22,7 +22,7 @@ import (
 )
 
 // Callback is the interface define actions for MessageType.
-// Success is called when XXXXX_RESPONSE message recieved from drive without problem.
+// Success is called when XXXXX_RESPONSE message received from drive without problem.
 // Failure is called when XXXXX_RESPONSE message status code is not OK, or any other kind of failure.
 // Done return true if either Success or Failure is called to indicate XXXXX_RESPONSE received and processed.
 // Status return the MessateType operation status.

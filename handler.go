@@ -24,7 +24,7 @@ import (
 )
 
 // ResponseHandler is the handler for XXXXX_RESPONSE message from drive.
-// For each operation, a unique ResponseHandler is requried
+// For each operation, a unique ResponseHandler is required
 type ResponseHandler struct {
 	callback Callback
 	done     bool
@@ -71,7 +71,7 @@ func (h *ResponseHandler) wait() {
 }
 
 // NewResponseHandler is helper function to build a ResponseHandler with call as the Callback.
-// For each operation, a unique ResponseHandler is requried
+// For each operation, a unique ResponseHandler is required
 func NewResponseHandler(call Callback) *ResponseHandler {
 	h := &ResponseHandler{callback: call, done: false, cond: sync.NewCond(&sync.Mutex{})}
 	return h
