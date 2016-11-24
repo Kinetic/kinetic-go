@@ -22,7 +22,7 @@ import (
 )
 
 // Callback is the interface define actions for MessageType.
-// Success is called when XXXXX_RESPONSE message recieved from drive without problem.
+// Success is called when XXXXX_RESPONSE message received from drive without problem.
 // Failure is called when XXXXX_RESPONSE message status code is not OK, or any other kind of failure.
 // Done return true if either Success or Failure is called to indicate XXXXX_RESPONSE received and processed.
 // Status return the MessateType operation status.
@@ -124,17 +124,20 @@ func (c *GetLogCallback) Success(resp *kproto.Command, value []byte) {
 	c.Logs = getLogFromProto(resp)
 }
 
+// BatchEndCallback is the Callback for Command_END_BATCH
 type BatchEndCallback struct {
 	GenericCallback
 	BatchStatus BatchStatus
 }
 
+// Success extracts all sequence IDs for commands (PUT/DELETE) performed in batch.
 func (c *BatchEndCallback) Success(resp *kproto.Command, value []byte) {
 	c.GenericCallback.Success(resp, value)
 	c.BatchStatus.DoneSequence = resp.GetBody().GetBatch().GetSequence()
 	c.BatchStatus.FailedSequence = resp.GetBody().GetBatch().GetFailedSequence()
 }
 
+// Failure extracts the first failed operation sequence in batch.
 func (c *BatchEndCallback) Failure(resp *kproto.Command, status Status) {
 	c.GenericCallback.Failure(resp, status)
 	c.BatchStatus.DoneSequence = resp.GetBody().GetBatch().GetSequence()

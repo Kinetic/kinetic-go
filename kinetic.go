@@ -58,12 +58,12 @@ const (
 	LogLevelDebug LogLevel = LogLevel(logrus.DebugLevel)
 )
 
-// SetLogLevel sets kinetic libary log level
+// SetLogLevel sets kinetic library log level
 func SetLogLevel(l LogLevel) {
 	klog.Level = logrus.Level(l)
 }
 
-// SetLogOutput sets kinetic libary log output
+// SetLogOutput sets kinetic library log output
 func SetLogOutput(out io.Writer) {
 	klog.Out = out
 }
@@ -77,94 +77,94 @@ type ClientOptions struct {
 	UseSSL bool // Use SSL connection, or plain connection
 }
 
-// MessageType are the top level kinetic command message type.
+// MessageType defines the top level kinetic command message type.
 type MessageType int32
 
 const (
-	_                                MessageType = iota
-	MESSAGE_GET                      MessageType = iota
-	MESSAGE_GET_RESPONSE             MessageType = iota
-	MESSAGE_PUT                      MessageType = iota
-	MESSAGE_PUT_RESPONSE             MessageType = iota
-	MESSAGE_DELETE                   MessageType = iota
-	MESSAGE_DELETE_RESPONSE          MessageType = iota
-	MESSAGE_GETNEXT                  MessageType = iota
-	MESSAGE_GETNEXT_RESPONSE         MessageType = iota
-	MESSAGE_GETPREVIOUS              MessageType = iota
-	MESSAGE_GETPREVIOUS_RESPONSE     MessageType = iota
-	MESSAGE_GETKEYRANGE              MessageType = iota
-	MESSAGE_GETKEYRANGE_RESPONSE     MessageType = iota
-	MESSAGE_GETVERSION               MessageType = iota
-	MESSAGE_GETVERSION_RESPONSE      MessageType = iota
-	MESSAGE_SETUP                    MessageType = iota
-	MESSAGE_SETUP_RESPONSE           MessageType = iota
-	MESSAGE_GETLOG                   MessageType = iota
-	MESSAGE_GETLOG_RESPONSE          MessageType = iota
-	MESSAGE_SECURITY                 MessageType = iota
-	MESSAGE_SECURITY_RESPONSE        MessageType = iota
-	MESSAGE_PEER2PEERPUSH            MessageType = iota
-	MESSAGE_PEER2PEERPUSH_RESPONS    MessageType = iota
-	MESSAGE_NOOP                     MessageType = iota
-	MESSAGE_NOOP_RESPONSE            MessageType = iota
-	MESSAGE_FLUSHALLDATA             MessageType = iota
-	MESSAGE_FLUSHALLDATA_RESPONS     MessageType = iota
-	MESSAGE_PINOP                    MessageType = iota
-	MESSAGE_PINOP_RESPONSE           MessageType = iota
-	MESSAGE_MEDIASCAN                MessageType = iota
-	MESSAGE_MEDIASCAN_RESPONSE       MessageType = iota
-	MESSAGE_MEDIAOPTIMIZE            MessageType = iota
-	MESSAGE_MEDIAOPTIMIZE_RESPON     MessageType = iota
-	MESSAGE_START_BATCH              MessageType = iota
-	MESSAGE_START_BATCH_RESPONSE     MessageType = iota
-	MESSAGE_END_BATCH                MessageType = iota
-	MESSAGE_END_BATCH_RESPONSE       MessageType = iota
-	MESSAGE_ABORT_BATCH              MessageType = iota
-	MESSAGE_ABORT_BATCH_RESPONSE     MessageType = iota
-	MESSAGE_SET_POWER_LEVEL          MessageType = iota
-	MESSAGE_SET_POWER_LEVEL_RESPONSE MessageType = iota
+	_                            MessageType = iota
+	MessageGet                   MessageType = iota
+	MessageGetResponse           MessageType = iota
+	MessagePut                   MessageType = iota
+	MessagePutResponse           MessageType = iota
+	MessageDelete                MessageType = iota
+	MessageDeleteResponse        MessageType = iota
+	MessageGetNext               MessageType = iota
+	MessageGetNextResponse       MessageType = iota
+	MessageGetPrevious           MessageType = iota
+	MessageGetPreviousResponse   MessageType = iota
+	MessageGetKeyRange           MessageType = iota
+	MessageGetKeyRangeResponse   MessageType = iota
+	MessageGetVersion            MessageType = iota
+	MessageGetVersionResponse    MessageType = iota
+	MessageSetup                 MessageType = iota
+	MessageSetupResponse         MessageType = iota
+	MessageGetLog                MessageType = iota
+	MessageGetLogResponse        MessageType = iota
+	MessageSecurity              MessageType = iota
+	MessageSecurityResponse      MessageType = iota
+	MessagePeer2PeerPush         MessageType = iota
+	MessagePeer2PeerPushResponse MessageType = iota
+	MessageNoop                  MessageType = iota
+	MessageNoopResponse          MessageType = iota
+	MessageFlushAllData          MessageType = iota
+	MessageFlushAllDataResponse  MessageType = iota
+	MessagePinOp                 MessageType = iota
+	MessagePinOpResponse         MessageType = iota
+	MessageMediaScan             MessageType = iota
+	MessageMediaScanResponse     MessageType = iota
+	MessageMediaOptimize         MessageType = iota
+	MessageMediaOptimizeResponse MessageType = iota
+	MessageStartBatch            MessageType = iota
+	MessageStartBatchResponse    MessageType = iota
+	MessageEndBatch              MessageType = iota
+	MessageEndBatchResponse      MessageType = iota
+	MessageAbortBatch            MessageType = iota
+	MessageAbortBatchResponse    MessageType = iota
+	MessageSetPowerLevel         MessageType = iota
+	MessageSetPowerLevelResponse MessageType = iota
 )
 
 var strMessageType = map[MessageType]string{
-	MESSAGE_GET:                      "GET",
-	MESSAGE_GET_RESPONSE:             "GET_RESPONSE",
-	MESSAGE_PUT:                      "PUT",
-	MESSAGE_PUT_RESPONSE:             "PUT_RESPONSE",
-	MESSAGE_DELETE:                   "DELETE",
-	MESSAGE_DELETE_RESPONSE:          "DELETE_RESPONSE",
-	MESSAGE_GETNEXT:                  "GETNEXT",
-	MESSAGE_GETNEXT_RESPONSE:         "GETNEXT_RESPONSE",
-	MESSAGE_GETPREVIOUS:              "GETPREVIOUS",
-	MESSAGE_GETPREVIOUS_RESPONSE:     "GETPREVIOUS_RESPONSE",
-	MESSAGE_GETKEYRANGE:              "GETKEYRANGE",
-	MESSAGE_GETKEYRANGE_RESPONSE:     "GETKEYRANGE_RESPONSE",
-	MESSAGE_GETVERSION:               "GETVERSION",
-	MESSAGE_GETVERSION_RESPONSE:      "GETVERSION_RESPONSE",
-	MESSAGE_SETUP:                    "SETUP",
-	MESSAGE_SETUP_RESPONSE:           "SETUP_RESPONSE",
-	MESSAGE_GETLOG:                   "GETLOG",
-	MESSAGE_GETLOG_RESPONSE:          "GETLOG_RESPONSE",
-	MESSAGE_SECURITY:                 "SECURITY",
-	MESSAGE_SECURITY_RESPONSE:        "SECURITY_RESPONSE",
-	MESSAGE_PEER2PEERPUSH:            "PEER2PEERPUSH",
-	MESSAGE_PEER2PEERPUSH_RESPONS:    "PEER2PEERPUSH_RESPONS",
-	MESSAGE_NOOP:                     "NOOP",
-	MESSAGE_NOOP_RESPONSE:            "NOOP_RESPONSE",
-	MESSAGE_FLUSHALLDATA:             "FLUSHALLDATA",
-	MESSAGE_FLUSHALLDATA_RESPONS:     "FLUSHALLDATA_RESPONS",
-	MESSAGE_PINOP:                    "PINOP",
-	MESSAGE_PINOP_RESPONSE:           "PINOP_RESPONSE",
-	MESSAGE_MEDIASCAN:                "MEDIASCAN",
-	MESSAGE_MEDIASCAN_RESPONSE:       "MEDIASCAN_RESPONSE",
-	MESSAGE_MEDIAOPTIMIZE:            "MEDIAOPTIMIZE",
-	MESSAGE_MEDIAOPTIMIZE_RESPON:     "MEDIAOPTIMIZE_RESPON",
-	MESSAGE_START_BATCH:              "START_BATCH",
-	MESSAGE_START_BATCH_RESPONSE:     "START_BATCH_RESPONSE",
-	MESSAGE_END_BATCH:                "END_BATCH",
-	MESSAGE_END_BATCH_RESPONSE:       "END_BATCH_RESPONSE",
-	MESSAGE_ABORT_BATCH:              "ABORT_BATCH",
-	MESSAGE_ABORT_BATCH_RESPONSE:     "ABORT_BATCH_RESPONSE",
-	MESSAGE_SET_POWER_LEVEL:          "SET_POWER_LEVEL",
-	MESSAGE_SET_POWER_LEVEL_RESPONSE: "SET_POWER_LEVEL_RESPONSE",
+	MessageGet:                   "GET",
+	MessageGetResponse:           "GET_RESPONSE",
+	MessagePut:                   "PUT",
+	MessagePutResponse:           "PUT_RESPONSE",
+	MessageDelete:                "DELETE",
+	MessageDeleteResponse:        "DELETE_RESPONSE",
+	MessageGetNext:               "GETNEXT",
+	MessageGetNextResponse:       "GETNEXT_RESPONSE",
+	MessageGetPrevious:           "GETPREVIOUS",
+	MessageGetPreviousResponse:   "GETPREVIOUS_RESPONSE",
+	MessageGetKeyRange:           "GETKEYRANGE",
+	MessageGetKeyRangeResponse:   "GETKEYRANGE_RESPONSE",
+	MessageGetVersion:            "GETVERSION",
+	MessageGetVersionResponse:    "GETVERSION_RESPONSE",
+	MessageSetup:                 "SETUP",
+	MessageSetupResponse:         "SETUP_RESPONSE",
+	MessageGetLog:                "GETLOG",
+	MessageGetLogResponse:        "GETLOG_RESPONSE",
+	MessageSecurity:              "SECURITY",
+	MessageSecurityResponse:      "SECURITY_RESPONSE",
+	MessagePeer2PeerPush:         "PEER2PEERPUSH",
+	MessagePeer2PeerPushResponse: "PEER2PEERPUSH_RESPONSE",
+	MessageNoop:                  "NOOP",
+	MessageNoopResponse:          "NOOP_RESPONSE",
+	MessageFlushAllData:          "FLUSHALLDATA",
+	MessageFlushAllDataResponse:  "FLUSHALLDATA_RESPONSE",
+	MessagePinOp:                 "PINOP",
+	MessagePinOpResponse:         "PINOP_RESPONSE",
+	MessageMediaScan:             "MEDIASCAN",
+	MessageMediaScanResponse:     "MEDIASCAN_RESPONSE",
+	MessageMediaOptimize:         "MEDIAOPTIMIZE",
+	MessageMediaOptimizeResponse: "MEDIAOPTIMIZE_RESPONSE",
+	MessageStartBatch:            "START_BATCH",
+	MessageStartBatchResponse:    "START_BATCH_RESPONSE",
+	MessageEndBatch:              "END_BATCH",
+	MessageEndBatchResponse:      "END_BATCH_RESPONSE",
+	MessageAbortBatch:            "ABORT_BATCH",
+	MessageAbortBatchResponse:    "ABORT_BATCH_RESPONSE",
+	MessageSetPowerLevel:         "SET_POWER_LEVEL",
+	MessageSetPowerLevelResponse: "SET_POWER_LEVEL_RESPONSE",
 }
 
 func (m MessageType) String() string {
@@ -178,85 +178,85 @@ func (m MessageType) String() string {
 func convertMessageTypeToProto(m MessageType) kproto.Command_MessageType {
 	ret := kproto.Command_INVALID_MESSAGE_TYPE
 	switch m {
-	case MESSAGE_GET:
+	case MessageGet:
 		ret = kproto.Command_GET
-	case MESSAGE_GET_RESPONSE:
+	case MessageGetResponse:
 		ret = kproto.Command_GET_RESPONSE
-	case MESSAGE_PUT:
+	case MessagePut:
 		ret = kproto.Command_PUT
-	case MESSAGE_PUT_RESPONSE:
+	case MessagePutResponse:
 		ret = kproto.Command_PUT_RESPONSE
-	case MESSAGE_DELETE:
+	case MessageDelete:
 		ret = kproto.Command_DELETE
-	case MESSAGE_DELETE_RESPONSE:
+	case MessageDeleteResponse:
 		ret = kproto.Command_DELETE_RESPONSE
-	case MESSAGE_GETNEXT:
+	case MessageGetNext:
 		ret = kproto.Command_GETNEXT
-	case MESSAGE_GETNEXT_RESPONSE:
+	case MessageGetNextResponse:
 		ret = kproto.Command_GETNEXT_RESPONSE
-	case MESSAGE_GETPREVIOUS:
+	case MessageGetPrevious:
 		ret = kproto.Command_GETPREVIOUS
-	case MESSAGE_GETPREVIOUS_RESPONSE:
+	case MessageGetPreviousResponse:
 		ret = kproto.Command_GETPREVIOUS_RESPONSE
-	case MESSAGE_GETKEYRANGE:
+	case MessageGetKeyRange:
 		ret = kproto.Command_GETKEYRANGE
-	case MESSAGE_GETKEYRANGE_RESPONSE:
+	case MessageGetKeyRangeResponse:
 		ret = kproto.Command_GETKEYRANGE_RESPONSE
-	case MESSAGE_GETVERSION:
+	case MessageGetVersion:
 		ret = kproto.Command_GETVERSION
-	case MESSAGE_GETVERSION_RESPONSE:
+	case MessageGetVersionResponse:
 		ret = kproto.Command_GETVERSION_RESPONSE
-	case MESSAGE_SETUP:
+	case MessageSetup:
 		ret = kproto.Command_SETUP
-	case MESSAGE_SETUP_RESPONSE:
+	case MessageSetupResponse:
 		ret = kproto.Command_SETUP_RESPONSE
-	case MESSAGE_GETLOG:
+	case MessageGetLog:
 		ret = kproto.Command_GETLOG
-	case MESSAGE_GETLOG_RESPONSE:
+	case MessageGetLogResponse:
 		ret = kproto.Command_GETLOG_RESPONSE
-	case MESSAGE_SECURITY:
+	case MessageSecurity:
 		ret = kproto.Command_SECURITY
-	case MESSAGE_SECURITY_RESPONSE:
+	case MessageSecurityResponse:
 		ret = kproto.Command_SECURITY_RESPONSE
-	case MESSAGE_PEER2PEERPUSH:
+	case MessagePeer2PeerPush:
 		ret = kproto.Command_PEER2PEERPUSH
-	case MESSAGE_PEER2PEERPUSH_RESPONS:
+	case MessagePeer2PeerPushResponse:
 		ret = kproto.Command_PEER2PEERPUSH_RESPONSE
-	case MESSAGE_NOOP:
+	case MessageNoop:
 		ret = kproto.Command_NOOP
-	case MESSAGE_NOOP_RESPONSE:
+	case MessageNoopResponse:
 		ret = kproto.Command_NOOP_RESPONSE
-	case MESSAGE_FLUSHALLDATA:
+	case MessageFlushAllData:
 		ret = kproto.Command_FLUSHALLDATA
-	case MESSAGE_FLUSHALLDATA_RESPONS:
+	case MessageFlushAllDataResponse:
 		ret = kproto.Command_FLUSHALLDATA_RESPONSE
-	case MESSAGE_PINOP:
+	case MessagePinOp:
 		ret = kproto.Command_PINOP
-	case MESSAGE_PINOP_RESPONSE:
+	case MessagePinOpResponse:
 		ret = kproto.Command_PINOP_RESPONSE
-	case MESSAGE_MEDIASCAN:
+	case MessageMediaScan:
 		ret = kproto.Command_MEDIASCAN
-	case MESSAGE_MEDIASCAN_RESPONSE:
+	case MessageMediaScanResponse:
 		ret = kproto.Command_MEDIASCAN_RESPONSE
-	case MESSAGE_MEDIAOPTIMIZE:
+	case MessageMediaOptimize:
 		ret = kproto.Command_MEDIAOPTIMIZE
-	case MESSAGE_MEDIAOPTIMIZE_RESPON:
+	case MessageMediaOptimizeResponse:
 		ret = kproto.Command_MEDIAOPTIMIZE_RESPONSE
-	case MESSAGE_START_BATCH:
+	case MessageStartBatch:
 		ret = kproto.Command_START_BATCH
-	case MESSAGE_START_BATCH_RESPONSE:
+	case MessageStartBatchResponse:
 		ret = kproto.Command_START_BATCH_RESPONSE
-	case MESSAGE_END_BATCH:
+	case MessageEndBatch:
 		ret = kproto.Command_END_BATCH
-	case MESSAGE_END_BATCH_RESPONSE:
+	case MessageEndBatchResponse:
 		ret = kproto.Command_END_BATCH_RESPONSE
-	case MESSAGE_ABORT_BATCH:
+	case MessageAbortBatch:
 		ret = kproto.Command_ABORT_BATCH
-	case MESSAGE_ABORT_BATCH_RESPONSE:
+	case MessageAbortBatchResponse:
 		ret = kproto.Command_ABORT_BATCH_RESPONSE
-	case MESSAGE_SET_POWER_LEVEL:
+	case MessageSetPowerLevel:
 		ret = kproto.Command_SET_POWER_LEVEL
-	case MESSAGE_SET_POWER_LEVEL_RESPONSE:
+	case MessageSetPowerLevelResponse:
 		ret = kproto.Command_SET_POWER_LEVEL_RESPONSE
 	}
 	return ret
@@ -266,85 +266,85 @@ func convertMessageTypeFromProto(m kproto.Command_MessageType) MessageType {
 	var ret MessageType
 	switch m {
 	case kproto.Command_GET:
-		ret = MESSAGE_GET
+		ret = MessageGet
 	case kproto.Command_GET_RESPONSE:
-		ret = MESSAGE_GET_RESPONSE
+		ret = MessageGetResponse
 	case kproto.Command_PUT:
-		ret = MESSAGE_PUT
+		ret = MessagePut
 	case kproto.Command_PUT_RESPONSE:
-		ret = MESSAGE_PUT_RESPONSE
+		ret = MessagePutResponse
 	case kproto.Command_DELETE:
-		ret = MESSAGE_DELETE
+		ret = MessageDelete
 	case kproto.Command_DELETE_RESPONSE:
-		ret = MESSAGE_DELETE_RESPONSE
+		ret = MessageDeleteResponse
 	case kproto.Command_GETNEXT:
-		ret = MESSAGE_GETNEXT
+		ret = MessageGetNext
 	case kproto.Command_GETNEXT_RESPONSE:
-		ret = MESSAGE_GETNEXT_RESPONSE
+		ret = MessageGetNextResponse
 	case kproto.Command_GETPREVIOUS:
-		ret = MESSAGE_GETPREVIOUS
+		ret = MessageGetPrevious
 	case kproto.Command_GETPREVIOUS_RESPONSE:
-		ret = MESSAGE_GETPREVIOUS_RESPONSE
+		ret = MessageGetPreviousResponse
 	case kproto.Command_GETKEYRANGE:
-		ret = MESSAGE_GETKEYRANGE
+		ret = MessageGetKeyRange
 	case kproto.Command_GETKEYRANGE_RESPONSE:
-		ret = MESSAGE_GETKEYRANGE_RESPONSE
+		ret = MessageGetKeyRangeResponse
 	case kproto.Command_GETVERSION:
-		ret = MESSAGE_GETVERSION
+		ret = MessageGetVersion
 	case kproto.Command_GETVERSION_RESPONSE:
-		ret = MESSAGE_GETVERSION_RESPONSE
+		ret = MessageGetVersionResponse
 	case kproto.Command_SETUP:
-		ret = MESSAGE_SETUP
+		ret = MessageSetup
 	case kproto.Command_SETUP_RESPONSE:
-		ret = MESSAGE_SETUP_RESPONSE
+		ret = MessageSetupResponse
 	case kproto.Command_GETLOG:
-		ret = MESSAGE_GETLOG
+		ret = MessageGetLog
 	case kproto.Command_GETLOG_RESPONSE:
-		ret = MESSAGE_GETLOG_RESPONSE
+		ret = MessageGetLogResponse
 	case kproto.Command_SECURITY:
-		ret = MESSAGE_SECURITY
+		ret = MessageSecurity
 	case kproto.Command_SECURITY_RESPONSE:
-		ret = MESSAGE_SECURITY_RESPONSE
+		ret = MessageSecurityResponse
 	case kproto.Command_PEER2PEERPUSH:
-		ret = MESSAGE_PEER2PEERPUSH
+		ret = MessagePeer2PeerPush
 	case kproto.Command_PEER2PEERPUSH_RESPONSE:
-		ret = MESSAGE_PEER2PEERPUSH_RESPONS
+		ret = MessagePeer2PeerPushResponse
 	case kproto.Command_NOOP:
-		ret = MESSAGE_NOOP
+		ret = MessageNoop
 	case kproto.Command_NOOP_RESPONSE:
-		ret = MESSAGE_NOOP_RESPONSE
+		ret = MessageNoopResponse
 	case kproto.Command_FLUSHALLDATA:
-		ret = MESSAGE_FLUSHALLDATA
+		ret = MessageFlushAllData
 	case kproto.Command_FLUSHALLDATA_RESPONSE:
-		ret = MESSAGE_FLUSHALLDATA_RESPONS
+		ret = MessageFlushAllDataResponse
 	case kproto.Command_PINOP:
-		ret = MESSAGE_PINOP
+		ret = MessagePinOp
 	case kproto.Command_PINOP_RESPONSE:
-		ret = MESSAGE_PINOP_RESPONSE
+		ret = MessagePinOpResponse
 	case kproto.Command_MEDIASCAN:
-		ret = MESSAGE_MEDIASCAN
+		ret = MessageMediaScan
 	case kproto.Command_MEDIASCAN_RESPONSE:
-		ret = MESSAGE_MEDIASCAN_RESPONSE
+		ret = MessageMediaScanResponse
 	case kproto.Command_MEDIAOPTIMIZE:
-		ret = MESSAGE_MEDIAOPTIMIZE
+		ret = MessageMediaOptimize
 	case kproto.Command_MEDIAOPTIMIZE_RESPONSE:
-		ret = MESSAGE_MEDIAOPTIMIZE_RESPON
+		ret = MessageMediaOptimizeResponse
 	case kproto.Command_START_BATCH:
-		ret = MESSAGE_START_BATCH
+		ret = MessageStartBatch
 	case kproto.Command_START_BATCH_RESPONSE:
-		ret = MESSAGE_START_BATCH_RESPONSE
+		ret = MessageStartBatchResponse
 	case kproto.Command_END_BATCH:
-		ret = MESSAGE_END_BATCH
+		ret = MessageEndBatch
 	case kproto.Command_END_BATCH_RESPONSE:
-		ret = MESSAGE_END_BATCH_RESPONSE
+		ret = MessageEndBatchResponse
 	case kproto.Command_ABORT_BATCH:
-		ret = MESSAGE_ABORT_BATCH
+		ret = MessageAbortBatch
 	case kproto.Command_ABORT_BATCH_RESPONSE:
-		ret = MESSAGE_ABORT_BATCH_RESPONSE
+		ret = MessageAbortBatchResponse
 	case kproto.Command_SET_POWER_LEVEL:
-		ret = MESSAGE_SET_POWER_LEVEL
+		ret = MessageSetPowerLevel
 	case kproto.Command_SET_POWER_LEVEL_RESPONSE:
-		ret = MESSAGE_SET_POWER_LEVEL_RESPONSE
+		ret = MessageSetPowerLevelResponse
 	}
 	return ret
 }
@@ -353,22 +353,22 @@ func convertMessageTypeFromProto(m kproto.Command_MessageType) MessageType {
 type Algorithm int32
 
 const (
-	_           Algorithm = iota
-	ALGO_SHA1   Algorithm = iota
-	ALGO_SHA2   Algorithm = iota
-	ALGO_SHA3   Algorithm = iota
-	ALGO_CRC32C Algorithm = iota
-	ALGO_CRC64  Algorithm = iota
-	ALGO_CRC32  Algorithm = iota
+	_               Algorithm = iota
+	AlgorithmSHA1   Algorithm = iota
+	AlgorithmSHA2   Algorithm = iota
+	AlgorithmSHA3   Algorithm = iota
+	AlgorithmCRC32C Algorithm = iota
+	AlgorithmCRC64  Algorithm = iota
+	AlgorithmCRC32  Algorithm = iota
 )
 
 var strAlgorithm = map[Algorithm]string{
-	ALGO_SHA1:   "ALGO_SHA1",
-	ALGO_SHA2:   "ALGO_SHA2",
-	ALGO_SHA3:   "ALGO_SHA3",
-	ALGO_CRC32C: "ALGO_CRC32C",
-	ALGO_CRC64:  "ALGO_CRC64",
-	ALGO_CRC32:  "ALGO_CRC32",
+	AlgorithmSHA1:   "Algorithm SHA1",
+	AlgorithmSHA2:   "Algorithm SHA2",
+	AlgorithmSHA3:   "Algorithm SHA3",
+	AlgorithmCRC32C: "Algorithm CRC32C",
+	AlgorithmCRC64:  "Algorithm CRC64",
+	AlgorithmCRC32:  "Algorithm CRC32",
 }
 
 func (a Algorithm) String() string {
@@ -382,17 +382,17 @@ func (a Algorithm) String() string {
 func convertAlgoToProto(a Algorithm) kproto.Command_Algorithm {
 	ret := kproto.Command_INVALID_ALGORITHM
 	switch a {
-	case ALGO_SHA1:
+	case AlgorithmSHA1:
 		ret = kproto.Command_SHA1
-	case ALGO_SHA2:
+	case AlgorithmSHA2:
 		ret = kproto.Command_SHA2
-	case ALGO_SHA3:
+	case AlgorithmSHA3:
 		ret = kproto.Command_SHA3
-	case ALGO_CRC32C:
+	case AlgorithmCRC32C:
 		ret = kproto.Command_CRC32C
-	case ALGO_CRC64:
+	case AlgorithmCRC64:
 		ret = kproto.Command_CRC64
-	case ALGO_CRC32:
+	case AlgorithmCRC32:
 		ret = kproto.Command_CRC32
 	}
 	return ret
@@ -402,17 +402,17 @@ func convertAlgoFromProto(a kproto.Command_Algorithm) Algorithm {
 	var ret Algorithm
 	switch a {
 	case kproto.Command_SHA1:
-		ret = ALGO_SHA1
+		ret = AlgorithmSHA1
 	case kproto.Command_SHA2:
-		ret = ALGO_SHA2
+		ret = AlgorithmSHA2
 	case kproto.Command_SHA3:
-		ret = ALGO_SHA3
+		ret = AlgorithmSHA3
 	case kproto.Command_CRC32C:
-		ret = ALGO_CRC32C
+		ret = AlgorithmCRC32C
 	case kproto.Command_CRC64:
-		ret = ALGO_CRC64
+		ret = AlgorithmCRC64
 	case kproto.Command_CRC32:
-		ret = ALGO_CRC32
+		ret = AlgorithmCRC32
 	}
 	return ret
 }
@@ -426,16 +426,16 @@ func convertAlgoFromProto(a kproto.Command_Algorithm) Algorithm {
 type Synchronization int32
 
 const (
-	_                 Synchronization = iota
-	SYNC_WRITETHROUGH Synchronization = iota
-	SYNC_WRITEBACK    Synchronization = iota
-	SYNC_FLUSH        Synchronization = iota
+	_                Synchronization = iota
+	SyncWriteThrough Synchronization = iota
+	SyncWriteBack    Synchronization = iota
+	SyncFlush        Synchronization = iota
 )
 
 var strSynchronization = map[Synchronization]string{
-	SYNC_WRITETHROUGH: "SYNC_WRITETHROUGH",
-	SYNC_WRITEBACK:    "SYNC_WRITEBACK",
-	SYNC_FLUSH:        "SYNC_FLUSH",
+	SyncWriteThrough: "SYNC_WRITETHROUGH",
+	SyncWriteBack:    "SYNC_WRITEBACK",
+	SyncFlush:        "SYNC_FLUSH",
 }
 
 func (sync Synchronization) String() string {
@@ -449,11 +449,11 @@ func (sync Synchronization) String() string {
 func convertSyncToProto(sync Synchronization) kproto.Command_Synchronization {
 	ret := kproto.Command_INVALID_SYNCHRONIZATION
 	switch sync {
-	case SYNC_WRITETHROUGH:
+	case SyncWriteThrough:
 		ret = kproto.Command_WRITETHROUGH
-	case SYNC_WRITEBACK:
+	case SyncWriteBack:
 		ret = kproto.Command_WRITEBACK
-	case SYNC_FLUSH:
+	case SyncFlush:
 		ret = kproto.Command_FLUSH
 	}
 	return ret
@@ -463,11 +463,11 @@ func convertSyncFromProto(sync kproto.Command_Synchronization) Synchronization {
 	var ret Synchronization
 	switch sync {
 	case kproto.Command_WRITETHROUGH:
-		ret = SYNC_WRITETHROUGH
+		ret = SyncWriteThrough
 	case kproto.Command_WRITEBACK:
-		ret = SYNC_WRITEBACK
+		ret = SyncWriteBack
 	case kproto.Command_FLUSH:
-		ret = SYNC_FLUSH
+		ret = SyncFlush
 	}
 	return ret
 }
@@ -475,20 +475,20 @@ func convertSyncFromProto(sync kproto.Command_Synchronization) Synchronization {
 type Priority int32
 
 const (
-	_                Priority = iota
-	PRIORITY_LOWEST  Priority = iota
-	PRIORITY_LOWER   Priority = iota
-	PRIORITY_NORMAL  Priority = iota
-	PRIORITY_HIGHER  Priority = iota
-	PRIORITY_HIGHEST Priority = iota
+	_               Priority = iota
+	PriorityLowest  Priority = iota
+	PriorityLower   Priority = iota
+	PriorityNormal  Priority = iota
+	PriorityHigher  Priority = iota
+	PriorityHighest Priority = iota
 )
 
 var strPriority = map[Priority]string{
-	PRIORITY_LOWEST:  "PRIORITY_LOWEST",
-	PRIORITY_LOWER:   "PRIORITY_LOWER",
-	PRIORITY_NORMAL:  "PRIORITY_NORMAL",
-	PRIORITY_HIGHER:  "PRIORITY_HIGHER",
-	PRIORITY_HIGHEST: "PRIORITY_HIGHEST",
+	PriorityLowest:  "PRIORITY_LOWEST",
+	PriorityLower:   "PRIORITY_LOWER",
+	PriorityNormal:  "PRIORITY_NORMAL",
+	PriorityHigher:  "PRIORITY_HIGHER",
+	PriorityHighest: "PRIORITY_HIGHEST",
 }
 
 func (p Priority) String() string {
@@ -502,33 +502,33 @@ func (p Priority) String() string {
 func convertPriorityToProto(p Priority) kproto.Command_Priority {
 	ret := kproto.Command_NORMAL
 	switch p {
-	case PRIORITY_LOWEST:
+	case PriorityLowest:
 		ret = kproto.Command_LOWEST
-	case PRIORITY_LOWER:
+	case PriorityLower:
 		ret = kproto.Command_LOWER
-	case PRIORITY_NORMAL:
+	case PriorityNormal:
 		ret = kproto.Command_NORMAL
-	case PRIORITY_HIGHER:
+	case PriorityHigher:
 		ret = kproto.Command_HIGHER
-	case PRIORITY_HIGHEST:
+	case PriorityHighest:
 		ret = kproto.Command_HIGHEST
 	}
 	return ret
 }
 
 func convertPriorityFromProto(p kproto.Command_Priority) Priority {
-	ret := PRIORITY_NORMAL
+	ret := PriorityNormal
 	switch p {
 	case kproto.Command_LOWEST:
-		ret = PRIORITY_LOWEST
+		ret = PriorityLowest
 	case kproto.Command_LOWER:
-		ret = PRIORITY_LOWER
+		ret = PriorityLower
 	case kproto.Command_NORMAL:
-		ret = PRIORITY_NORMAL
+		ret = PriorityNormal
 	case kproto.Command_HIGHER:
-		ret = PRIORITY_HIGHER
+		ret = PriorityHigher
 	case kproto.Command_HIGHEST:
-		ret = PRIORITY_HIGHEST
+		ret = PriorityHighest
 	}
 	return ret
 }
@@ -563,28 +563,28 @@ type MediaOperation struct {
 type ACLPermission int32
 
 const (
-	_                               ACLPermission = iota
-	ACL_PERMISSION_READ             ACLPermission = iota // Can read key/values
-	ACL_PERMISSION_WRITE            ACLPermission = iota // Can write key/values
-	ACL_PERMISSION_DELETE           ACLPermission = iota // Can delete key/values
-	ACL_PERMISSION_RANGE            ACLPermission = iota // Can do a range
-	ACL_PERMISSION_SETUP            ACLPermission = iota // Can setup a device
-	ACL_PERMISSION_P2POP            ACLPermission = iota // Can do a peer to peer operation
-	ACL_PERMISSION_GETLOG           ACLPermission = iota // Can get log
-	ACL_PERMISSION_SECURITY         ACLPermission = iota // Can set up the security of device
-	ACL_PERMISSION_POWER_MANAGEMENT ACLPermission = iota // Can set power level
+	_                            ACLPermission = iota
+	ACLPermissionRead            ACLPermission = iota // Can read key/values
+	ACLPermissionWrite           ACLPermission = iota // Can write key/values
+	ACLPermissionDelete          ACLPermission = iota // Can delete key/values
+	ACLPermissionRange           ACLPermission = iota // Can do a range
+	ACLPermissionSetup           ACLPermission = iota // Can setup a device
+	ACLPermissionP2POP           ACLPermission = iota // Can do a peer to peer operation
+	ACLPermissionGetLog          ACLPermission = iota // Can get log
+	ACLPermissionSecurity        ACLPermission = iota // Can set up the security of device
+	ACLPermissionPowerManagement ACLPermission = iota // Can set power level
 )
 
 var strACLPermission = map[ACLPermission]string{
-	ACL_PERMISSION_READ:             "ACL_PERMISSION_READ",
-	ACL_PERMISSION_WRITE:            "ACL_PERMISSION_WRITE",
-	ACL_PERMISSION_DELETE:           "ACL_PERMISSION_DELETE",
-	ACL_PERMISSION_RANGE:            "ACL_PERMISSION_RANGE",
-	ACL_PERMISSION_SETUP:            "ACL_PERMISSION_SETUP",
-	ACL_PERMISSION_P2POP:            "ACL_PERMISSION_P2POP",
-	ACL_PERMISSION_GETLOG:           "ACL_PERMISSION_GETLOG",
-	ACL_PERMISSION_SECURITY:         "ACL_PERMISSION_SECURITY",
-	ACL_PERMISSION_POWER_MANAGEMENT: "ACL_PERMISSION_POWER_MANAGEMENT",
+	ACLPermissionRead:            "ACL_PERMISSION_READ",
+	ACLPermissionWrite:           "ACL_PERMISSION_WRITE",
+	ACLPermissionDelete:          "ACL_PERMISSION_DELETE",
+	ACLPermissionRange:           "ACL_PERMISSION_RANGE",
+	ACLPermissionSetup:           "ACL_PERMISSION_SETUP",
+	ACLPermissionP2POP:           "ACL_PERMISSION_P2POP",
+	ACLPermissionGetLog:          "ACL_PERMISSION_GETLOG",
+	ACLPermissionSecurity:        "ACL_PERMISSION_SECURITY",
+	ACLPermissionPowerManagement: "ACL_PERMISSION_POWER_MANAGEMENT",
 }
 
 func (p ACLPermission) String() string {
@@ -598,23 +598,23 @@ func (p ACLPermission) String() string {
 func convertACLPermissionToProto(perm ACLPermission) kproto.Command_Security_ACL_Permission {
 	ret := kproto.Command_Security_ACL_INVALID_PERMISSION
 	switch perm {
-	case ACL_PERMISSION_READ:
+	case ACLPermissionRead:
 		ret = kproto.Command_Security_ACL_READ
-	case ACL_PERMISSION_WRITE:
+	case ACLPermissionWrite:
 		ret = kproto.Command_Security_ACL_WRITE
-	case ACL_PERMISSION_DELETE:
+	case ACLPermissionDelete:
 		ret = kproto.Command_Security_ACL_DELETE
-	case ACL_PERMISSION_RANGE:
+	case ACLPermissionRange:
 		ret = kproto.Command_Security_ACL_RANGE
-	case ACL_PERMISSION_SETUP:
+	case ACLPermissionSetup:
 		ret = kproto.Command_Security_ACL_SETUP
-	case ACL_PERMISSION_P2POP:
+	case ACLPermissionP2POP:
 		ret = kproto.Command_Security_ACL_P2POP
-	case ACL_PERMISSION_GETLOG:
+	case ACLPermissionGetLog:
 		ret = kproto.Command_Security_ACL_GETLOG
-	case ACL_PERMISSION_SECURITY:
+	case ACLPermissionSecurity:
 		ret = kproto.Command_Security_ACL_SECURITY
-	case ACL_PERMISSION_POWER_MANAGEMENT:
+	case ACLPermissionPowerManagement:
 		ret = kproto.Command_Security_ACL_POWER_MANAGEMENT
 	}
 	return ret
@@ -624,23 +624,23 @@ func convertACLPermissionFromProto(perm kproto.Command_Security_ACL_Permission) 
 	var ret ACLPermission
 	switch perm {
 	case kproto.Command_Security_ACL_READ:
-		ret = ACL_PERMISSION_READ
+		ret = ACLPermissionRead
 	case kproto.Command_Security_ACL_WRITE:
-		ret = ACL_PERMISSION_WRITE
+		ret = ACLPermissionWrite
 	case kproto.Command_Security_ACL_DELETE:
-		ret = ACL_PERMISSION_DELETE
+		ret = ACLPermissionDelete
 	case kproto.Command_Security_ACL_RANGE:
-		ret = ACL_PERMISSION_RANGE
+		ret = ACLPermissionRange
 	case kproto.Command_Security_ACL_SETUP:
-		ret = ACL_PERMISSION_SETUP
+		ret = ACLPermissionSetup
 	case kproto.Command_Security_ACL_P2POP:
-		ret = ACL_PERMISSION_P2POP
+		ret = ACLPermissionP2POP
 	case kproto.Command_Security_ACL_GETLOG:
-		ret = ACL_PERMISSION_GETLOG
+		ret = ACLPermissionGetLog
 	case kproto.Command_Security_ACL_SECURITY:
-		ret = ACL_PERMISSION_SECURITY
+		ret = ACLPermissionSecurity
 	case kproto.Command_Security_ACL_POWER_MANAGEMENT:
-		ret = ACL_PERMISSION_POWER_MANAGEMENT
+		ret = ACLPermissionPowerManagement
 	}
 	return ret
 }
@@ -648,12 +648,12 @@ func convertACLPermissionFromProto(perm kproto.Command_Security_ACL_Permission) 
 type ACLAlgorithm int32
 
 const (
-	_                      ACLAlgorithm = iota
-	ACL_ALGORITHM_HMACSHA1 ACLAlgorithm = iota
+	_                    ACLAlgorithm = iota
+	ACLAlgorithmHMACSHA1 ACLAlgorithm = iota
 )
 
 var strACLAlgorithm = map[ACLAlgorithm]string{
-	ACL_ALGORITHM_HMACSHA1: "ACL_ALGORITHM_HMACSHA1",
+	ACLAlgorithmHMACSHA1: "ACL_ALGORITHM_HMACSHA1",
 }
 
 func (p ACLAlgorithm) String() string {
@@ -667,7 +667,7 @@ func (p ACLAlgorithm) String() string {
 func convertACLAlgorithmToProto(algo ACLAlgorithm) kproto.Command_Security_ACL_HMACAlgorithm {
 	ret := kproto.Command_Security_ACL_INVALID_HMAC_ALGORITHM
 	switch algo {
-	case ACL_ALGORITHM_HMACSHA1:
+	case ACLAlgorithmHMACSHA1:
 		ret = kproto.Command_Security_ACL_HmacSHA1
 	}
 	return ret
@@ -677,7 +677,7 @@ type ACLScope struct {
 	Offset      int64
 	Value       []byte
 	Permissions []ACLPermission
-	TlsRequired bool
+	TLSRequired bool
 }
 
 type ACL struct {
@@ -701,7 +701,7 @@ type P2PPushOperation struct {
 type P2PPushRequest struct {
 	HostName   string // Peer kinetic device IP / hostname
 	Port       int32  // Peer kinetic drvice port
-	Tls        bool
+	TLS        bool
 	Operations []P2PPushOperation // List of operations to perform on peer kinetic device
 }
 
@@ -724,18 +724,18 @@ type BatchStatus struct {
 type PowerLevel int32
 
 const (
-	_                 PowerLevel = iota
-	POWER_OPERATIONAL PowerLevel = iota
-	POWER_HIBERNATE   PowerLevel = iota
-	POWER_SHUTDOWN    PowerLevel = iota
-	POWER_FAIL        PowerLevel = iota
+	_                     PowerLevel = iota
+	PowerLevelOperational PowerLevel = iota
+	PowerLevelHibernate   PowerLevel = iota
+	PowerLevelShutdown    PowerLevel = iota
+	PowerLevelFail        PowerLevel = iota
 )
 
 var strPowerLevel = map[PowerLevel]string{
-	POWER_OPERATIONAL: "OPERATIONAL",
-	POWER_HIBERNATE:   "HIBERNATE",
-	POWER_SHUTDOWN:    "SHUTDOWN",
-	POWER_FAIL:        "FAIL",
+	PowerLevelOperational: "OPERATIONAL",
+	PowerLevelHibernate:   "HIBERNATE",
+	PowerLevelShutdown:    "SHUTDOWN",
+	PowerLevelFail:        "FAIL",
 }
 
 func (p PowerLevel) String() string {
@@ -749,13 +749,13 @@ func (p PowerLevel) String() string {
 func convertPowerLevelToProto(p PowerLevel) kproto.Command_PowerLevel {
 	var ret kproto.Command_PowerLevel
 	switch p {
-	case POWER_OPERATIONAL:
+	case PowerLevelOperational:
 		ret = kproto.Command_OPERATIONAL
-	case POWER_HIBERNATE:
+	case PowerLevelHibernate:
 		ret = kproto.Command_HIBERNATE
-	case POWER_SHUTDOWN:
+	case PowerLevelShutdown:
 		ret = kproto.Command_SHUTDOWN
-	case POWER_FAIL:
+	case PowerLevelFail:
 		ret = kproto.Command_FAIL
 	}
 	return ret
@@ -765,13 +765,13 @@ func convertPowerLevelFromProto(p kproto.Command_PowerLevel) PowerLevel {
 	var ret PowerLevel
 	switch p {
 	case kproto.Command_OPERATIONAL:
-		ret = POWER_OPERATIONAL
+		ret = PowerLevelOperational
 	case kproto.Command_HIBERNATE:
-		ret = POWER_HIBERNATE
+		ret = PowerLevelHibernate
 	case kproto.Command_SHUTDOWN:
-		ret = POWER_SHUTDOWN
+		ret = PowerLevelShutdown
 	case kproto.Command_FAIL:
-		ret = POWER_FAIL
+		ret = PowerLevelFail
 	}
 	return ret
 }

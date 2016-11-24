@@ -21,8 +21,8 @@ import (
 	"bytes"
 	"testing"
 
-	proto "github.com/golang/protobuf/proto"
 	kproto "github.com/Kinetic/kinetic-go/proto"
+	proto "github.com/golang/protobuf/proto"
 )
 
 func TestHmacEmptyMessage(t *testing.T) {

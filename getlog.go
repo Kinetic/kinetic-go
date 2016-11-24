@@ -25,26 +25,26 @@ import (
 type LogType int32
 
 const (
-	_                 LogType = iota
-	LOG_UTILIZATIONS  LogType = iota
-	LOG_TEMPERATURES  LogType = iota
-	LOG_CAPACITIES    LogType = iota
-	LOG_CONFIGURATION LogType = iota
-	LOG_STATISTICS    LogType = iota
-	LOG_MESSAGES      LogType = iota
-	LOG_LIMITS        LogType = iota
-	LOG_DEVICE        LogType = iota
+	_                    LogType = iota
+	LogTypeUtilizations  LogType = iota
+	LogTypeTemperatures  LogType = iota
+	LogTypeCapacities    LogType = iota
+	LogTypeConfiguration LogType = iota
+	LogTypeStatistics    LogType = iota
+	LogTypeMessages      LogType = iota
+	LogTypeLimits        LogType = iota
+	LogTypeDevice        LogType = iota
 )
 
 var strLogType = map[LogType]string{
-	LOG_UTILIZATIONS:  "LOG_UTILIZATIONS",
-	LOG_TEMPERATURES:  "LOG_TEMPERATURES",
-	LOG_CAPACITIES:    "LOG_CAPACITIES",
-	LOG_CONFIGURATION: "LOG_CONFIGURATION",
-	LOG_STATISTICS:    "LOG_STATISTICS",
-	LOG_MESSAGES:      "LOG_MESSAGES",
-	LOG_LIMITS:        "LOG_LIMITS",
-	LOG_DEVICE:        "LOG_DEVICE",
+	LogTypeUtilizations:  "LOG_UTILIZATIONS",
+	LogTypeTemperatures:  "LOG_TEMPERATURES",
+	LogTypeCapacities:    "LOG_CAPACITIES",
+	LogTypeConfiguration: "LOG_CONFIGURATION",
+	LogTypeStatistics:    "LOG_STATISTICS",
+	LogTypeMessages:      "LOG_MESSAGES",
+	LogTypeLimits:        "LOG_LIMITS",
+	LogTypeDevice:        "LOG_DEVICE",
 }
 
 func (l LogType) String() string {
@@ -58,21 +58,21 @@ func (l LogType) String() string {
 func convertLogTypeToProto(l LogType) kproto.Command_GetLog_Type {
 	ret := kproto.Command_GetLog_INVALID_TYPE
 	switch l {
-	case LOG_UTILIZATIONS:
+	case LogTypeUtilizations:
 		ret = kproto.Command_GetLog_UTILIZATIONS
-	case LOG_TEMPERATURES:
+	case LogTypeTemperatures:
 		ret = kproto.Command_GetLog_TEMPERATURES
-	case LOG_CAPACITIES:
+	case LogTypeCapacities:
 		ret = kproto.Command_GetLog_CAPACITIES
-	case LOG_CONFIGURATION:
+	case LogTypeConfiguration:
 		ret = kproto.Command_GetLog_CONFIGURATION
-	case LOG_STATISTICS:
+	case LogTypeStatistics:
 		ret = kproto.Command_GetLog_STATISTICS
-	case LOG_MESSAGES:
+	case LogTypeMessages:
 		ret = kproto.Command_GetLog_MESSAGES
-	case LOG_LIMITS:
+	case LogTypeLimits:
 		ret = kproto.Command_GetLog_LIMITS
-	case LOG_DEVICE:
+	case LogTypeDevice:
 		ret = kproto.Command_GetLog_DEVICE
 	}
 	return ret
@@ -82,21 +82,21 @@ func convertLogTypeFromProto(l kproto.Command_GetLog_Type) LogType {
 	var ret LogType
 	switch l {
 	case kproto.Command_GetLog_UTILIZATIONS:
-		ret = LOG_UTILIZATIONS
+		ret = LogTypeUtilizations
 	case kproto.Command_GetLog_TEMPERATURES:
-		ret = LOG_TEMPERATURES
+		ret = LogTypeTemperatures
 	case kproto.Command_GetLog_CAPACITIES:
-		ret = LOG_CAPACITIES
+		ret = LogTypeCapacities
 	case kproto.Command_GetLog_CONFIGURATION:
-		ret = LOG_CONFIGURATION
+		ret = LogTypeConfiguration
 	case kproto.Command_GetLog_STATISTICS:
-		ret = LOG_STATISTICS
+		ret = LogTypeStatistics
 	case kproto.Command_GetLog_MESSAGES:
-		ret = LOG_MESSAGES
+		ret = LogTypeMessages
 	case kproto.Command_GetLog_LIMITS:
-		ret = LOG_LIMITS
+		ret = LogTypeLimits
 	case kproto.Command_GetLog_DEVICE:
-		ret = LOG_DEVICE
+		ret = LogTypeDevice
 	}
 	return ret
 }
@@ -144,7 +144,7 @@ type ConfigurationLog struct {
 	ProtocolSourceHash      string                   // Device supported protocol source code repository hash value
 	Interface               []ConfigurationInterface // Device interfaces as list
 	Port                    int32                    // Service port
-	TlsPort                 int32                    // TLS service port
+	TLSPort                 int32                    // TLS service port
 	CurrentPowerLevel       PowerLevel               // Device current power level, valid value only POWER_HIBERNATE or POWER_OPERATIONAL
 }
 
@@ -272,7 +272,7 @@ func getConfigurationLogFromProto(getlog *kproto.Command_GetLog) (log *Configura
 			ProtocolSourceHash:      conf.GetProtocolSourceHash(),
 			Interface:               getConfigurationInterfaceFromProto(conf),
 			Port:                    conf.GetPort(),
-			TlsPort:                 conf.GetTlsPort(),
+			TLSPort:                 conf.GetTlsPort(),
 			CurrentPowerLevel:       convertPowerLevelFromProto(conf.GetCurrentPowerLevel()),
 		}
 	}

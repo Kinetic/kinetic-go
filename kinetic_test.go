@@ -43,8 +43,8 @@ func ExampleBlockConnection_putGetDelete() {
 	pentry := Record{
 		Key:   []byte("Test Object"),
 		Value: []byte("Test Object Data"),
-		Sync:  SYNC_WRITETHROUGH,
-		Algo:  ALGO_SHA1,
+		Sync:  SyncWriteThrough,
+		Algo:  AlgorithmSHA1,
 		Tag:   []byte(""),
 		Force: true,
 	}
@@ -120,8 +120,8 @@ func ExampleNonBlockConnection_putGetDelete() {
 	pentry := Record{
 		Key:   []byte("Test Object"),
 		Value: []byte("Test Object Data"),
-		Sync:  SYNC_WRITETHROUGH,
-		Algo:  ALGO_SHA1,
+		Sync:  SyncWriteThrough,
+		Algo:  AlgorithmSHA1,
 		Tag:   []byte(""),
 		Force: true,
 	}
@@ -200,8 +200,8 @@ func ExampleNonBlockConnection_multiplePut() {
 		pentry := Record{
 			Key:   key,
 			Value: v,
-			Sync:  SYNC_WRITETHROUGH,
-			Algo:  ALGO_SHA1,
+			Sync:  SyncWriteThrough,
+			Algo:  AlgorithmSHA1,
 			Tag:   []byte(""),
 			Force: true,
 		}
@@ -230,8 +230,8 @@ func ExampleNonBlockConnection_multiplePut() {
 			pentry := Record{
 				Key:   key,
 				Value: v,
-				Sync:  SYNC_WRITETHROUGH,
-				Algo:  ALGO_SHA1,
+				Sync:  SyncWriteThrough,
+				Algo:  AlgorithmSHA1,
 				Tag:   []byte(""),
 				Force: true,
 			}
@@ -272,7 +272,7 @@ func ExampleBlockConnection_SetACL() {
 	}
 
 	perms := []ACLPermission{
-		ACL_PERMISSION_GETLOG,
+		ACLPermissionGetLog,
 	}
 	scope := []ACLScope{
 		ACLScope{
@@ -283,7 +283,7 @@ func ExampleBlockConnection_SetACL() {
 		ACL{
 			Identify: 100,
 			Key:      []byte("asdfasdf"),
-			Algo:     ACL_ALGORITHM_HMACSHA1,
+			Algo:     ACLAlgorithmHMACSHA1,
 			Scopes:   scope,
 		},
 	}
@@ -310,13 +310,13 @@ func ExampleBlockConnection_SetACL() {
 	}
 
 	logs := []LogType{
-		LOG_UTILIZATIONS,
-		LOG_TEMPERATURES,
-		LOG_CAPACITIES,
-		LOG_CONFIGURATION,
-		LOG_STATISTICS,
-		LOG_MESSAGES,
-		LOG_LIMITS,
+		LogTypeUtilizations,
+		LogTypeTemperatures,
+		LogTypeCapacities,
+		LogTypeConfiguration,
+		LogTypeStatistics,
+		LogTypeMessages,
+		LogTypeLimits,
 	}
 
 	_, status, err = conn.GetLog(logs)
@@ -329,7 +329,7 @@ func ExampleBlockConnection_SetACL() {
 		fmt.Println("Get Failure: ", err)
 	}
 
-	if status.Code != REMOTE_NOT_AUTHORIZED {
+	if status.Code != RemoteNotAuthorized {
 		fmt.Println("SET ACL not effective, ", status)
 	}
 

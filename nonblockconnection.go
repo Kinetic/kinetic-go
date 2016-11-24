@@ -192,7 +192,7 @@ func (conn *NonBlockConnection) buildP2PMessage(request *P2PPushRequest) *kproto
 			Peer: &kproto.Command_P2POperation_Peer{
 				Hostname: &request.HostName,
 				Port:     &request.Port,
-				Tls:      &request.Tls,
+				Tls:      &request.TLS,
 			},
 			Operation: make([]*kproto.Command_P2POperation_Operation, len(request.Operations)),
 		}
@@ -240,7 +240,7 @@ func (conn *NonBlockConnection) BatchStart(h *ResponseHandler) error {
 }
 
 // BatchPut puts objects to kinetic drive, as a batch job. Batch PUT / DELETE won't expect acknowledgement
-// from kinetic device. Status for batch PUT / DELETE will only availabe in response message for BatchEnd.
+// from kinetic device. Status for batch PUT / DELETE will only available in response message for BatchEnd.
 func (conn *NonBlockConnection) BatchPut(entry *Record) error {
 	// Batch operation PUT
 	conn.batchMu.Lock()
@@ -250,7 +250,7 @@ func (conn *NonBlockConnection) BatchPut(entry *Record) error {
 }
 
 // BatchDelete delete object from kinetic drive, as a batch job. Batch PUT / DELETE won't expect acknowledgement
-// from kinetic device. Status for batch PUT / DELETE will only availabe in response message for BatchEnd.
+// from kinetic device. Status for batch PUT / DELETE will only available in response message for BatchEnd.
 func (conn *NonBlockConnection) BatchDelete(entry *Record) error {
 	// Batch operation DELETE
 	conn.batchMu.Lock()
@@ -427,7 +427,7 @@ func (conn *NonBlockConnection) SetACL(acls []ACL, h *ResponseHandler) error {
 				Offset:      &scope.Offset,
 				Value:       scope.Value,
 				Permission:  cmdPermission,
-				TlsRequired: &scope.TlsRequired,
+				TlsRequired: &scope.TLSRequired,
 			}
 		}
 		cmdAlgo := convertACLAlgorithmToProto(acl.Algo)

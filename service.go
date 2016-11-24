@@ -61,7 +61,7 @@ type networkService struct {
 	conn           net.Conn
 	clusterVersion int64                      // Cluster version
 	seq            int64                      // Operation sequence ID
-	connID         int64                      // current conection ID
+	connID         int64                      // current connection ID
 	option         ClientOptions              // current connection operation
 	hmap           map[int64]*ResponseHandler // Message handler map
 	fatal          bool                       // Network has fatal failure
@@ -116,7 +116,7 @@ func newNetworkService(op ClientOptions) (*networkService, error) {
 	klog.Debugf("\tFirmware Version: %s", ns.device.Configuration.Version)
 	klog.Debugf("\tKinetic Protocol Version: %s", ns.device.Configuration.ProtocolVersion)
 	klog.Debugf("\tPort: %d", ns.device.Configuration.Port)
-	klog.Debugf("\tTlsPort: %d", ns.device.Configuration.TlsPort)
+	klog.Debugf("\tTlsPort: %d", ns.device.Configuration.TLSPort)
 	klog.Debugf("\tCurrentPowerLevel : %s", ns.device.Configuration.CurrentPowerLevel.String())
 
 	return ns, nil
@@ -212,7 +212,7 @@ func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value
 	cmdBytes, err := proto.Marshal(cmd)
 	if err != nil {
 		klog.Error("Error marshl Kinetic Command")
-		s := Status{Code: CLIENT_INTERNAL_ERROR, ErrorMsg: "Error marshl Kinetic Command"}
+		s := Status{Code: ClientInternalError, ErrorMsg: "Error marshl Kinetic Command"}
 		ns.clientError(s, h)
 		return err
 	}
@@ -246,7 +246,7 @@ func (ns *networkService) submit(msg *kproto.Message, cmd *kproto.Command, value
 func (ns *networkService) send(msg *kproto.Message, value []byte) error {
 	msgBytes, err := proto.Marshal(msg)
 	if err != nil {
-		s := Status{Code: CLIENT_INTERNAL_ERROR, ErrorMsg: "Error marshl Kinetic Message"}
+		s := Status{Code: ClientInternalError, ErrorMsg: "Error marshl Kinetic Message"}
 		ns.clientError(s, nil)
 		return err
 	}
@@ -268,7 +268,7 @@ func (ns *networkService) send(msg *kproto.Message, value []byte) error {
 	_, err = ns.conn.Write(packet)
 	if err != nil {
 		klog.Error("Network I/O write error, " + err.Error())
-		s := Status{Code: CLIENT_IO_ERROR, ErrorMsg: "Network I/O write error, " + err.Error()}
+		s := Status{Code: ClientIOError, ErrorMsg: "Network I/O write error, " + err.Error()}
 		ns.clientError(s, nil)
 		ns.fatal = true
 		ns.fatalError = err
@@ -287,7 +287,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 	_, err := io.ReadFull(ns.conn, header[0:])
 	if err != nil {
 		klog.Error("Network I/O read error, " + err.Error())
-		s := Status{Code: CLIENT_IO_ERROR, ErrorMsg: "Network I/O read error, " + err.Error()}
+		s := Status{Code: ClientIOError, ErrorMsg: "Network I/O read error, " + err.Error()}
 		ns.clientError(s, nil)
 		ns.fatal = true
 		ns.fatalError = err
@@ -297,7 +297,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 	magic := header[0]
 	if magic != 'F' {
 		klog.Error("Network I/O read error Header wrong magic")
-		s := Status{Code: CLIENT_IO_ERROR, ErrorMsg: "Network I/O read error Header wrong magic"}
+		s := Status{Code: ClientIOError, ErrorMsg: "Network I/O read error Header wrong magic"}
 		ns.clientError(s, nil)
 		ns.fatal = true
 		ns.fatalError = errors.New("Wrong magic number")
@@ -311,7 +311,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 	_, err = io.ReadFull(ns.conn, protoBuf)
 	if err != nil {
 		klog.Error("Network I/O read error receive Kinetic Header, " + err.Error())
-		s := Status{Code: CLIENT_IO_ERROR, ErrorMsg: "Network I/O read error receive Kinetic Header, " + err.Error()}
+		s := Status{Code: ClientIOError, ErrorMsg: "Network I/O read error receive Kinetic Header, " + err.Error()}
 		ns.clientError(s, nil)
 		ns.fatal = true
 		ns.fatalError = err
@@ -322,7 +322,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 	err = proto.Unmarshal(protoBuf, msg)
 	if err != nil {
 		klog.Error("Network I/O read error receive Kinetic Header, " + err.Error())
-		s := Status{Code: CLIENT_IO_ERROR, ErrorMsg: "Network I/O read error reaceive Kinetic Message, " + err.Error()}
+		s := Status{Code: ClientIOError, ErrorMsg: "Network I/O read error reaceive Kinetic Message, " + err.Error()}
 		ns.clientError(s, nil)
 		ns.fatal = true
 		ns.fatalError = err
@@ -331,7 +331,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 
 	if msg.GetAuthType() == kproto.Message_HMACAUTH && validateHmac(msg, ns.option.Hmac) == false {
 		klog.Error("Response HMAC mismatch")
-		s := Status{Code: CLIENT_RESPONSE_HMAC_VERIFICATION_ERROR, ErrorMsg: "Response HMAC mismatch"}
+		s := Status{Code: ClientResponseHMACError, ErrorMsg: "Response HMAC mismatch"}
 		ns.clientError(s, nil)
 		return nil, nil, nil, err
 	}
@@ -340,7 +340,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 	err = proto.Unmarshal(msg.CommandBytes, cmd)
 	if err != nil {
 		klog.Error("Network I/O read error parsing Kinetic Command, " + err.Error())
-		s := Status{Code: CLIENT_IO_ERROR, ErrorMsg: "Network I/O read error parsing Kinetic Command, " + err.Error()}
+		s := Status{Code: ClientIOError, ErrorMsg: "Network I/O read error parsing Kinetic Command, " + err.Error()}
 		ns.clientError(s, nil)
 		ns.fatal = true
 		ns.fatalError = err
@@ -365,7 +365,7 @@ func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, e
 		_, err = io.ReadFull(ns.conn, valueBuf)
 		if err != nil {
 			klog.Error("Network I/O read error parsing Kinetic Value, " + err.Error())
-			s := Status{Code: CLIENT_IO_ERROR, ErrorMsg: "Network I/O read error parsing Kinetic Value, " + err.Error()}
+			s := Status{Code: ClientIOError, ErrorMsg: "Network I/O read error parsing Kinetic Value, " + err.Error()}
 			ns.clientError(s, nil)
 			ns.fatal = true
 			ns.fatalError = err
