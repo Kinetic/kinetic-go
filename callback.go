@@ -124,17 +124,20 @@ func (c *GetLogCallback) Success(resp *kproto.Command, value []byte) {
 	c.Logs = getLogFromProto(resp)
 }
 
+// BatchEndCallback is the Callback for Command_END_BATCH
 type BatchEndCallback struct {
 	GenericCallback
 	BatchStatus BatchStatus
 }
 
+// Success extracts all sequence IDs for commands (PUT/DELETE) performed in batch.
 func (c *BatchEndCallback) Success(resp *kproto.Command, value []byte) {
 	c.GenericCallback.Success(resp, value)
 	c.BatchStatus.DoneSequence = resp.GetBody().GetBatch().GetSequence()
 	c.BatchStatus.FailedSequence = resp.GetBody().GetBatch().GetFailedSequence()
 }
 
+// Failure extracts the first failed operation sequence in batch.
 func (c *BatchEndCallback) Failure(resp *kproto.Command, status Status) {
 	c.GenericCallback.Failure(resp, status)
 	c.BatchStatus.DoneSequence = resp.GetBody().GetBatch().GetSequence()

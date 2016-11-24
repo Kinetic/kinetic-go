@@ -58,32 +58,32 @@ func TestBlockNoOp(t *testing.T) {
 
 func TestBlockGet(t *testing.T) {
 	_, status, err := blockConn.Get([]byte("object000"))
-	// Object might not exist, expect to see OK status, or REMOTE_NOT_FOUND
-	if err != nil || (status.Code != OK && status.Code != REMOTE_NOT_FOUND) {
+	// Object might not exist, expect to see OK status, or RemoteNotFound
+	if err != nil || (status.Code != OK && status.Code != RemoteNotFound) {
 		t.Fatal("Blocking Get Failure", err, status.String())
 	}
 }
 
 func TestBlockGetNext(t *testing.T) {
 	_, status, err := blockConn.GetNext([]byte("object000"))
-	// Object might not exist, expect to see OK status, or REMOTE_NOT_FOUND
-	if err != nil || (status.Code != OK && status.Code != REMOTE_NOT_FOUND) {
+	// Object might not exist, expect to see OK status, or RemoteNotFound
+	if err != nil || (status.Code != OK && status.Code != RemoteNotFound) {
 		t.Fatal("Blocking GetNext Failure", err, status.String())
 	}
 }
 
 func TestBlockGetPrevious(t *testing.T) {
 	_, status, err := blockConn.GetPrevious([]byte("object000"))
-	// Object might not exist, expect to see OK status, or REMOTE_NOT_FOUND
-	if err != nil || (status.Code != OK && status.Code != REMOTE_NOT_FOUND) {
+	// Object might not exist, expect to see OK status, or RemoteNotFound
+	if err != nil || (status.Code != OK && status.Code != RemoteNotFound) {
 		t.Fatal("Blocking GetPrevious Failure", err, status.String())
 	}
 }
 
 func TestBlockGetVersion(t *testing.T) {
 	version, status, err := blockConn.GetVersion([]byte("object000"))
-	// Object might not exist, expect to see OK status, or REMOTE_NOT_FOUND
-	if err != nil || (status.Code != OK && status.Code != REMOTE_NOT_FOUND) {
+	// Object might not exist, expect to see OK status, or RemoteNotFound
+	if err != nil || (status.Code != OK && status.Code != RemoteNotFound) {
 		t.Fatal("Blocking GetVersion Failure", err, status.String())
 	}
 	t.Logf("Object version = %x", version)
@@ -100,8 +100,8 @@ func TestBlockPut(t *testing.T) {
 	entry := Record{
 		Key:   []byte("object000"),
 		Value: []byte("ABCDEFG"),
-		Sync:  SYNC_WRITETHROUGH,
-		Algo:  ALGO_SHA1,
+		Sync:  SyncWriteThrough,
+		Algo:  AlgorithmSHA1,
 		Tag:   []byte(""),
 		Force: true,
 	}
@@ -117,14 +117,14 @@ func TestBlockPut_keyOverflow(t *testing.T) {
 	entry := Record{
 		Key:   bytes.Repeat([]byte("K"), int(blockConn.nbc.service.device.Limits.MaxKeySize+1)),
 		Value: []byte("ABCDEFG"),
-		Sync:  SYNC_WRITETHROUGH,
-		Algo:  ALGO_SHA1,
+		Sync:  SyncWriteThrough,
+		Algo:  AlgorithmSHA1,
 		Tag:   []byte(""),
 		Force: true,
 	}
 	status, err := blockConn.Put(&entry)
-	// Request with key buffer overflow, expect to see failure code REMOTE_INVALID_REQUEST
-	if err != nil || status.Code != REMOTE_INVALID_REQUEST {
+	// Request with key buffer overflow, expect to see failure code RemoteInvalidRequest
+	if err != nil || status.Code != RemoteInvalidRequest {
 		t.Fatal("Blocking Put Failure", err, status.String())
 	}
 }
@@ -135,14 +135,14 @@ func TestBlockPut_valueOverflow(t *testing.T) {
 	entry := Record{
 		Key:   []byte("key"),
 		Value: bytes.Repeat([]byte("V"), int(blockConn.nbc.service.device.Limits.MaxValueSize+1)),
-		Sync:  SYNC_WRITETHROUGH,
-		Algo:  ALGO_SHA1,
+		Sync:  SyncWriteThrough,
+		Algo:  AlgorithmSHA1,
 		Tag:   []byte(""),
 		Force: true,
 	}
 	status, err := blockConn.Put(&entry)
-	// Request with value buffer overflow, expect to see failure code REMOTE_INVALID_REQUEST
-	if err != nil || status.Code != REMOTE_INVALID_REQUEST {
+	// Request with value buffer overflow, expect to see failure code RemoteInvalidRequest
+	if err != nil || status.Code != RemoteInvalidRequest {
 		t.Fatal("Blocking Put Failure", err, status.String())
 	}
 }
@@ -156,14 +156,14 @@ func TestBlockPut_tagOverflow(t *testing.T) {
 	entry := Record{
 		Key:   []byte("key"),
 		Value: []byte("value"),
-		Sync:  SYNC_WRITETHROUGH,
-		Algo:  ALGO_SHA1,
+		Sync:  SyncWriteThrough,
+		Algo:  AlgorithmSHA1,
 		Tag:   bytes.Repeat([]byte("T"), int(blockConn.nbc.service.device.Limits.MaxTagSize+1)),
 		Force: true,
 	}
 	status, err := blockConn.Put(&entry)
-	// Request with tag buffer overflow, expect to see failure code REMOTE_INVALID_REQUEST
-	if err != nil || status.Code != REMOTE_INVALID_REQUEST {
+	// Request with tag buffer overflow, expect to see failure code RemoteInvalidRequest
+	if err != nil || status.Code != RemoteInvalidRequest {
 		t.Fatal("Blocking Put Failure", err, status.String())
 	}
 }
@@ -171,8 +171,8 @@ func TestBlockPut_tagOverflow(t *testing.T) {
 func TestBlockDelete(t *testing.T) {
 	entry := Record{
 		Key:   []byte("object000"),
-		Sync:  SYNC_WRITETHROUGH,
-		Algo:  ALGO_SHA1,
+		Sync:  SyncWriteThrough,
+		Algo:  AlgorithmSHA1,
 		Force: true,
 	}
 	status, err := blockConn.Delete(&entry)
@@ -200,7 +200,7 @@ func TestBlockGetKeyRange(t *testing.T) {
 
 func TestBlockGetLogCapacity(t *testing.T) {
 	logs := []LogType{
-		LOG_CAPACITIES,
+		LogTypeCapacities,
 	}
 	klogs, status, err := blockConn.GetLog(logs)
 	if err != nil || status.Code != OK {
@@ -215,7 +215,7 @@ func TestBlockGetLogCapacity(t *testing.T) {
 
 func TestBlockGetLogLimit(t *testing.T) {
 	logs := []LogType{
-		LOG_LIMITS,
+		LogTypeLimits,
 	}
 	klogs, status, err := blockConn.GetLog(logs)
 	if err != nil || status.Code != OK {
@@ -230,13 +230,13 @@ func TestBlockGetLogLimit(t *testing.T) {
 
 func TestBlockGetLogAll(t *testing.T) {
 	logs := []LogType{
-		LOG_UTILIZATIONS,
-		LOG_TEMPERATURES,
-		LOG_CAPACITIES,
-		LOG_CONFIGURATION,
-		LOG_STATISTICS,
-		LOG_MESSAGES,
-		LOG_LIMITS,
+		LogTypeUtilizations,
+		LogTypeTemperatures,
+		LogTypeCapacities,
+		LogTypeConfiguration,
+		LogTypeStatistics,
+		LogTypeMessages,
+		LogTypeLimits,
 	}
 	klogs, status, err := blockConn.GetLog(logs)
 	if err != nil || status.Code != OK {
@@ -261,7 +261,7 @@ func TestBlockMediaScan(t *testing.T) {
 		StartKeyInclusive: true,
 		EndKeyInclusive:   true,
 	}
-	status, err := blockConn.MediaScan(&op, PRIORITY_NORMAL)
+	status, err := blockConn.MediaScan(&op, PriorityNormal)
 	if err != nil || status.Code != OK {
 		t.Fatal("Blocking MediaScan Failure: ", err, status.String())
 	}
@@ -274,18 +274,18 @@ func TestBlockMediaOptimize(t *testing.T) {
 		StartKeyInclusive: true,
 		EndKeyInclusive:   true,
 	}
-	status, err := blockConn.MediaOptimize(&op, PRIORITY_NORMAL)
+	status, err := blockConn.MediaOptimize(&op, PriorityNormal)
 	if err != nil || status.Code != OK {
 		t.Fatal("Blocking MediaOptimize Failure: ", err, status.String())
 	}
 }
 
 func TestSetPowerLevel(t *testing.T) {
-	status, err := blockConn.SetPowerLevel(POWER_HIBERNATE)
+	status, err := blockConn.SetPowerLevel(PowerLevelHibernate)
 	if err != nil || status.Code != OK {
 		t.Fatal("Blocking SetPowerLevel Failure: ", err, status.String())
 	}
-	status, err = blockConn.SetPowerLevel(POWER_OPERATIONAL)
+	status, err = blockConn.SetPowerLevel(PowerLevelOperational)
 	if err != nil || status.Code != OK {
 		t.Fatal("Blocking SetPowerLevel Failure: ", err, status.String())
 	}
@@ -299,8 +299,8 @@ func TestBlockSetClusterVersion(t *testing.T) {
 
 	blockConn.SetClientClusterVersion(2)
 	_, status, err = blockConn.Get([]byte("object000"))
-	if err != nil || status.Code != REMOTE_CLUSTER_VERSION_MISMATCH {
-		t.Fatal("Blocking Get expected REMOTE_CLUSTER_VERSION_MISMATCH. ", err, status.String())
+	if err != nil || status.Code != RemoteClusterVersionMismatch {
+		t.Fatal("Blocking Get expected RemoteClusterVersionMismatch. ", err, status.String())
 	}
 	t.Log(status.String())
 }
