@@ -281,7 +281,7 @@ func ExampleBlockConnection_SetACL() {
 	}
 	acls := []ACL{
 		ACL{
-			Identify: 100,
+			Identity: 100,
 			Key:      []byte("asdfasdf"),
 			Algo:     ACLAlgorithmHMACSHA1,
 			Scopes:   scope,

@@ -376,7 +376,7 @@ func (conn *BlockConnection) SetErasePin(currentPin []byte, newPin []byte) (Stat
 	return callback.Status(), err
 }
 
-// SetACL sets Permission for particular user Identify.
+// SetACL sets Permission for particular user Identity.
 // On success, Status.Code = OK.
 func (conn *BlockConnection) SetACL(acls []ACL) (Status, error) {
 	callback := &GenericCallback{}

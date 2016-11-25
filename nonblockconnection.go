@@ -410,7 +410,7 @@ func (conn *NonBlockConnection) SetErasePin(currentPin []byte, newPin []byte, h 
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
-// SetACL sets Permission for particular user Identify.
+// SetACL sets Permission for particular user Identity.
 func (conn *NonBlockConnection) SetACL(acls []ACL, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_SECURITY)
@@ -433,7 +433,7 @@ func (conn *NonBlockConnection) SetACL(acls []ACL, h *ResponseHandler) error {
 		cmdAlgo := convertACLAlgorithmToProto(acl.Algo)
 		cmdPriority := convertPriorityToProto(acl.MaxPriority)
 		cmdACL[ka] = &kproto.Command_Security_ACL{
-			Identity:      &acl.Identify,
+			Identity:      &acl.Identity,
 			Key:           acl.Key,
 			HmacAlgorithm: &cmdAlgo,
 			Scope:         cmdScope,

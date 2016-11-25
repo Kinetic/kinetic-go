@@ -698,7 +698,7 @@ type ACLScope struct {
 
 // ACL structure for SetACL call. Defines permission for identity.
 type ACL struct {
-	Identify    int64
+	Identity    int64
 	Key         []byte
 	Algo        ACLAlgorithm
 	Scopes      []ACLScope
