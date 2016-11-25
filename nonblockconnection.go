@@ -33,7 +33,7 @@ type NonBlockConnection struct {
 	batchMu    sync.Mutex
 }
 
-// Helper function to establish non-block connection to device.
+// NewNonBlockConnection is helper function to establish non-block connection to device.
 func NewNonBlockConnection(op ClientOptions) (*NonBlockConnection, error) {
 	if op.Hmac == nil {
 		klog.Panic("HMAC is required for ClientOptions")
@@ -212,7 +212,7 @@ func (conn *NonBlockConnection) buildP2PMessage(request *P2PPushRequest) *kproto
 	return p2pop
 }
 
-// P2Push
+// P2PPush performs peer to peer push operation
 func (conn *NonBlockConnection) P2PPush(request *P2PPushRequest, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 	cmd := newCommand(kproto.Command_PEER2PEERPUSH)
@@ -450,6 +450,9 @@ func (conn *NonBlockConnection) SetACL(acls []ACL, h *ResponseHandler) error {
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+// MediaScan is to check that the user data is readable, and
+// if the end to end integrity is known to the device, if the
+// end to end integrity field is correct.
 func (conn *NonBlockConnection) MediaScan(op *MediaOperation, pri Priority, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 
@@ -470,6 +473,9 @@ func (conn *NonBlockConnection) MediaScan(op *MediaOperation, pri Priority, h *R
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+// MediaOptimize performs optimizations of the media. Things like
+// defragmentation, compaction, garbage collection, compression
+// could be things accomplished using the media optimize command.
 func (conn *NonBlockConnection) MediaOptimize(op *MediaOperation, pri Priority, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 
@@ -490,6 +496,7 @@ func (conn *NonBlockConnection) MediaOptimize(op *MediaOperation, pri Priority, 
 	return conn.service.submit(msg, cmd, nil, h)
 }
 
+// SetPowerLevel sets device power level
 func (conn *NonBlockConnection) SetPowerLevel(p PowerLevel, h *ResponseHandler) error {
 	msg := newMessage(kproto.Message_HMACAUTH)
 

@@ -27,6 +27,7 @@ import (
 // Including status code get from device, or client internal error code.
 type StatusCode int32
 
+// StatusCode code value
 const (
 	RemoteNotAttempted                 StatusCode = iota
 	OK                                 StatusCode = iota
