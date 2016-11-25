@@ -170,7 +170,7 @@ func (conn *BlockConnection) Put(entry *Record) (Status, error) {
 	return callback.Status(), err
 }
 
-// P2Push
+// P2PPush performs peer to peer push operation
 func (conn *BlockConnection) P2PPush(request *P2PPushRequest) (*P2PPushStatus, Status, error) {
 	callback := &P2PPushCallback{}
 	h := NewResponseHandler(callback)
@@ -376,7 +376,7 @@ func (conn *BlockConnection) SetErasePin(currentPin []byte, newPin []byte) (Stat
 	return callback.Status(), err
 }
 
-// SetACL sets Permission for particular user Identify.
+// SetACL sets Permission for particular user Identity.
 // On success, Status.Code = OK.
 func (conn *BlockConnection) SetACL(acls []ACL) (Status, error) {
 	callback := &GenericCallback{}
@@ -391,7 +391,9 @@ func (conn *BlockConnection) SetACL(acls []ACL) (Status, error) {
 	return callback.Status(), err
 }
 
-// MediaScan
+// MediaScan is to check that the user data is readable, and
+// if the end to end integrity is known to the device, if the
+// end to end integrity field is correct.
 func (conn *BlockConnection) MediaScan(op *MediaOperation, pri Priority) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)
@@ -405,7 +407,9 @@ func (conn *BlockConnection) MediaScan(op *MediaOperation, pri Priority) (Status
 	return callback.Status(), err
 }
 
-// MediaOptimize
+// MediaOptimize performs optimizations of the media. Things like
+// defragmentation, compaction, garbage collection, compression
+// could be things accomplished using the media optimize command.
 func (conn *BlockConnection) MediaOptimize(op *MediaOperation, pri Priority) (Status, error) {
 	callback := &GenericCallback{}
 	h := NewResponseHandler(callback)

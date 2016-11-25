@@ -42,6 +42,7 @@ func init() {
 type LogLevel logrus.Level
 
 const (
+	// LogLevelPanic level. Panic.
 	LogLevelPanic LogLevel = LogLevel(logrus.PanicLevel)
 	// LogLevelFatal level. Logs and then calls `os.Exit(1)`. It will exit even if the
 	// logging level is set to Panic.
@@ -80,6 +81,7 @@ type ClientOptions struct {
 // MessageType defines the top level kinetic command message type.
 type MessageType int32
 
+// MessageType for each message exchanged between kinetic device and client
 const (
 	_                            MessageType = iota
 	MessageGet                   MessageType = iota
@@ -349,9 +351,10 @@ func convertMessageTypeFromProto(m kproto.Command_MessageType) MessageType {
 	return ret
 }
 
-// Algorithm
+// Algorithm defines the which algorithm used to protect data.
 type Algorithm int32
 
+// Algorithm to protect data
 const (
 	_               Algorithm = iota
 	AlgorithmSHA1   Algorithm = iota
@@ -417,14 +420,15 @@ func convertAlgoFromProto(a kproto.Command_Algorithm) Algorithm {
 	return ret
 }
 
-// Synchronization allows the puts and deletes to determine if they are to be
-// SYNC_WRITETHROUGH: This request is made persistent before returning. This does not effect any other pending operations.
-// SYNC_WRITEBACK: They can be made persistent when the device chooses, or when a subsequent FLUSH is give to the device.
-// SYNC_FLUSH: All pending information that has not been written is pushed to the disk and the command that specifies
-// FLUSH is written last and then returned. All WRITEBACK writes that have received ending status will be guaranteed
-// to be written before the FLUSH operation is returned completed.
+// Synchronization allows the puts and deletes to determine how to make data persistent.
 type Synchronization int32
 
+// Syncchronization types
+// SyncWriteThrough: This request is made persistent before returning. This does not effect any other pending operations.
+// SyncWriteBack: They can be made persistent when the device chooses, or when a subsequent FLUSH is give to the device.
+// SyncFlush: All pending information that has not been written is pushed to the disk and the command that specifies
+// FLUSH is written last and then returned. All WRITEBACK writes that have received ending status will be guaranteed
+// to be written before the FLUSH operation is returned completed.
 const (
 	_                Synchronization = iota
 	SyncWriteThrough Synchronization = iota
@@ -472,8 +476,12 @@ func convertSyncFromProto(sync kproto.Command_Synchronization) Synchronization {
 	return ret
 }
 
+// Priority is a simple integer that determines the priority of this
+// request. All activity at a higher priority will execute before that
+// of lower priority traffic. A higher number is higher priority.
 type Priority int32
 
+// Priority level from lowest to highest.
 const (
 	_               Priority = iota
 	PriorityLowest  Priority = iota
@@ -533,6 +541,7 @@ func convertPriorityFromProto(p kproto.Command_Priority) Priority {
 	return ret
 }
 
+// Record structure defines information for an object stored on kinetic device.
 type Record struct {
 	Key      []byte
 	Value    []byte
@@ -544,6 +553,7 @@ type Record struct {
 	MetaOnly bool
 }
 
+// KeyRange structure defines the range for GetRange operation.
 type KeyRange struct {
 	StartKey          []byte
 	EndKey            []byte
@@ -553,6 +563,7 @@ type KeyRange struct {
 	Max               int32
 }
 
+// MediaOperation structure defines media operation information for MediaScan and MediaOptimize.
 type MediaOperation struct {
 	StartKey          []byte
 	EndKey            []byte
@@ -560,8 +571,10 @@ type MediaOperation struct {
 	EndKeyInclusive   bool
 }
 
+// ACLPermission defines what operations a user identity can perform.
 type ACLPermission int32
 
+// ACLPermission for various type of operation.
 const (
 	_                            ACLPermission = iota
 	ACLPermissionRead            ACLPermission = iota // Can read key/values
@@ -645,8 +658,10 @@ func convertACLPermissionFromProto(perm kproto.Command_Security_ACL_Permission) 
 	return ret
 }
 
+// ACLAlgorithm defines the HMAC algorithm.
 type ACLAlgorithm int32
 
+// ACLAlgorithm values.
 const (
 	_                    ACLAlgorithm = iota
 	ACLAlgorithmHMACSHA1 ACLAlgorithm = iota
@@ -673,6 +688,7 @@ func convertACLAlgorithmToProto(algo ACLAlgorithm) kproto.Command_Security_ACL_H
 	return ret
 }
 
+// ACLScope defines scope of ACL.
 type ACLScope struct {
 	Offset      int64
 	Value       []byte
@@ -680,15 +696,16 @@ type ACLScope struct {
 	TLSRequired bool
 }
 
+// ACL structure for SetACL call. Defines permission for identity.
 type ACL struct {
-	Identify    int64
+	Identity    int64
 	Key         []byte
 	Algo        ACLAlgorithm
 	Scopes      []ACLScope
 	MaxPriority Priority
 }
 
-// P2PPushOperation
+// P2PPushOperation structure for P2PPush operation.
 type P2PPushOperation struct {
 	Key     []byte // Key for the object to push to peer kinetic device
 	Version []byte
@@ -697,7 +714,7 @@ type P2PPushOperation struct {
 	Request *P2PPushRequest // Chain P2PPushRequest, which will perform on peer kinetic device
 }
 
-// P2PPushRequest
+// P2PPushRequest structure for P2PPush operation
 type P2PPushRequest struct {
 	HostName   string // Peer kinetic device IP / hostname
 	Port       int32  // Peer kinetic drvice port
@@ -720,9 +737,10 @@ type BatchStatus struct {
 	FailedSequence int64   // Non 0 value means the first failed operation sequence in the batch, 0 means no failure
 }
 
-// PowerLevel
+// PowerLevel defines the power level of kinetic device.
 type PowerLevel int32
 
+// PowerLevel values.
 const (
 	_                     PowerLevel = iota
 	PowerLevelOperational PowerLevel = iota

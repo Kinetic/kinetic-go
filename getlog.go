@@ -24,6 +24,7 @@ import (
 // LogType defines what type of information to retrieve by GetLog.
 type LogType int32
 
+// LogType values
 const (
 	_                    LogType = iota
 	LogTypeUtilizations  LogType = iota
@@ -177,6 +178,17 @@ type LimitsLog struct {
 	MaxBatchCountPerDevice      uint32 //
 }
 
+// DeviceLog is to ask the device to send back the
+// log of a certain name in the value field. The limit of each
+// log is 1m byte.
+//
+// Proprietary names should be prefaced by the vendor name so that name
+// collisions do not happen in the future. An example could be names that
+// start with “com.WD” would be for Western Digital devices.
+//
+// If the name is not found, the get log returns NOT_FOUND.
+//
+// There can be only one Device in the list of logs that can be retrieved.!
 type DeviceLog struct {
 	Name []byte
 }
