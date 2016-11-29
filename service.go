@@ -72,17 +72,22 @@ type networkService struct {
 func newNetworkService(op ClientOptions) (*networkService, error) {
 	var conn net.Conn
 	var err error
+	if op.Timeout > 0 {
+		networkTimeout = time.Duration(op.Timeout) * time.Millisecond
+	}
+
 	target := fmt.Sprintf("%s:%d", op.Host, op.Port)
 	if op.UseSSL {
 		// TODO: Need to enable verify certification later
 		config := tls.Config{InsecureSkipVerify: true}
-		conn, err = tls.Dial("tcp", target, &config)
+		d := &net.Dialer{Timeout: networkTimeout}
+		conn, err = tls.DialWithDialer(d, "tcp", target, &config)
 	} else {
 		conn, err = net.DialTimeout("tcp", target, networkTimeout)
 	}
 
 	if err != nil {
-		klog.Panic("Can't establish connection to ", op.Host, err)
+		klog.Error("Can't establish connection to ", op.Host, err)
 		return nil, err
 	}
 

@@ -71,11 +71,12 @@ func SetLogOutput(out io.Writer) {
 
 // ClientOptions specify connection options to kinetic device.
 type ClientOptions struct {
-	Host   string // Kinetic device IP address
-	Port   int    // Network port to connect, if UseSSL is true, this port should be the TlsPort
-	User   int64  // User Id
-	Hmac   []byte
-	UseSSL bool // Use SSL connection, or plain connection
+	Host    string // Kinetic device IP address
+	Port    int    // Network port to connect, if UseSSL is true, this port should be the TlsPort
+	User    int64  // User Id
+	Hmac    []byte
+	UseSSL  bool  // Use SSL connection, or plain connection
+	Timeout int64 // Network timeout in millisecond
 }
 
 // MessageType defines the top level kinetic command message type.
