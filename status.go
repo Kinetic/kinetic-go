@@ -98,6 +98,16 @@ var statusName = map[StatusCode]string{
 	RemoteShutdown:                     "REMOTE_SHUTDOWN",
 }
 
+// String returns string value of StatusCode.
+func (c StatusCode) String() string {
+	str, ok := statusName[c]
+	if ok {
+		return str
+	}
+
+	return "Unknown Status"
+}
+
 // Status for each kinetic message.
 // Code is the status code and ErrorMsg is the detail message
 type Status struct {
