@@ -175,7 +175,7 @@ func (ns *networkService) listen() error {
 	// For UNSOLICITEDSTATUS, command may not have Header or AckSequence, set the ack to -1 so
 	// no ResponseHandler will be found from hmap table.
 	var ack int64 = -1
-	if cmd.Header != nil && cmd.Header.AckSequence != nil {
+	if cmd.GetHeader() != nil {
 		ack = cmd.GetHeader().GetAckSequence()
 	}
 
