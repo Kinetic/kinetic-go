@@ -31,8 +31,14 @@ import (
 	proto "github.com/golang/protobuf/proto"
 )
 
+const (
+	defaultConnectionTimeout = 20 * time.Second
+	defaultRequestTimeout    = 60 * time.Second
+)
+
 var (
-	networkTimeout = 20 * time.Second
+	connectionTimeout = defaultConnectionTimeout
+	requestTimeout    = defaultRequestTimeout
 )
 
 func newMessage(t kproto.Message_AuthType) *kproto.Message {
@@ -72,18 +78,22 @@ type networkService struct {
 func newNetworkService(op ClientOptions) (*networkService, error) {
 	var conn net.Conn
 	var err error
+
 	if op.Timeout > 0 {
-		networkTimeout = time.Duration(op.Timeout) * time.Millisecond
+		connectionTimeout = time.Duration(op.Timeout) * time.Millisecond
+	}
+	if op.RequestTimeout > 0 {
+		requestTimeout = time.Duration(op.RequestTimeout) * time.Millisecond
 	}
 
 	target := fmt.Sprintf("%s:%d", op.Host, op.Port)
 	if op.UseSSL {
 		// TODO: Need to enable verify certification later
 		config := tls.Config{InsecureSkipVerify: true}
-		d := &net.Dialer{Timeout: networkTimeout}
+		d := &net.Dialer{Timeout: connectionTimeout}
 		conn, err = tls.DialWithDialer(d, "tcp", target, &config)
 	} else {
-		conn, err = net.DialTimeout("tcp", target, networkTimeout)
+		conn, err = net.DialTimeout("tcp", target, connectionTimeout)
 	}
 
 	if err != nil {
@@ -257,7 +267,7 @@ func (ns *networkService) send(msg *kproto.Message, value []byte) error {
 	}
 
 	// Set timeout for send packet
-	ns.conn.SetWriteDeadline(time.Now().Add(networkTimeout))
+	ns.conn.SetWriteDeadline(time.Now().Add(requestTimeout))
 
 	// Construct message header 9 bytes
 	header := make([]byte, 9)
@@ -285,7 +295,7 @@ func (ns *networkService) send(msg *kproto.Message, value []byte) error {
 
 func (ns *networkService) receive() (*kproto.Message, *kproto.Command, []byte, error) {
 	// Set timeout for receive packet
-	ns.conn.SetReadDeadline(time.Now().Add(networkTimeout))
+	ns.conn.SetReadDeadline(time.Now().Add(requestTimeout))
 
 	header := make([]byte, 9)
 
